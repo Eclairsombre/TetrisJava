@@ -1,6 +1,10 @@
 package Tetris.vue;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.util.Observer;
 
 import javax.swing.JFrame;
@@ -21,9 +25,9 @@ public class Vue extends JFrame implements Observer {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.grid = m;
         cases = new JPanel[grid.getHeight()][grid.getWidth()];
+        // Suppression de l'abonnement ici pour éviter les warnings
 
-
-// Plateau de jeu (grille Tetris)
+        // Plateau de jeu (grille Tetris)
         JPanel board = new JPanel();
         JPanel boardPanel = new JPanel();
         boardPanel.setLayout(new GridLayout(grid.getHeight(), grid.getWidth(), 0, 0));
@@ -39,14 +43,14 @@ public class Vue extends JFrame implements Observer {
         }
         board.add(boardPanel);
 
-// Panneau score
+        // Panneau score
         JPanel scorePanel = new JPanel();
         scorePanel.setPreferredSize(new Dimension(200, 100));
         JLabel scoreLabel = new JLabel("Score : 0", SwingConstants.CENTER);
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 24));
         scorePanel.add(scoreLabel, BorderLayout.CENTER);
 
-// Panneau prochaine pièce
+        // Panneau prochaine pièce
         JPanel nextPiecePanel = new JPanel();
         nextPiecePanel.setPreferredSize(new Dimension(200, 200));
         nextPiecePanel.setLayout(new BorderLayout());
@@ -69,7 +73,7 @@ public class Vue extends JFrame implements Observer {
         templatePanel.add(npPanel);
         nextPiecePanel.add(templatePanel);
 
-// Layout principal façon Tetris
+        // Layout principal façon Tetris
         JPanel westPanel = new JPanel();
         westPanel.setPreferredSize(new Dimension(20, 20));
         screen.setLayout(new BorderLayout());
@@ -102,7 +106,7 @@ public class Vue extends JFrame implements Observer {
     }
 
     public void start() {
-        grid.addObserver(this);
+        grid.addObserver(this); // Abonnement déplacé ici
         setVisible(true);
     }
 

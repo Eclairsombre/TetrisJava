@@ -10,15 +10,13 @@ import Tetris.vue.Vue;
 public class Controller extends Observable {
     private final Grid model;
     private final Vue vue;
-    private final Ordennanceur ord;
     private final Game game;
 
     public Controller(Grid model, Vue vue) {
         this.model = model;
         this.vue = vue;
         this.game = new Game();
-        this.ord = new Ordennanceur(game);
-        this.ord.start();
+
     }
 
     public Piece getNewPiece() {

@@ -49,6 +49,7 @@ public class Grid extends Observable {
 
     public void setCell(int x, int y, String value) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
+            System.err.println("Setting cell at (" + x + ", " + y + ") to " + value);
             grid[y][x] = value;
             setChanged();
             notifyObservers(grid[y][x]);
@@ -89,7 +90,8 @@ public class Grid extends Observable {
             int x = c[0];
             int y = c[1];
             if (x >= 0 && x < width && y >= 0 && y < height) {
-                grid[y][x] = " ";
+                setCell(x, y, " ");
+
             }
         }
         System.out.println("Coordonnées de la pièce actuelle : " + pieceX + ", " + pieceY);
