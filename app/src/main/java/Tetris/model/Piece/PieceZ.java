@@ -7,5 +7,4 @@ public class PieceZ extends Piece {
         int[][] shape = {{0, 0}, {1, 0}, {1, 1}, {2, 1}};
         super.setShape(shape);
     }
-
 }

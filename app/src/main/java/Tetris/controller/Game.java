@@ -7,12 +7,10 @@ import Tetris.model.Grid;
 @SuppressWarnings("deprecation")
 public class Game extends Observable {
     private final Grid grid;
-    private final int score;
 
     public Game(Grid grid) {
         this.grid = grid;
-        this.score = 0;
-        new Ordonnanceur(700, this::movePieceDown).start();
+        new Scheduler(700, this::movePieceDown).start();
     }
 
     public Grid getGrid() {
@@ -21,6 +19,7 @@ public class Game extends Observable {
 
     public void movePieceDown() {
         grid.movePiece(0, 1, true);
+        grid.updateScore(1);
     }
 
     public void movePieceLeft() {

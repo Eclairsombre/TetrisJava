@@ -2,13 +2,13 @@ package Tetris.controller;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-public class Ordonnanceur extends Thread {
+public class Scheduler extends Thread {
     Runnable r;
     long pause;
     boolean running;
     private final ScheduledExecutorService scheduler; // Thread-safe scheduler
 
-    public Ordonnanceur(long pause, Runnable runnable) {
+    public Scheduler(long pause, Runnable runnable) {
         this.r = runnable;
         this.pause = pause;
         this.running = true;

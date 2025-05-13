@@ -15,6 +15,9 @@ import Tetris.controller.Game;
 @SuppressWarnings("deprecation")
 public class Vue extends JFrame implements Observer {
     private final JPanel[][] cases;
+    private final JLabel scoreLabel;
+    private final JPanel[][] nextPieceCells;
+
     private final Game game;
 
     public Vue(Game g) {
@@ -24,7 +27,7 @@ public class Vue extends JFrame implements Observer {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         cases = new JPanel[game.getGrid().getHeight()][game.getGrid().getWidth()];
 
-        // Plateau de jeu (grille Tetris)
+        // Game board
         JPanel board = new JPanel();
         JPanel boardPanel = new JPanel();
         boardPanel.setLayout(new GridLayout(game.getGrid().getHeight(), game.getGrid().getWidth(), 0, 0));
@@ -40,26 +43,27 @@ public class Vue extends JFrame implements Observer {
         }
         board.add(boardPanel);
 
-        // Panneau score
+        // Panel score
         JPanel scorePanel = new JPanel();
         scorePanel.setPreferredSize(new Dimension(200, 100));
-        JLabel scoreLabel = new JLabel("Score : 0", SwingConstants.CENTER);
+        scoreLabel = new JLabel("Score : " + game.getGrid().getScore(), SwingConstants.CENTER);
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 24));
         scorePanel.add(scoreLabel, BorderLayout.CENTER);
 
-        // Panneau prochaine pièce
+        // Panel next piece
         JPanel nextPiecePanel = new JPanel();
         nextPiecePanel.setPreferredSize(new Dimension(200, 200));
         nextPiecePanel.setLayout(new BorderLayout());
 
         JPanel npPanel = new JPanel();
         npPanel.setLayout(new GridLayout(4, 4, 0, 0));
+        nextPieceCells = new JPanel[4][4];
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                JPanel nextPieceCell = new JPanel();
-                nextPieceCell.setBackground(Color.LIGHT_GRAY);
-                nextPieceCell.setPreferredSize(new Dimension(40, 40));
-                npPanel.add(nextPieceCell);
+                nextPieceCells[j][i] = new JPanel();
+                nextPieceCells[j][i].setBackground(Color.LIGHT_GRAY);
+                nextPieceCells[j][i].setPreferredSize(new Dimension(40, 40));
+                npPanel.add(nextPieceCells[j][i]);
             }
         }
         JLabel nextPieceLabel = new JLabel("Prochaine pièce", SwingConstants.CENTER);
@@ -92,8 +96,8 @@ public class Vue extends JFrame implements Observer {
         setVisible(true);
     }
 
-    public Color getColorCell(int x, int y) {
-        return switch (game.getGrid().getCell(x, y)) {
+    private Color getColorCell(String color) {
+        return switch (color) {
             case "red" -> new Color(0xFF0000);
             case "green" -> new Color(0x00FF00);
             case "blue" -> new Color(0x0000FF);
@@ -105,11 +109,14 @@ public class Vue extends JFrame implements Observer {
         };
     }
 
+    public Color getColorCell(int x, int y) {
+        return getColorCell(game.getGrid().getCell(x, y));
+    }
+
     public void start() {
         game.addObserver(this); // Abonnement déplacé ici
         setVisible(true);
     }
-
 
     public void createEventListener(JPanel panel) {
         panel.addKeyListener(new KeyAdapter() {
@@ -129,7 +136,7 @@ public class Vue extends JFrame implements Observer {
         });
     }
 
-    private void updateCases() {
+    private void updateBoard() {
         for (int i = 0; i < game.getGrid().getWidth(); i++) {
             for (int j = 0; j < game.getGrid().getHeight(); j++) {
                 cases[j][i].setBackground(getColorCell(i, j));
@@ -138,13 +145,43 @@ public class Vue extends JFrame implements Observer {
         repaint();
     }
 
+    private void updateNextPiece() {
+        String[][] nextPiece = game.getGrid().getNextPiece();
+        Color color = getColorCell(game.getGrid().getNextPieceColor());
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                nextPieceCells[j][i].setBackground(nextPiece[j][i].equals(" ") ? Color.BLACK : color);
+            }
+        }
+        repaint();
+    }
+
+    private void updateScore() {
+        scoreLabel.setText("Score : " + game.getGrid().getScore());
+        repaint();
+    }
+
     @Override
     public synchronized void update(Observable o, Object arg) {
         try {
-            if (SwingUtilities.isEventDispatchThread()) {
-                updateCases();
+            if (arg instanceof Integer) {
+                updateScore();
             } else {
-                SwingUtilities.invokeAndWait(this::updateCases);
+                if (SwingUtilities.isEventDispatchThread()) {
+                    updateBoard();
+                    if (game.getGrid().isNewNextPiece()) {
+                        game.getGrid().setNewNextPiece(false);
+                        updateNextPiece();
+                    }
+                } else {
+                    SwingUtilities.invokeAndWait(() -> {
+                        updateBoard();
+                        if (game.getGrid().isNewNextPiece()) {
+                            game.getGrid().setNewNextPiece(false);
+                            updateNextPiece();
+                        }
+                    });
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
