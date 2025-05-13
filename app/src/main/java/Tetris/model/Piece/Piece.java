@@ -19,13 +19,17 @@ public class Piece {
 
     public int[][] getCoordinates(int x, int y) {
         int[][] coordinates = new int[4][2];
+        int coordIndex = 0;
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                if (shape[i][j] != null) {
-                    coordinates[i][0] = x + i;
-                    coordinates[i][1] = y + j;
+                if (shape[i][j] != null && !shape[i][j].equals(" ")) {
+                    coordinates[coordIndex][0] = x + j; // Correction: j représente la colonne (x)
+                    coordinates[coordIndex][1] = y + i; // Correction: i représente la ligne (y)
+                    coordIndex++;
+                    if (coordIndex >= 4) break;
                 }
             }
+            if (coordIndex == 4) break;
         }
         return coordinates;
     }
