@@ -1,20 +1,24 @@
-package Tetris;
+package Tetris.controller;
 
+import java.util.Observable;
+
+import Tetris.model.Game;
 import Tetris.model.Grid;
 import Tetris.model.Piece.Piece;
 import Tetris.vue.Vue;
 
-import java.util.Observable;
-
 public class Controller extends Observable {
     private final Grid model;
     private final Vue vue;
-
+    private final Ordennanceur ord;
+    private final Game game;
 
     public Controller(Grid model, Vue vue) {
         this.model = model;
         this.vue = vue;
-
+        this.game = new Game();
+        this.ord = new Ordennanceur(game);
+        this.ord.start();
     }
 
     public Piece getNewPiece() {
@@ -40,25 +44,25 @@ public class Controller extends Observable {
     }
 
     /*
-    public void start() {
-        model.addObserver(view);
-        model.startGame();
-    }
-
-    public void moveLeft() {
-        model.moveLeft();
-    }
-
-    public void moveRight() {
-        model.moveRight();
-    }
-
-    public void rotate() {
-        model.rotate();
-    }
-
-    public void drop() {
-        model.drop();
-    }
+     * public void start() {
+     * model.addObserver(view);
+     * model.startGame();
+     * }
+     * 
+     * public void moveLeft() {
+     * model.moveLeft();
+     * }
+     * 
+     * public void moveRight() {
+     * model.moveRight();
+     * }
+     * 
+     * public void rotate() {
+     * model.rotate();
+     * }
+     * 
+     * public void drop() {
+     * model.drop();
+     * }
      */
 }
