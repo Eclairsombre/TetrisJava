@@ -32,9 +32,9 @@ public class Grid extends Observable {
 
     public void setCell(int x, int y, String value) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
-            grid[x][y] = value;
+            grid[y][x] = value;
             setChanged();
-            notifyObservers(grid[x][y]);
+            notifyObservers(grid[y][x]);
         }
     }
 

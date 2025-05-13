@@ -1,10 +1,17 @@
 package Tetris.vue;
 
-import Tetris.model.Grid;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.util.Observer;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
+import Tetris.model.Grid;
 
 public class Vue extends JFrame implements Observer {
     private final JPanel[][] cases;
