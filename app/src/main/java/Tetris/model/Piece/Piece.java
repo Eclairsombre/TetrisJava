@@ -19,6 +19,19 @@ public class Piece {
         return shape;
     }
 
+    public int[][] getCoordinates(int x, int y) {
+        int[][] coordinates = new int[4][2];
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (shape[i][j] != null) {
+                    coordinates[i][0] = x + i;
+                    coordinates[i][1] = y + j;
+                }
+            }
+        }
+        return coordinates;
+    }
+
     public void setShape(String[][] shape) {
         if (shape.length == 4 && shape[0].length == 4) {
             for (int i = 0; i < 4; i++) {

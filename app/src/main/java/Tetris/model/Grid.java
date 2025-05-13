@@ -1,5 +1,7 @@
 package Tetris.model;
 
+import Tetris.model.Piece.*;
+
 import java.util.Observable;
 
 public class Grid extends Observable {
@@ -43,6 +45,26 @@ public class Grid extends Observable {
             return grid[y][x];
         }
         return null;
+    }
+
+    public Piece getNouvellePiece() {
+        String[] pieceTypes = {"PieceI", "PieceJ", "PieceL", "PieceO", "PieceS", "PieceT", "PieceZ"};
+        int idx = (int) (Math.random() * pieceTypes.length);
+        try {
+            return switch (pieceTypes[idx]) {
+                case "PieceI" -> new PieceI("red");
+                case "PieceJ" -> new PieceJ("red");
+                case "PieceL" -> new PieceL("red");
+                case "PieceO" -> new PieceO("red");
+                case "PieceS" -> new PieceS("red");
+                case "PieceT" -> new PieceT("red");
+                case "PieceZ" -> new PieceZ("red");
+                default -> throw new IllegalArgumentException("Unknown piece type: " + pieceTypes[idx]);
+            };
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

@@ -10,10 +10,14 @@ import Tetris.vue.Vue;
 
 public class App {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Grid grid = new Grid(10, 20);
-            Vue tetris = new Vue(grid);
-            tetris.start();
-        });
+
+        Grid grid = new Grid(10, 20);
+        Vue tetris = new Vue(grid);
+        grid.addObserver(tetris);
+
+        Controller controller = new Controller(grid, tetris);
+        controller.placeNewPiece();
+
+        SwingUtilities.invokeLater(tetris::start);
     }
 }

@@ -1,16 +1,42 @@
 package Tetris;
 
 import Tetris.model.Grid;
+import Tetris.model.Piece.Piece;
+import Tetris.vue.Vue;
 
-import javax.swing.text.View;
+import java.util.Observable;
 
-public class Controller {
+public class Controller extends Observable {
     private final Grid model;
-    private final View view;
+    private final Vue vue;
 
-    public Controller(Grid model, View view) {
+
+    public Controller(Grid model, Vue vue) {
         this.model = model;
-        this.view = view;
+        this.vue = vue;
+
+    }
+
+    public Piece getNewPiece() {
+        Piece new_piece = model.getNouvellePiece();
+        if (new_piece == null) {
+            System.out.println("Error: Unable to create a new piece.");
+            return null;
+        }
+        return new_piece;
+    }
+
+    public void placeNewPiece() {
+        Piece new_piece = getNewPiece();
+        if (new_piece != null) {
+            // Assuming the piece has a method to get its coordinates
+            int[][] coordinates = new_piece.getCoordinates(4, 0);
+            for (int[] coordinate : coordinates) {
+                int x = coordinate[0];
+                int y = coordinate[1];
+                model.setCell(x, y, new_piece.getColor());
+            }
+        }
     }
 
     /*
