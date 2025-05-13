@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
+@SuppressWarnings("deprecation")
 public class Grid extends Observable {
     private final int width;
     private final int height;
@@ -57,6 +58,7 @@ public class Grid extends Observable {
     }
 
     public Piece getNouvellePiece() {
+        // make a semi-random choice of a piece to avoid too many duplicates
         java.security.SecureRandom random = new java.security.SecureRandom();
         int idx = random.nextInt(7);
         try {
@@ -86,33 +88,29 @@ public class Grid extends Observable {
         return false;
     }
 
-    public void movePiece(int x_move, int y_move, boolean fixPiece) {
-        int[][] nextCoords = currentPiece.getCoordinates(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
+    public boolean checkCollision(int[][] rotatedShape) {
         List<int[]> pointsToCheck = new ArrayList<>();
-
-        for (int[] coord : nextCoords) {
-            if (!isInCurrentPiece(coord[0], coord[1])) {
-                pointsToCheck.add(coord);
+        for (int[] pos : rotatedShape) {
+            if (!isInCurrentPiece(pos[0], pos[1])) {
+                pointsToCheck.add(pos);
             }
         }
-        boolean canMoveDown = true;
 
         for (int[] c : pointsToCheck) {
             int x_next = c[0];
             int y_next = c[1];
-            if (isInCurrentPiece(x_next, y_next)) {
-                continue;
-            }
             if (x_next < 0 || x_next >= width || y_next >= height || (y_next >= 0 && !grid[y_next][x_next].equals(" "))) {
-                if (!fixPiece) {
-                    return;
-                }
-                canMoveDown = false;
-                break;
+                return false;
             }
         }
-        if (canMoveDown) {
 
+        return true;
+    }
+
+    public void movePiece(int x_move, int y_move, boolean fixPiece) {
+        int[][] nextCoords = currentPiece.getCoordinates(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
+
+        if (checkCollision(nextCoords)) {
             for (int[] c : nextCoords) {
                 int x = c[0] - x_move;
                 int y = c[1] - y_move;
@@ -124,6 +122,9 @@ public class Grid extends Observable {
                 setCell(x_next, y_next, currentPiece.getColor());
             }
         } else {
+            if (!fixPiece) {
+                return;
+            }
             this.currentPiece = initializePiece();
         }
 
@@ -131,7 +132,27 @@ public class Grid extends Observable {
         signalVue();
     }
 
-    public void rotatePiece(boolean b) {
-        return;
+    public void rotatePiece(boolean isLeft) {
+        int[][] originalRotatedShape = currentPiece.getRotatedPosition(isLeft);
+        int[][] rotatedShape = new int[originalRotatedShape.length][originalRotatedShape[0].length];
+        for (int i = 0; i < originalRotatedShape.length; i++) {
+            System.arraycopy(originalRotatedShape[i], 0, rotatedShape[i], 0, originalRotatedShape[i].length);
+        }
+        
+        for (int[] c : rotatedShape) {
+            c[0] += currentPiece.getX();
+            c[1] += currentPiece.getY();
+        }
+
+        if (checkCollision(rotatedShape)) {
+            for (int[] c : currentPiece.getCoordinates(currentPiece.getX(), currentPiece.getY())) {
+                setCell(c[0], c[1], " ");
+            }
+            currentPiece.setShape(originalRotatedShape);
+            for (int[] c : currentPiece.getCoordinates(currentPiece.getX(), currentPiece.getY())) {
+                setCell(c[0], c[1], currentPiece.getColor());
+            }
+            signalVue();
+        }
     }
 }

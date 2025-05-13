@@ -4,6 +4,7 @@ import java.util.Observable;
 
 import Tetris.model.Grid;
 
+@SuppressWarnings("deprecation")
 public class Game extends Observable {
     private final Grid grid;
     private final int score;

@@ -86,7 +86,6 @@ public class Vue extends JFrame implements Observer {
         screen.add(board, BorderLayout.CENTER);
         screen.add(scorePanel, BorderLayout.NORTH);
         screen.add(nextPiecePanel, BorderLayout.EAST);
-        setResizable(false); // stop redefinition of screen;
 
 
         add(screen);
