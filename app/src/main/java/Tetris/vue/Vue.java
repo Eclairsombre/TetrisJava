@@ -17,12 +17,14 @@ public class Vue extends JFrame implements Observer {
 
     public Vue(Grid m) {
         setTitle("Tetris");
-        setSize(800, 800);
+        setSize(700, 1000);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.grid = m;
         cases = new JPanel[grid.getHeight()][grid.getWidth()];
 
+
 // Plateau de jeu (grille Tetris)
+        JPanel board = new JPanel();
         JPanel boardPanel = new JPanel();
         boardPanel.setLayout(new GridLayout(grid.getHeight(), grid.getWidth(), 0, 0));
         boardPanel.setPreferredSize(new Dimension(400, 800));
@@ -30,10 +32,12 @@ public class Vue extends JFrame implements Observer {
             for (int x = 0; x < cases[y].length; x++) {
                 cases[y][x] = new JPanel();
                 cases[y][x].setBackground(getColorCell(x, y));
-                cases[y][x].setPreferredSize(new Dimension(30, 30));
+                cases[y][x].setPreferredSize(new Dimension(20, 20));
+                boardPanel.setLayout(new GridLayout(20, 10, 0, 0));
                 boardPanel.add(cases[y][x]);
             }
         }
+        board.add(boardPanel);
 
 // Panneau score
         JPanel scorePanel = new JPanel();
@@ -45,23 +49,36 @@ public class Vue extends JFrame implements Observer {
 // Panneau prochaine pièce
         JPanel nextPiecePanel = new JPanel();
         nextPiecePanel.setPreferredSize(new Dimension(200, 200));
+        nextPiecePanel.setLayout(new BorderLayout());
+
+        JPanel npPanel = new JPanel();
+        npPanel.setLayout(new GridLayout(4, 4, 0, 0));
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 JPanel nextPieceCell = new JPanel();
                 nextPieceCell.setBackground(Color.LIGHT_GRAY);
                 nextPieceCell.setPreferredSize(new Dimension(40, 40));
-                nextPiecePanel.add(nextPieceCell);
+                npPanel.add(nextPieceCell);
             }
         }
         JLabel nextPieceLabel = new JLabel("Prochaine pièce", SwingConstants.CENTER);
         nextPieceLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        nextPiecePanel.add(nextPieceLabel);
+        nextPiecePanel.add(nextPieceLabel, BorderLayout.NORTH);
+
+        JPanel templatePanel = new JPanel();
+        templatePanel.add(npPanel);
+        nextPiecePanel.add(templatePanel);
 
 // Layout principal façon Tetris
+        JPanel westPanel = new JPanel();
+        westPanel.setPreferredSize(new Dimension(20, 20));
         screen.setLayout(new BorderLayout());
-        screen.add(boardPanel, BorderLayout.CENTER);
+        screen.add(westPanel, BorderLayout.WEST);
+        screen.add(board, BorderLayout.CENTER);
         screen.add(scorePanel, BorderLayout.NORTH);
         screen.add(nextPiecePanel, BorderLayout.EAST);
+        setResizable(false); // stop redefinition of screen
+
         add(screen);
         setVisible(true);
     }
