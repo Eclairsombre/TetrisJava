@@ -1,21 +1,14 @@
 package Tetris.model;
 
-import java.util.Observable;
+import Tetris.model.Piece.*;
 
-import Tetris.model.Piece.Piece;
-import Tetris.model.Piece.PieceI;
-import Tetris.model.Piece.PieceJ;
-import Tetris.model.Piece.PieceL;
-import Tetris.model.Piece.PieceO;
-import Tetris.model.Piece.PieceS;
-import Tetris.model.Piece.PieceT;
-import Tetris.model.Piece.PieceZ;
+import java.util.Observable;
 
 public class Grid extends Observable {
     private final int width;
     private final int height;
     private final String[][] grid;
-    private final Piece currentPiece;
+    private Piece currentPiece;
     private int pieceX = 4; // position initiale X (centré)
     private int pieceY = 0; // position initiale Y (en haut)
 
@@ -85,16 +78,32 @@ public class Grid extends Observable {
 
     public void descendrePiece() {
         int[][] nextCoords = currentPiece.getCoordinates(pieceX, pieceY + 1);
+        boolean canMoveDown = true;
         for (int[] c : nextCoords) {
             int x = c[0];
             int y = c[1] - 1;
             int y_next = c[1];
             if (y_next >= height || (y_next >= 0 && x >= 0 && x < width && !grid[y_next][x].equals(" "))) {
+                canMoveDown = false;
                 break;
             }
-            setCell(x, y, " ");
-            setCell(x, y_next, currentPiece.getColor());
+
         }
+        if (canMoveDown) {
+            for (int[] c : nextCoords) {
+                int x = c[0];
+                int y = c[1] - 1;
+                int y_next = c[1];
+                setCell(x, y, " ");
+                setCell(x, y_next, currentPiece.getColor());
+            }
+        } else {
+            this.currentPiece = initializePiece();
+            this.pieceX = 4;
+            this.pieceY = 0;
+        }
+
+
         pieceY++;
         signalVue();
     }
