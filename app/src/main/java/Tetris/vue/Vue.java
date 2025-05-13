@@ -12,24 +12,24 @@ import java.util.Observer;
 
 import javax.swing.*;
 
-import Tetris.model.Grid;
+import Tetris.controller.Game;
 
 @SuppressWarnings("deprecation")
 public class Vue extends JFrame implements Observer {
     private final JPanel[][] cases;
-    private final Grid grid;
+    private final Game game;
 
-    public Vue(Grid g) {
-        this.grid = g;
+    public Vue(Game g) {
+        this.game = g;
         setTitle("Tetris");
         setSize(700, 950);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        cases = new JPanel[grid.getHeight()][grid.getWidth()];
+        cases = new JPanel[game.getGrid().getHeight()][game.getGrid().getWidth()];
 
         // Plateau de jeu (grille Tetris)
         JPanel board = new JPanel();
         JPanel boardPanel = new JPanel();
-        boardPanel.setLayout(new GridLayout(grid.getHeight(), grid.getWidth(), 0, 0));
+        boardPanel.setLayout(new GridLayout(game.getGrid().getHeight(), game.getGrid().getWidth(), 0, 0));
         boardPanel.setPreferredSize(new Dimension(400, 800));
         for (int y = 0; y < cases.length; y++) {
             for (int x = 0; x < cases[y].length; x++) {
@@ -96,7 +96,7 @@ public class Vue extends JFrame implements Observer {
     }
 
     public Color getColorCell(int x, int y) {
-        return switch (grid.getCell(x, y)) {
+        return switch (game.getGrid().getCell(x, y)) {
             case "red" -> Color.RED;
             case "green" -> Color.GREEN;
             case "blue" -> Color.BLUE;
@@ -107,7 +107,7 @@ public class Vue extends JFrame implements Observer {
     }
 
     public void start() {
-        grid.addObserver(this); // Abonnement déplacé ici
+        game.addObserver(this); // Abonnement déplacé ici
         setVisible(true);
     }
 
@@ -117,7 +117,7 @@ public class Vue extends JFrame implements Observer {
             @Override
             public void keyPressed(KeyEvent e) {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_DOWN -> grid.descendrePiece();
+                    case KeyEvent.VK_DOWN -> game.movePieceDown();
                     default -> {
                         // Do nothing
                     }
@@ -129,9 +129,9 @@ public class Vue extends JFrame implements Observer {
     @Override
     public synchronized void update(Observable o, Object arg) {
         try {
-            SwingUtilities.invokeAndWait(() -> {
-                for (int i = 0; i < grid.getWidth(); i++) {
-                    for (int j = 0; j < grid.getHeight(); j++) {
+            SwingUtilities.invokeLater(() -> { // if any problem with movement, you can use invokeAndWait to ensure thread safety
+                for (int i = 0; i < game.getGrid().getWidth(); i++) {
+                    for (int j = 0; j < game.getGrid().getHeight(); j++) {
                         cases[j][i].setBackground(getColorCell(i, j));
                     }
                 }

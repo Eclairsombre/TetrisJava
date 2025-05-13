@@ -12,7 +12,7 @@ import Tetris.vue.Vue;
 public class App {
     public static void main(String[] args) {
         Game game = new Game(new Grid(10, 20));
-        Vue tetris = new Vue(game.getGrid());
+        Vue tetris = new Vue(game);
         SwingUtilities.invokeLater(tetris::start);
         game.getGrid().addObserver(tetris);
     }
