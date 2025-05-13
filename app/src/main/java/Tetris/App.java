@@ -5,22 +5,15 @@ package Tetris;
 
 import javax.swing.SwingUtilities;
 
-import Tetris.controller.Controller;
 import Tetris.model.Game;
 import Tetris.model.Grid;
 import Tetris.vue.Vue;
 
 public class App {
     public static void main(String[] args) {
-
-        Game game = new Game();
-        Grid grid = game.getGrid();
-        Vue tetris = new Vue(grid);
-        grid.addObserver(tetris);
-
-        Controller controller = new Controller(grid, tetris);
-        controller.placeNewPiece();
-
+        Game game = new Game(new Grid(10, 20));
+        Vue tetris = new Vue(game.getGrid());
         SwingUtilities.invokeLater(tetris::start);
+        game.getGrid().addObserver(tetris);
     }
 }

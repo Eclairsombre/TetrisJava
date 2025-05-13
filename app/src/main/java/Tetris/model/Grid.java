@@ -43,17 +43,15 @@ public class Grid extends Observable {
         return height;
     }
 
-    public String[][] getGrid() {
-        return grid;
-    }
-
     public void setCell(int x, int y, String value) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
-            System.err.println("Setting cell at (" + x + ", " + y + ") to " + value);
             grid[y][x] = value;
-            setChanged();
-            notifyObservers(grid[y][x]);
         }
+    }
+
+    public void signalVue() {
+        setChanged();
+        notifyObservers(grid);
     }
 
     public String getCell(int x, int y) {
@@ -64,8 +62,10 @@ public class Grid extends Observable {
     }
 
     public Piece getNouvellePiece() {
-        String[] pieceTypes = { "PieceI", "PieceJ", "PieceL", "PieceO", "PieceS", "PieceT", "PieceZ" };
-        int idx = (int) (Math.random() * pieceTypes.length);
+        String[] pieceTypes = {"PieceI", "PieceJ", "PieceL", "PieceO", "PieceS", "PieceT", "PieceZ"};
+        // TODO : use a better random generator
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        int idx = random.nextInt(pieceTypes.length);
         try {
             return switch (pieceTypes[idx]) {
                 case "PieceI" -> new PieceI("red");
@@ -78,49 +78,24 @@ public class Grid extends Observable {
                 default -> throw new IllegalArgumentException("Unknown piece type: " + pieceTypes[idx]);
             };
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error creating piece: " + e.getMessage());
             return null;
         }
     }
 
     public void descendrePiece() {
-        System.out.println("Descendre la pièce");
-        int[][] coords = currentPiece.getCoordinates(pieceX, pieceY);
-        for (int[] c : coords) {
-            int x = c[0];
-            int y = c[1];
-            if (x >= 0 && x < width && y >= 0 && y < height) {
-                setCell(x, y, " ");
-
-            }
-        }
-        System.out.println("Coordonnées de la pièce actuelle : " + pieceX + ", " + pieceY);
-        boolean canMove = true;
         int[][] nextCoords = currentPiece.getCoordinates(pieceX, pieceY + 1);
         for (int[] c : nextCoords) {
             int x = c[0];
-            int y = c[1];
-            if (y >= height || (y >= 0 && x >= 0 && x < width && !grid[y][x].equals(" "))) {
-                canMove = false;
+            int y = c[1] - 1;
+            int y_next = c[1];
+            if (y_next >= height || (y_next >= 0 && x >= 0 && x < width && !grid[y_next][x].equals(" "))) {
                 break;
             }
+            setCell(x, y, " ");
+            setCell(x, y_next, currentPiece.getColor());
         }
-        if (canMove) {
-            System.out.println("La pièce peut descendre");
-            pieceY++;
-        }
-        int[][] newCoords = currentPiece.getCoordinates(pieceX, pieceY);
-        for (int[] c : newCoords) {
-            int x = c[0];
-            int y = c[1];
-            if (x >= 0 && x < width && y >= 0 && y < height) {
-                System.out.println("Coordonnées de la pièce actuelle : " + x + ", " + y);
-                System.out.println("Couleur de la pièce actuelle : " + currentPiece.getColor());
-                setCell(x, y, currentPiece.getColor());
-            }
-        }
-        setChanged();
-        notifyObservers(grid);
+        pieceY++;
+        signalVue();
     }
-
 }

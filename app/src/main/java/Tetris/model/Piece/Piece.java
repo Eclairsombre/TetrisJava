@@ -1,7 +1,5 @@
 package Tetris.model.Piece;
 
-import Tetris.model.Grid;
-
 public class Piece {
     private final String[][] shape;
     private String color;
@@ -60,19 +58,5 @@ public class Piece {
 
     public String getColor() {
         return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public void placePiece(Grid grid) {
-        for (int i = 0; i < shape.length; i++) {
-            for (int j = 0; j < shape[i].length; j++) {
-                if (shape[i][j] != null) {
-                    grid.setCell(x + i, y + j, color);
-                }
-            }
-        }
     }
 }

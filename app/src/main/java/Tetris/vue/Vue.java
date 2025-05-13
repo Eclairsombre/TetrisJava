@@ -5,27 +5,24 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.util.Observable;
 import java.util.Observer;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 
 import Tetris.model.Grid;
 
+@SuppressWarnings("deprecation")
 public class Vue extends JFrame implements Observer {
     private final JPanel[][] cases;
     private final Grid grid;
-    private final JPanel screen = new JPanel();
 
-    public Vue(Grid m) {
+    public Vue(Grid g) {
+        this.grid = g;
         setTitle("Tetris");
-        setSize(700, 1000);
+        setSize(700, 950);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.grid = m;
         cases = new JPanel[grid.getHeight()][grid.getWidth()];
-        // Suppression de l'abonnement ici pour éviter les warnings
 
         // Plateau de jeu (grille Tetris)
         JPanel board = new JPanel();
@@ -76,6 +73,7 @@ public class Vue extends JFrame implements Observer {
         // Layout principal façon Tetris
         JPanel westPanel = new JPanel();
         westPanel.setPreferredSize(new Dimension(20, 20));
+        JPanel screen = new JPanel();
         screen.setLayout(new BorderLayout());
         screen.add(westPanel, BorderLayout.WEST);
         screen.add(board, BorderLayout.CENTER);
@@ -88,21 +86,14 @@ public class Vue extends JFrame implements Observer {
     }
 
     public Color getColorCell(int x, int y) {
-        String res = grid.getCell(x, y);
-        switch (res) {
-            case "red":
-                return Color.RED;
-            case "green":
-                return Color.GREEN;
-            case "blue":
-                return Color.BLUE;
-            case "yellow":
-                return Color.YELLOW;
-            case "pink":
-                return Color.PINK;
-            default:
-                return Color.BLACK;
-        }
+        return switch (grid.getCell(x, y)) {
+            case "red" -> Color.RED;
+            case "green" -> Color.GREEN;
+            case "blue" -> Color.BLUE;
+            case "yellow" -> Color.YELLOW;
+            case "pink" -> Color.PINK;
+            default -> Color.BLACK;
+        };
     }
 
     public void start() {
@@ -111,11 +102,19 @@ public class Vue extends JFrame implements Observer {
     }
 
     @Override
-    public void update(java.util.Observable o, Object arg) {
-        for (int i = 0; i < grid.getWidth(); i++) {
-            for (int j = 0; j < grid.getHeight(); j++) {
-                cases[j][i].setBackground(getColorCell(i, j));
-            }
+    public synchronized void update(Observable o, Object arg) {
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                for (int i = 0; i < grid.getWidth(); i++) {
+                    for (int j = 0; j < grid.getHeight(); j++) {
+                        cases[j][i].setBackground(getColorCell(i, j));
+                    }
+                }
+
+                repaint();
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }
