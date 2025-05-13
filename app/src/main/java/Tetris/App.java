@@ -3,8 +3,17 @@
  */
 package Tetris;
 
+import Tetris.model.Grid;
+import Tetris.vue.Vue;
+
 import javax.swing.SwingUtilities;
 
 public class App {
-
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            Grid grid = new Grid(10, 20);
+            Vue tetris = new Vue(grid);
+            tetris.start();
+        });
+    }
 }

@@ -10,7 +10,12 @@ public class Grid extends Observable {
     public Grid(int width, int height) {
         this.width = width;
         this.height = height;
-        this.grid = new String[width][height];
+        this.grid = new String[height][width];
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                grid[y][x] = " ";
+            }
+        }
     }
 
     public int getWidth() {
@@ -35,7 +40,7 @@ public class Grid extends Observable {
 
     public String getCell(int x, int y) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
-            return grid[x][y];
+            return grid[y][x];
         }
         return null;
     }
