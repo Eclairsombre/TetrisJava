@@ -33,4 +33,11 @@ public class Grid extends Observable {
         }
     }
 
+    public String getCell(int x, int y) {
+        if (x >= 0 && x < width && y >= 0 && y < height) {
+            return grid[x][y];
+        }
+        return null;
+    }
+
 }
