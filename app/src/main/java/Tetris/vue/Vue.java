@@ -115,7 +115,7 @@ public class Vue extends JFrame implements Observer {
     public void createEventListener(JPanel panel) {
         panel.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e) {
+            public synchronized void keyPressed(KeyEvent e) {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_DOWN -> game.movePieceDown();
                     default -> {
@@ -126,17 +126,23 @@ public class Vue extends JFrame implements Observer {
         });
     }
 
+    private void updateCases() {
+        for (int i = 0; i < game.getGrid().getWidth(); i++) {
+            for (int j = 0; j < game.getGrid().getHeight(); j++) {
+                cases[j][i].setBackground(getColorCell(i, j));
+            }
+        }
+        repaint();
+    }
+
     @Override
     public synchronized void update(Observable o, Object arg) {
         try {
-            SwingUtilities.invokeLater(() -> { // if any problem with movement, you can use invokeAndWait to ensure thread safety
-                for (int i = 0; i < game.getGrid().getWidth(); i++) {
-                    for (int j = 0; j < game.getGrid().getHeight(); j++) {
-                        cases[j][i].setBackground(getColorCell(i, j));
-                    }
-                }
-                repaint();
-            });
+            if (SwingUtilities.isEventDispatchThread()) {
+                updateCases();
+            } else {
+                SwingUtilities.invokeAndWait(this::updateCases);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
