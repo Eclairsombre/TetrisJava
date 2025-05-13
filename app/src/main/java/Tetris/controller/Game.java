@@ -19,7 +19,15 @@ public class Game extends Observable {
     }
 
     public void movePieceDown() {
-        grid.descendrePiece();
+        grid.movePiece(0, 1, true);
+    }
+
+    public void movePieceLeft() {
+        grid.movePiece(-1, 0, false);
+    }
+
+    public void movePieceRight() {
+        grid.movePiece(1, 0, false);
     }
 
 }

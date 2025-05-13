@@ -2,7 +2,7 @@ package Tetris.model.Piece;
 
 public class Piece {
     private final String[][] shape;
-    private String color;
+    private final String color;
     private int x;
     private int y;
 

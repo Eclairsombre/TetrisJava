@@ -9,8 +9,6 @@ public class Grid extends Observable {
     private final int height;
     private final String[][] grid;
     private Piece currentPiece;
-    private int pieceX = 4; // position initiale X (centré)
-    private int pieceY = 0; // position initiale Y (en haut)
 
     public Grid(int width, int height) {
         this.width = width;
@@ -25,7 +23,10 @@ public class Grid extends Observable {
     }
 
     private Piece initializePiece() {
-        return getNouvellePiece();
+        Piece p = getNouvellePiece();
+        p.setX(3);
+        p.setY(-2); // TODO ?????
+        return p;
     }
 
     public int getWidth() {
@@ -76,35 +77,50 @@ public class Grid extends Observable {
         }
     }
 
-    public void descendrePiece() {
-        int[][] nextCoords = currentPiece.getCoordinates(pieceX, pieceY + 1);
+    private boolean inCurrentPiece(int x, int y) {
+        int[][] coords = currentPiece.getCoordinates(currentPiece.getX(), currentPiece.getY());
+        for (int[] c : coords) {
+            if (c[0] == x && c[1] == y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void movePiece(int x_move, int y_move, boolean fixPiece) {
+        int[][] nextCoords = currentPiece.getCoordinates(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
         boolean canMoveDown = true;
         for (int[] c : nextCoords) {
-            int x = c[0];
-            int y = c[1] - 1;
+            int x_next = c[0];
             int y_next = c[1];
-            if (y_next >= height || (y_next >= 0 && x >= 0 && x < width && !grid[y_next][x].equals(" "))) {
+            if (inCurrentPiece(x_next, y_next)) {
+                continue;
+            }
+            if (y_next >= height || (y_next >= 0 && x_next >= 0 && x_next < width && !grid[y_next][x_next].equals(" "))) {
+                if (!fixPiece) {
+                    return;
+                }
                 canMoveDown = false;
                 break;
             }
-
         }
         if (canMoveDown) {
             for (int[] c : nextCoords) {
-                int x = c[0];
-                int y = c[1] - 1;
-                int y_next = c[1];
+                int x = c[0] - x_move;
+                int y = c[1] - y_move;
                 setCell(x, y, " ");
-                setCell(x, y_next, currentPiece.getColor());
+            }
+            for (int[] c : nextCoords) {
+                int x_next = c[0];
+                int y_next = c[1];
+                setCell(x_next, y_next, currentPiece.getColor());
             }
         } else {
             this.currentPiece = initializePiece();
-            this.pieceX = 4;
-            this.pieceY = 0;
         }
 
-
-        pieceY++;
+        currentPiece.setX(currentPiece.getX() + x_move);
+        currentPiece.setY(currentPiece.getY() + y_move);
         signalVue();
     }
 }
