@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -70,16 +72,24 @@ public class Vue extends JFrame implements Observer {
         templatePanel.add(npPanel);
         nextPiecePanel.add(templatePanel);
 
-        // Layout principal façon Tetris
         JPanel westPanel = new JPanel();
         westPanel.setPreferredSize(new Dimension(20, 20));
+
+        westPanel.setFocusable(false);
+        board.setFocusable(false);
+        scorePanel.setFocusable(false);
+        nextPiecePanel.setFocusable(false);
         JPanel screen = new JPanel();
+        screen.setFocusable(true);
+        createEventListener(screen);
+
         screen.setLayout(new BorderLayout());
         screen.add(westPanel, BorderLayout.WEST);
         screen.add(board, BorderLayout.CENTER);
         screen.add(scorePanel, BorderLayout.NORTH);
         screen.add(nextPiecePanel, BorderLayout.EAST);
-        setResizable(false); // stop redefinition of screen
+        setResizable(false); // stop redefinition of screen;
+
 
         add(screen);
         setVisible(true);
@@ -101,6 +111,21 @@ public class Vue extends JFrame implements Observer {
         setVisible(true);
     }
 
+
+    public void createEventListener(JPanel panel) {
+        panel.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_DOWN -> grid.descendrePiece();
+                    default -> {
+                        // Do nothing
+                    }
+                }
+            }
+        });
+    }
+
     @Override
     public synchronized void update(Observable o, Object arg) {
         try {
@@ -110,7 +135,6 @@ public class Vue extends JFrame implements Observer {
                         cases[j][i].setBackground(getColorCell(i, j));
                     }
                 }
-
                 repaint();
             });
         } catch (Exception e) {

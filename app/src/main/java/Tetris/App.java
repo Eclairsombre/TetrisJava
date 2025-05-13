@@ -5,7 +5,7 @@ package Tetris;
 
 import javax.swing.SwingUtilities;
 
-import Tetris.model.Game;
+import Tetris.controller.Game;
 import Tetris.model.Grid;
 import Tetris.vue.Vue;
 

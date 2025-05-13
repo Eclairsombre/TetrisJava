@@ -1,8 +1,8 @@
-package Tetris.model;
+package Tetris.controller;
 
 import java.util.Observable;
 
-import Tetris.controller.Ordonnanceur; // Import the Ordonnanceur class
+import Tetris.model.Grid;
 
 public class Game extends Observable {
     private final Grid grid;
