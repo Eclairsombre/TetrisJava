@@ -2,6 +2,8 @@ package Tetris.model;
 
 import Tetris.model.Piece.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
 public class Grid extends Observable {
@@ -24,8 +26,7 @@ public class Grid extends Observable {
 
     private Piece initializePiece() {
         Piece p = getNouvellePiece();
-        p.setX(3);
-        p.setY(-2); // TODO ?????
+        p.setPos(3, 0);
         return p;
     }
 
@@ -56,20 +57,18 @@ public class Grid extends Observable {
     }
 
     public Piece getNouvellePiece() {
-        String[] pieceTypes = {"PieceI", "PieceJ", "PieceL", "PieceO", "PieceS", "PieceT", "PieceZ"};
-        // TODO : use a better random generator
         java.security.SecureRandom random = new java.security.SecureRandom();
-        int idx = random.nextInt(pieceTypes.length);
+        int idx = random.nextInt(7);
         try {
-            return switch (pieceTypes[idx]) {
-                case "PieceI" -> new PieceI("red");
-                case "PieceJ" -> new PieceJ("red");
-                case "PieceL" -> new PieceL("red");
-                case "PieceO" -> new PieceO("red");
-                case "PieceS" -> new PieceS("red");
-                case "PieceT" -> new PieceT("red");
-                case "PieceZ" -> new PieceZ("red");
-                default -> throw new IllegalArgumentException("Unknown piece type: " + pieceTypes[idx]);
+            return switch (idx) {
+                case 0 -> new PieceI("red");
+                case 1 -> new PieceJ("orange");
+                case 2 -> new PieceL("blue");
+                case 3 -> new PieceO("yellow");
+                case 4 -> new PieceS("green");
+                case 5 -> new PieceT("cyan");
+                case 6 -> new PieceZ("pink");
+                default -> throw new IllegalArgumentException("Invalid piece index: " + idx);
             };
         } catch (Exception e) {
             System.err.println("Error creating piece: " + e.getMessage());
@@ -77,7 +76,7 @@ public class Grid extends Observable {
         }
     }
 
-    private boolean inCurrentPiece(int x, int y) {
+    private boolean isInCurrentPiece(int x, int y) {
         int[][] coords = currentPiece.getCoordinates(currentPiece.getX(), currentPiece.getY());
         for (int[] c : coords) {
             if (c[0] == x && c[1] == y) {
@@ -89,14 +88,22 @@ public class Grid extends Observable {
 
     public void movePiece(int x_move, int y_move, boolean fixPiece) {
         int[][] nextCoords = currentPiece.getCoordinates(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
+        List<int[]> pointsToCheck = new ArrayList<>();
+
+        for (int[] coord : nextCoords) {
+            if (!isInCurrentPiece(coord[0], coord[1])) {
+                pointsToCheck.add(coord);
+            }
+        }
         boolean canMoveDown = true;
-        for (int[] c : nextCoords) {
+
+        for (int[] c : pointsToCheck) {
             int x_next = c[0];
             int y_next = c[1];
-            if (inCurrentPiece(x_next, y_next)) {
+            if (isInCurrentPiece(x_next, y_next)) {
                 continue;
             }
-            if (y_next >= height || (y_next >= 0 && x_next >= 0 && x_next < width && !grid[y_next][x_next].equals(" "))) {
+            if (x_next < 0 || x_next >= width || y_next >= height || (y_next >= 0 && !grid[y_next][x_next].equals(" "))) {
                 if (!fixPiece) {
                     return;
                 }
@@ -105,6 +112,7 @@ public class Grid extends Observable {
             }
         }
         if (canMoveDown) {
+
             for (int[] c : nextCoords) {
                 int x = c[0] - x_move;
                 int y = c[1] - y_move;
@@ -119,8 +127,11 @@ public class Grid extends Observable {
             this.currentPiece = initializePiece();
         }
 
-        currentPiece.setX(currentPiece.getX() + x_move);
-        currentPiece.setY(currentPiece.getY() + y_move);
+        currentPiece.setPos(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
         signalVue();
+    }
+
+    public void rotatePiece(boolean b) {
+        return;
     }
 }

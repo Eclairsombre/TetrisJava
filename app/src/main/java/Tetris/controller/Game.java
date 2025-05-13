@@ -30,4 +30,11 @@ public class Game extends Observable {
         grid.movePiece(1, 0, false);
     }
 
+    public void rotatePieceLeft() {
+        grid.rotatePiece(true);
+    }
+
+    public void rotatePieceRight() {
+        grid.rotatePiece(false);
+    }
 }

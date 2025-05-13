@@ -4,12 +4,8 @@ public class PieceS extends Piece {
 
     public PieceS(String color) {
         super(color);
-        String[][] shape = {
-                {" ", " ", color, color},
-                {" ", color, color, " "},
-                {" ", " ", " ", " "},
-                {" ", " ", " ", " "}
-        };
+        int[][] shape = {{0, 1}, {1, 1}, {1, 0}, {2, 0}};
+
         super.setShape(shape);
     }
 

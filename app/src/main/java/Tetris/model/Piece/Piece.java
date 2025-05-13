@@ -1,46 +1,35 @@
 package Tetris.model.Piece;
 
 public class Piece {
-    private final String[][] shape;
+    private final int[][] shape = new int[4][2]; // General shape for the piece
     private final String color;
-    private int x;
-    private int y;
+    private int x = 0;
+    private int y = 0; // Position of the piece on the grid
 
     public Piece(String color) {
         this.color = color;
-        this.x = 0;
-        this.y = 0;
-        this.shape = new String[4][4];
     }
 
-    public String[][] getShape() {
+    public int[][] getShape() {
         return shape;
     }
 
     public int[][] getCoordinates(int x, int y) {
         int[][] coordinates = new int[4][2];
-        int coordIndex = 0;
         for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (shape[i][j] != null && !shape[i][j].equals(" ")) {
-                    coordinates[coordIndex][0] = x + j; // Correction: j représente la colonne (x)
-                    coordinates[coordIndex][1] = y + i; // Correction: i représente la ligne (y)
-                    coordIndex++;
-                    if (coordIndex >= 4) break;
-                }
-            }
-            if (coordIndex == 4) break;
+            coordinates[i][0] = this.shape[i][0] + x;
+            coordinates[i][1] = this.shape[i][1] + y;
         }
         return coordinates;
     }
 
-    public void setShape(String[][] shape) {
-        if (shape.length == 4 && shape[0].length == 4) {
+    public void setShape(int[][] shape) {
+        if (shape.length == 4 && shape[0].length == 2) {
             for (int i = 0; i < 4; i++) {
-                System.arraycopy(shape[i], 0, this.shape[i], 0, 4);
+                System.arraycopy(shape[i], 0, this.shape[i], 0, 2);
             }
         } else {
-            throw new IllegalArgumentException("Shape must be 4x4.");
+            throw new IllegalArgumentException("Shape must be 4x2.");
         }
     }
 
@@ -52,15 +41,26 @@ public class Piece {
         return y;
     }
 
-    public void setX(int x) {
+    public void setPos(int x, int y) {
         this.x = x;
-    }
-
-    public void setY(int y) {
         this.y = y;
     }
 
     public String getColor() {
         return color;
+    }
+
+    public int[][] getRotatedPosition(boolean isLeft) {
+        int[][] rotatedShape = new int[4][2];
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (isLeft) {
+                    rotatedShape[i][j] = this.shape[3 - j][i];
+                } else {
+                    rotatedShape[i][j] = this.shape[j][3 - i];
+                }
+            }
+        }
+        return rotatedShape;
     }
 }

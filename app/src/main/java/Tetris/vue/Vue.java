@@ -9,9 +9,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Observable;
 import java.util.Observer;
-
 import javax.swing.*;
-
 import Tetris.controller.Game;
 
 @SuppressWarnings("deprecation")
@@ -97,11 +95,13 @@ public class Vue extends JFrame implements Observer {
 
     public Color getColorCell(int x, int y) {
         return switch (game.getGrid().getCell(x, y)) {
-            case "red" -> Color.RED;
-            case "green" -> Color.GREEN;
-            case "blue" -> Color.BLUE;
-            case "yellow" -> Color.YELLOW;
-            case "pink" -> Color.PINK;
+            case "red" -> new Color(0xFF0000);
+            case "green" -> new Color(0x00FF00);
+            case "blue" -> new Color(0x0000FF);
+            case "yellow" -> new Color(0xFFFF00);
+            case "pink" -> new Color(0x800080);
+            case "orange" -> new Color(0xFF7F00);
+            case "cyan" -> new Color(0x00FFFF);
             default -> Color.BLACK;
         };
     }
@@ -120,6 +120,8 @@ public class Vue extends JFrame implements Observer {
                     case KeyEvent.VK_DOWN -> game.movePieceDown();
                     case KeyEvent.VK_LEFT -> game.movePieceLeft();
                     case KeyEvent.VK_RIGHT -> game.movePieceRight();
+                    case KeyEvent.VK_Q -> game.rotatePieceLeft();
+                    case KeyEvent.VK_D -> game.rotatePieceRight();
                     default -> {
                         // Do nothing
                     }

@@ -4,12 +4,7 @@ public class PieceL extends Piece {
 
     public PieceL(String color) {
         super(color);
-        String[][] shape = {
-                {" ", " ", color, " "},
-                {" ", " ", color, " "},
-                {" ", " ", color, color},
-                {" ", " ", " ", " "}
-        };
+        int[][] shape = {{0, 1}, {1, 1}, {2, 1}, {2, 0}};
         super.setShape(shape);
     }
 
