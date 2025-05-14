@@ -11,7 +11,7 @@ public class Grid extends Observable {
     private final int width;
     private final int height;
     private int score;
-    private final String[][] grid;
+    private final PieceColor[][] grid;
     private Piece currentPiece;
     private Piece nextPiece;
     private boolean isNewNextPiece;
@@ -20,10 +20,10 @@ public class Grid extends Observable {
         this.width = width;
         this.height = height;
         this.score = 0;
-        this.grid = new String[height][width];
+        this.grid = new PieceColor[height][width];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                grid[y][x] = " ";
+                grid[y][x] = PieceColor.NONE;
             }
         }
         this.currentPiece = initializePiece();
@@ -55,7 +55,7 @@ public class Grid extends Observable {
         return height;
     }
 
-    public void setCell(int x, int y, String value) {
+    public void setCell(int x, int y, PieceColor value) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             grid[y][x] = value;
         }
@@ -66,7 +66,7 @@ public class Grid extends Observable {
         notifyObservers(grid);
     }
 
-    public String getCell(int x, int y) {
+    public PieceColor getCell(int x, int y) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             return grid[y][x];
         }
@@ -81,11 +81,11 @@ public class Grid extends Observable {
         this.isNewNextPiece = isNewNextPiece;
     }
 
-    public String[][] getNextPiece() {
-        String[][] nextPieceGrid = new String[4][4];
+    public PieceColor[][] getNextPiece() {
+        PieceColor[][] nextPieceGrid = new PieceColor[4][4];
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                nextPieceGrid[i][j] = " ";
+                nextPieceGrid[i][j] = PieceColor.NONE;
             }
         }
         int[][] coords = nextPiece.getCoordinates(0, 0);
@@ -105,13 +105,13 @@ public class Grid extends Observable {
         int idx = random.nextInt(7);
         try {
             return switch (idx) {
-                case 0 -> new PieceI("red");
-                case 1 -> new PieceJ("orange");
-                case 2 -> new PieceL("blue");
-                case 3 -> new PieceO("yellow");
-                case 4 -> new PieceS("green");
-                case 5 -> new PieceT("cyan");
-                case 6 -> new PieceZ("pink");
+                case 0 -> new PieceI(PieceColor.RED);
+                case 1 -> new PieceJ(PieceColor.ORANGE);
+                case 2 -> new PieceL(PieceColor.BLUE);
+                case 3 -> new PieceO(PieceColor.YELLOW);
+                case 4 -> new PieceS(PieceColor.GREEN);
+                case 5 -> new PieceT(PieceColor.CYAN);
+                case 6 -> new PieceZ(PieceColor.PINK);
                 default -> throw new IllegalArgumentException("Invalid piece index: " + idx);
             };
         } catch (Exception e) {
@@ -141,7 +141,7 @@ public class Grid extends Observable {
         for (int[] c : pointsToCheck) {
             int x_next = c[0];
             int y_next = c[1];
-            if (x_next < 0 || x_next >= width || y_next >= height || (y_next >= 0 && !grid[y_next][x_next].equals(" "))) {
+            if (x_next < 0 || x_next >= width || y_next >= height || (y_next >= 0 && !(grid[y_next][x_next] == PieceColor.NONE))) {
                 return false;
             }
         }
@@ -173,19 +173,19 @@ public class Grid extends Observable {
 
     private void deleteLine(int y) {
         for (int x = 0; x < width; x++) {
-            setCell(x, y, " ");
+            setCell(x, y, PieceColor.NONE);
         }
         for (int i = y; i > 0; i--) {
             if (width >= 0) System.arraycopy(grid[i - 1], 0, grid[i], 0, width);
         }
         for (int x = 0; x < width; x++) {
-            grid[0][x] = " ";
+            grid[0][x] = PieceColor.NONE;
         }
     }
 
     private boolean isLineComplete(int y) {
         for (int x = 0; x < width; x++) {
-            if (grid[y][x].equals(" ")) {
+            if (grid[y][x] == PieceColor.NONE) {
                 return false;
             }
         }
@@ -199,7 +199,7 @@ public class Grid extends Observable {
             for (int[] c : nextCoords) {
                 int x = c[0] - x_move;
                 int y = c[1] - y_move;
-                setCell(x, y, " ");
+                setCell(x, y, PieceColor.NONE);
             }
             for (int[] c : nextCoords) {
                 int x_next = c[0];
@@ -235,7 +235,7 @@ public class Grid extends Observable {
 
         if (checkCollision(rotatedShape)) {
             for (int[] c : currentPiece.getCoordinates(currentPiece.getX(), currentPiece.getY())) {
-                setCell(c[0], c[1], " ");
+                setCell(c[0], c[1], PieceColor.NONE);
             }
             currentPiece.setShape(originalRotatedShape);
             for (int[] c : currentPiece.getCoordinates(currentPiece.getX(), currentPiece.getY())) {
@@ -245,7 +245,15 @@ public class Grid extends Observable {
         }
     }
 
-    public String getNextPieceColor() {
+    public PieceColor getNextPieceColor() {
         return nextPiece.getColor();
+    }
+
+    public PieceColor[][] getGrid() {
+        PieceColor[][] gridCopy = new PieceColor[height][width];
+        for (int i = 0; i < height; i++) {
+            System.arraycopy(grid[i], 0, gridCopy[i], 0, width);
+        }
+        return gridCopy;
     }
 }

@@ -1,7 +1,7 @@
 package Tetris.model.Piece;
 
 public class PieceI extends Piece {
-    public PieceI(String color) {
+    public PieceI(PieceColor color) {
         super(color);
         int[][] shape = {{1, 0}, {1, 1}, {1, 2}, {1, 3}};
         super.setShape(shape);

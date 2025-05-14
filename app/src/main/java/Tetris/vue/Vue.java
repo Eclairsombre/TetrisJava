@@ -1,12 +1,12 @@
 package Tetris.vue;
 
 import Tetris.controller.Game;
+import Tetris.model.Piece.PieceColor;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -94,15 +94,15 @@ public class Vue extends JFrame implements Observer {
         setVisible(true);
     }
 
-    private Color getColorCell(String color) {
+    private Color getColorCell(PieceColor color) {
         return switch (color) {
-            case "red" -> new Color(0xFF0000);
-            case "green" -> new Color(0x00FF00);
-            case "blue" -> new Color(0x0000FF);
-            case "yellow" -> new Color(0xFFFF00);
-            case "pink" -> new Color(0x800080);
-            case "orange" -> new Color(0xFF7F00);
-            case "cyan" -> new Color(0x00FFFF);
+            case PieceColor.RED -> new Color(0xFF0000);
+            case PieceColor.GREEN -> new Color(0x00FF00);
+            case PieceColor.BLUE -> new Color(0x0000FF);
+            case PieceColor.YELLOW -> new Color(0xFFFF00);
+            case PieceColor.PINK -> new Color(0x800080);
+            case PieceColor.ORANGE -> new Color(0xFF7F00);
+            case PieceColor.CYAN -> new Color(0x00FFFF);
             default -> Color.BLACK;
         };
     }
@@ -144,20 +144,18 @@ public class Vue extends JFrame implements Observer {
     }
 
     private void updateNextPiece() {
-        String[][] nextPiece = game.getGrid().getNextPiece();
+        PieceColor[][] nextPiece = game.getGrid().getNextPiece();
         Color color = getColorCell(game.getGrid().getNextPieceColor());
         int temp = 0;
-        System.out.println(Arrays.deepToString(nextPiece));
-        if (nextPiece[3][1].equals(" ")) {
+        if (nextPiece[3][1] == PieceColor.NONE) {
             temp = 1;
         }
-        System.out.println(temp);
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if (temp != 1) {
-                    nextPieceCells[j][i].setBackground(nextPiece[j][i].equals(" ") ? Color.BLACK : color);
+                    nextPieceCells[j][i].setBackground((nextPiece[j][i] == PieceColor.NONE) ? Color.BLACK : color);
                 } else {
-                    nextPieceCells[j][i].setBackground((i > 0 && j > 0 && !nextPiece[j - 1][i - 1].equals(" ")) ? color : Color.BLACK);
+                    nextPieceCells[j][i].setBackground((i > 0 && j > 0 && !(nextPiece[j - 1][i - 1] == PieceColor.NONE)) ? color : Color.BLACK);
                 }
             }
         }

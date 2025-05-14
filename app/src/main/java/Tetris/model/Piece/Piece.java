@@ -1,13 +1,14 @@
 package Tetris.model.Piece;
 
+
 public class Piece {
     private final int[][] shape = new int[4][2]; // General shape for the piece
-    private final String color;
+    private final PieceColor color;
     private int x = 0;
     private int y = 0; // Position of the piece on the grid
     private final int[] center = new int[2]; // Center of the piece for rotation
 
-    public Piece(String color) {
+    public Piece(PieceColor color) {
         this.color = color;
         this.center[0] = 1;
         this.center[1] = 1;
@@ -50,7 +51,7 @@ public class Piece {
         this.y = y;
     }
 
-    public String getColor() {
+    public PieceColor getColor() {
         return color;
     }
 
