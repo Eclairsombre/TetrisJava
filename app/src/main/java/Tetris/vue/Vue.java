@@ -121,7 +121,7 @@ public class Vue extends JFrame implements Observer {
             @Override
             public synchronized void keyPressed(KeyEvent e) {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_DOWN -> game.movePieceDown();
+                    case KeyEvent.VK_DOWN -> game.movePieceDown(true);
                     case KeyEvent.VK_LEFT -> game.movePieceLeft();
                     case KeyEvent.VK_RIGHT -> game.movePieceRight();
                     case KeyEvent.VK_Q -> game.rotatePieceLeft();

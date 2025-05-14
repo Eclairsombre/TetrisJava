@@ -15,6 +15,7 @@ public class Grid extends Observable {
     private Piece currentPiece;
     private Piece nextPiece;
     private boolean isNewNextPiece;
+    public boolean isGameOver;
 
     public Grid(int width, int height) {
         this.width = width;
@@ -130,9 +131,9 @@ public class Grid extends Observable {
         return false;
     }
 
-    public boolean checkCollision(int[][] rotatedShape) {
+    public boolean checkCollision(int[][] shape) {
         List<int[]> pointsToCheck = new ArrayList<>();
-        for (int[] pos : rotatedShape) {
+        for (int[] pos : shape) {
             if (!isInCurrentPiece(pos[0], pos[1])) {
                 pointsToCheck.add(pos);
             }
@@ -161,13 +162,13 @@ public class Grid extends Observable {
         for (int y : linesToCheck) {
             if (isLineComplete(y)) {
                 deleteLine(y);
-                countPoints += 100;
+                countPoints += 10;
             }
         }
         if (countPoints > 0) {
-            updateScore(countPoints);
+            updateScore(countPoints * countPoints); // to favorize double, triple, etc.
             setChanged();
-            notifyObservers(countPoints);
+            notifyObservers(countPoints * countPoints);
         }
     }
 
@@ -208,6 +209,12 @@ public class Grid extends Observable {
             }
         } else {
             if (!fixPiece) {
+                return;
+            }
+            // check end game
+            if (currentPiece.getY() == 1) {
+                System.out.println("Game Over");
+                this.isGameOver = true;
                 return;
             }
             // we check if a line is complete
@@ -255,5 +262,9 @@ public class Grid extends Observable {
             System.arraycopy(grid[i], 0, gridCopy[i], 0, width);
         }
         return gridCopy;
+    }
+
+    public boolean isGameOver() {
+        return isGameOver;
     }
 }
