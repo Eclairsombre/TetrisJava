@@ -1,16 +1,14 @@
 package Tetris.vue;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
+import Tetris.controller.Game;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
-import javax.swing.*;
-import Tetris.controller.Game;
 
 @SuppressWarnings("deprecation")
 public class Vue extends JFrame implements Observer {
@@ -148,9 +146,19 @@ public class Vue extends JFrame implements Observer {
     private void updateNextPiece() {
         String[][] nextPiece = game.getGrid().getNextPiece();
         Color color = getColorCell(game.getGrid().getNextPieceColor());
+        int temp = 0;
+        System.out.println(Arrays.deepToString(nextPiece));
+        if (nextPiece[3][1].equals(" ")) {
+            temp = 1;
+        }
+        System.out.println(temp);
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                nextPieceCells[j][i].setBackground(nextPiece[j][i].equals(" ") ? Color.BLACK : color);
+                if (temp != 1) {
+                    nextPieceCells[j][i].setBackground(nextPiece[j][i].equals(" ") ? Color.BLACK : color);
+                } else {
+                    nextPieceCells[j][i].setBackground((i > 0 && j > 0 && !nextPiece[j - 1][i - 1].equals(" ")) ? color : Color.BLACK);
+                }
             }
         }
         repaint();
