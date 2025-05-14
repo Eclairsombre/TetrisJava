@@ -23,9 +23,11 @@ public class Grid extends Observable {
     public boolean isGameOver;
     private boolean canHoldPiece;
     java.util.Random random;
+    private final List<Integer> lastPiece;
 
     public Grid(int width, int height) {
         random = new java.util.Random((int) (System.currentTimeMillis() % Integer.MAX_VALUE));
+        this.lastPiece = new ArrayList<>(List.of(0, 0));
         this.width = width;
         this.height = height;
         this.score = 0;
@@ -115,6 +117,14 @@ public class Grid extends Observable {
         // make a semi-random choice of a piece to avoid too many duplicates
         java.security.SecureRandom random = new java.security.SecureRandom();
         int idx = random.nextInt(7);
+        for (int i = 0; i < lastPiece.size(); i++) {
+            if (!lastPiece.contains(idx)) {
+                break;
+            }
+            idx = random.nextInt(7); // re-roll if the piece is already in the last 3
+        } // if the piece is in the last 3 again, we select it anyway
+        lastPiece.removeFirst();
+        lastPiece.add(idx);
         try {
             return switch (idx) {
                 case 0 -> new PieceI(PieceColor.RED);
