@@ -150,26 +150,19 @@ public class TetrisView extends JFrame implements Observer {
     }
 
     @Override
-    public synchronized void update(Observable o, Object arg) {
+    public void update(Observable o, Object arg) {
         try {
             if (arg instanceof Integer) {
                 updateScore();
             } else {
-                if (SwingUtilities.isEventDispatchThread()) {
+                SwingUtilities.invokeLater(() -> {
                     updateBoard();
                     if (game.getGrid().isNewNextPiece()) {
                         game.getGrid().setNewNextPiece(false);
                         updateNextPiece();
                     }
-                } else {
-                    SwingUtilities.invokeAndWait(() -> {
-                        updateBoard();
-                        if (game.getGrid().isNewNextPiece()) {
-                            game.getGrid().setNewNextPiece(false);
-                            updateNextPiece();
-                        }
-                    });
-                }
+                    repaint();
+                });
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
