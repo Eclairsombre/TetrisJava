@@ -12,12 +12,25 @@ public class Game extends Observable {
     public Game(Grid grid) {
         this.grid = grid;
         this.scheduler = new Scheduler(grid.getLevel().getSpeed(), () -> movePieceDown(false));
-        this.scheduler.start();
+        this.timer =  new Scheduler(1000, grid::incrementSeconds);
+    }
 
-        this.timer = new Scheduler(1000, grid::incrementSeconds);
+    public void startGame() {
+        this.scheduler.start();
         this.timer.start();
     }
 
+    public void pauseGame() {
+        if (scheduler.isAlive() && timer.isAlive()) {
+            scheduler.stopThread();
+            timer.stopThread();
+        } else {
+            scheduler = new Scheduler(grid.getLevel().getSpeed(), () -> movePieceDown(false));
+            timer = new Scheduler(1000, grid::incrementSeconds);
+            scheduler.start();
+            timer.start();
+        }
+    }
     public Grid getGrid() {
         return grid;
     }
