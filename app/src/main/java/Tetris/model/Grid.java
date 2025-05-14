@@ -28,8 +28,10 @@ public class Grid extends Observable {
             }
         }
         this.currentPiece = initializePiece();
-        this.nextPiece = new ArrayList<Piece>();
-        this.nextPiece.add(getNouvellePiece());
+        this.nextPiece = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            this.nextPiece.add(initializePiece());
+        }
     }
 
     public int getScore() {
@@ -83,23 +85,8 @@ public class Grid extends Observable {
         this.isNewNextPiece = isNewNextPiece;
     }
 
-    public PieceColor[][] getNextPiece() {
-        Piece firstNextPiece = this.nextPiece.getFirst();
-        PieceColor[][] nextPieceGrid = new PieceColor[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                nextPieceGrid[i][j] = PieceColor.NONE;
-            }
-        }
-        int[][] coords = firstNextPiece.getCoordinates(0, 0);
-        for (int[] c : coords) {
-            int x = c[0];
-            int y = c[1];
-            if (x >= 0 && x < 4 && y >= 0 && y < 4) {
-                nextPieceGrid[y][x] = firstNextPiece.getColor();
-            }
-        }
-        return nextPieceGrid;
+    public List<Piece> getNextPiece() {
+        return nextPiece;
     }
 
     public Piece getNouvellePiece() {
@@ -224,7 +211,7 @@ public class Grid extends Observable {
             // we create a new piece
             this.currentPiece = this.nextPiece.getFirst();
             this.nextPiece.removeFirst();
-            this.nextPiece.addLast(getNouvellePiece());
+            this.nextPiece.addLast(initializePiece());
             this.setNewNextPiece(true);
 
 
@@ -258,10 +245,6 @@ public class Grid extends Observable {
         }
     }
 
-    public PieceColor getNextPieceColor() {
-        return nextPiece.getFirst().getColor();
-    }
-
     public PieceColor[][] getGrid() {
         PieceColor[][] gridCopy = new PieceColor[height][width];
         for (int i = 0; i < height; i++) {
@@ -272,5 +255,29 @@ public class Grid extends Observable {
 
     public boolean isGameOver() {
         return isGameOver;
+    }
+
+    public void reset() {
+        this.score = 0;
+        this.isGameOver = false;
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                grid[y][x] = PieceColor.NONE;
+            }
+        }
+        // we check if a line is complete
+        checkingLines(currentPiece);
+        // we create a new piece
+        this.currentPiece = initializePiece();
+        this.nextPiece.clear();
+        for (int i = 0; i < 3; i++) {
+            this.nextPiece.addLast(initializePiece());
+        }
+        setChanged();
+        notifyObservers(grid);
+    }
+
+    public Piece getCurrentPiece() {
+        return currentPiece;
     }
 }

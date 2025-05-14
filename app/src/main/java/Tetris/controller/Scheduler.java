@@ -20,20 +20,9 @@ public class Scheduler extends Thread {
                 break;
             }
         }
-        stopThread();
     }
 
     public void stopThread() {
         this.interrupt();
-    }
-
-    public void setPause(long pause) {
-        this.pause = pause;
-        this.stopThread();
-        this.start();
-    }
-
-    public void setRunning(boolean running) {
-        this.running = running;
     }
 }

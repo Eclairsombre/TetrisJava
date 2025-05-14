@@ -7,7 +7,7 @@ import Tetris.model.Grid;
 @SuppressWarnings("deprecation")
 public class Game extends Observable {
     private final Grid grid;
-    private final Scheduler scheduler = new Scheduler(700, () -> movePieceDown(false));
+    private Scheduler scheduler = new Scheduler(700, () -> movePieceDown(false));
 
     public Game(Grid grid) {
         this.grid = grid;
@@ -52,5 +52,18 @@ public class Game extends Observable {
         if (!grid.isGameOver()) {
             grid.rotatePiece(false);
         }
+    }
+
+    public void resetScheduler(long pause) {
+        scheduler.stopThread();
+        scheduler = new Scheduler(pause, () -> movePieceDown(false));
+        scheduler.start();
+    }
+
+    public void reset() {
+        grid.reset();
+        resetScheduler(700);
+        setChanged();
+        notifyObservers();
     }
 }

@@ -1,6 +1,7 @@
 package Tetris.vue;
 
 import Tetris.controller.Game;
+import Tetris.model.Piece.Piece;
 import Tetris.model.Piece.PieceColor;
 
 import javax.swing.*;
@@ -126,6 +127,11 @@ public class Vue extends JFrame implements Observer {
                     case KeyEvent.VK_RIGHT -> game.movePieceRight();
                     case KeyEvent.VK_Q -> game.rotatePieceLeft();
                     case KeyEvent.VK_D -> game.rotatePieceRight();
+                    case KeyEvent.VK_SPACE -> {
+                        if (game.getGrid().isGameOver()) {
+                            game.reset();
+                        }
+                    }
                     default -> {
                         // Do nothing
                     }
@@ -140,23 +146,36 @@ public class Vue extends JFrame implements Observer {
                 cases[j][i].setBackground(getColorCell(i, j));
             }
         }
+        Piece piece = game.getGrid().getCurrentPiece();
+        int[][] coords = piece.getCoordinates(piece.getX(), piece.getY());
+        Color color = getColorCell(piece.getColor());
+        for (int[] coord : coords) {
+            int x = coord[0];
+            int y = coord[1];
+            if (x >= 0 && x < game.getGrid().getWidth() && y >= 0 && y < game.getGrid().getHeight()) {
+                cases[y][x].setBackground(color);
+            }
+        }
         repaint();
     }
 
     private void updateNextPiece() {
-        PieceColor[][] nextPiece = game.getGrid().getNextPiece();
-        Color color = getColorCell(game.getGrid().getNextPieceColor());
-        int temp = 0;
-        if (nextPiece[3][1] == PieceColor.NONE) {
-            temp = 1;
+        Piece nextPiece = game.getGrid().getNextPiece().getFirst();
+        int [][] coords = nextPiece.getShape();
+        Color color = getColorCell(nextPiece.getColor());
+        if (!(coords[3][0] == 1 && coords[3][1] == 3)) {
+            coords = nextPiece.getCoordinates(1, 1);
         }
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (temp != 1) {
-                    nextPieceCells[j][i].setBackground((nextPiece[j][i] == PieceColor.NONE) ? Color.BLACK : color);
-                } else {
-                    nextPieceCells[j][i].setBackground((i > 0 && j > 0 && !(nextPiece[j - 1][i - 1] == PieceColor.NONE)) ? color : Color.BLACK);
-                }
+        for (JPanel[] nextPieceCell : nextPieceCells) {
+            for (JPanel jPanel : nextPieceCell) {
+                jPanel.setBackground(Color.BLACK);
+            }
+        }
+        for (int[] coord : coords) {
+            int x = coord[0];
+            int y = coord[1];
+            if (x >= 0 && x < nextPieceCells.length && y >= 0 && y < nextPieceCells[0].length) {
+                nextPieceCells[x][y].setBackground(color);
             }
         }
         repaint();
