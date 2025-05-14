@@ -14,6 +14,7 @@ import java.util.Observer;
 @SuppressWarnings("deprecation")
 public class TetrisView extends JFrame implements Observer {
     private final JPanel[][] cases;
+    private final JPanel[][] holdPieceCells;
     private final JPanel[][][] nextPieceCells;
     private final Game game;
     private final DashBoardView dashBoardVue = new DashBoardView();
@@ -21,26 +22,21 @@ public class TetrisView extends JFrame implements Observer {
     public TetrisView(Game g) {
         this.game = g;
         setTitle("Tetris");
-        setSize(700, 1050);
+        setSize(900, 1050);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         cases = new JPanel[game.getGrid().getHeight()][game.getGrid().getWidth()];
         GameBoardView boardView = new GameBoardView(game.getGrid().getWidth(), game.getGrid().getHeight(), cases);
         nextPieceCells = new JPanel[3][4][4];
-        PieceDisplayView[] nextPiecePanel = new PieceDisplayView[3];
-        JPanel PiecePanel = new JPanel();
-        PiecePanel.setPreferredSize(new Dimension(200, 600));
-
-        JLabel nextPieceLabel = new JLabel("Prochaine pièce", SwingConstants.CENTER);
-        nextPieceLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        PiecePanel.add(nextPieceLabel, BorderLayout.CENTER);
-        PiecePanel.setLayout(new GridLayout(4, 0, 0, 0));
-        for (int i = 0; i < 3; i++) {
-            nextPiecePanel[i] = new PieceDisplayView(nextPieceCells[i]);
-            PiecePanel.add(nextPiecePanel[i], BorderLayout.CENTER);
-        }
+        holdPieceCells = new JPanel[4][4];
+        JPanel templatePanel = new JPanel();
+        PieceDisplayManager piecePanel = new PieceDisplayManager(nextPieceCells, holdPieceCells, 20, 20);
+        JPanel eastPanel = new JPanel();
+        eastPanel.setPreferredSize(new Dimension(50, 20));
+        templatePanel.add(piecePanel);
+        templatePanel.add(eastPanel);
 
         JPanel westPanel = new JPanel();
-        westPanel.setPreferredSize(new Dimension(20, 20));
+        westPanel.setPreferredSize(new Dimension(50, 20));
         westPanel.setFocusable(false);
 
         JPanel screen = new JPanel();
@@ -50,7 +46,7 @@ public class TetrisView extends JFrame implements Observer {
         screen.add(westPanel, BorderLayout.WEST);
         screen.add(boardView, BorderLayout.CENTER);
         screen.add(dashBoardVue, BorderLayout.NORTH);
-        screen.add(PiecePanel, BorderLayout.EAST);
+        screen.add(templatePanel, BorderLayout.EAST);
 
         add(screen);
         setVisible(true);
@@ -138,6 +134,24 @@ public class TetrisView extends JFrame implements Observer {
                 int x = coord[0];
                 int y = coord[1];
                 nextPieceCells[i][x][y].setBackground(color);
+            }
+        }
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                holdPieceCells[i][j].setBackground(Color.BLACK);
+            }
+        }
+        Piece holdPiece = game.getGrid().getHoldPiece();
+        if (holdPiece != null) {
+            int[][] coords = holdPiece.getShape();
+            Color color = getColorCell(holdPiece.getColor());
+            if (!(coords[3][0] == 1 && coords[3][1] == 3)) {
+                coords = holdPiece.getCoordinates(1, 1);
+            }
+            for (int[] coord : coords) {
+                int x = coord[0];
+                int y = coord[1];
+                holdPieceCells[x][y].setBackground(color);
             }
         }
 

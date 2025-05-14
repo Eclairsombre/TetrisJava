@@ -109,6 +109,10 @@ public class Grid extends Observable {
         return this.pieceManager.getNextPiece();
     }
 
+    public Piece getHoldPiece() {
+        return this.pieceManager.getHoldPiece();
+    }
+
     public Piece getNouvellePiece() {
         // make a semi-random choice of a piece to avoid too many duplicates
         java.security.SecureRandom random = new java.security.SecureRandom();
