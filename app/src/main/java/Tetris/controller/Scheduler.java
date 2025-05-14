@@ -1,22 +1,39 @@
 package Tetris.controller;
 
-import java.util.concurrent.ScheduledExecutorService;
-
 public class Scheduler extends Thread {
     Runnable r;
-    long pause;
-    boolean running;
-    private final ScheduledExecutorService scheduler; // Thread-safe scheduler
+    long pause;// Thread-safe scheduler
+    boolean running = true;
 
     public Scheduler(long pause, Runnable runnable) {
         this.r = runnable;
         this.pause = pause;
-        this.running = true;
-        this.scheduler = java.util.concurrent.Executors.newScheduledThreadPool(1);
     }
 
     @Override
     public void run() {
-        scheduler.scheduleAtFixedRate(r, 0, pause, java.util.concurrent.TimeUnit.MILLISECONDS);
+        while (running) {
+            try {
+                Thread.sleep(pause);
+                r.run();
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+        stopThread();
+    }
+
+    public void stopThread() {
+        this.interrupt();
+    }
+
+    public void setPause(long pause) {
+        this.pause = pause;
+        this.stopThread();
+        this.start();
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
     }
 }
