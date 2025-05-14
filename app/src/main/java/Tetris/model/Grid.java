@@ -14,6 +14,7 @@ public class Grid extends Observable {
     private final int width;
     private final int height;
     private int score;
+    private int lineDeleteCount;
     private final PieceColor[][] grid;
     private PieceManager pieceManager;
 
@@ -24,6 +25,7 @@ public class Grid extends Observable {
         this.width = width;
         this.height = height;
         this.score = 0;
+        this.lineDeleteCount = 0;
         this.grid = new PieceColor[height][width];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -168,6 +170,7 @@ public class Grid extends Observable {
     }
 
     private void deleteLine(int y) {
+        lineDeleteCount++;
         for (int x = 0; x < width; x++) {
             setCell(x, y, PieceColor.NONE);
         }
