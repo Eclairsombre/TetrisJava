@@ -7,9 +7,12 @@ public class Level {
 
     public Level(int level) {
         this.level = level;
-        this.speed = 1000 - (level * 100);
-        if (this.speed < 100) {
-            this.speed = 100;
+        if (level < 6) {
+            this.speed = 700 - (level * 100L);
+        } else if (level < 15) {
+            this.speed = 100 - ((level - 6) * 10);
+        } else {
+            this.speed = 10;
         }
     }
 

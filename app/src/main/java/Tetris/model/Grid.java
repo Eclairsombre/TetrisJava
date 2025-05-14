@@ -154,16 +154,9 @@ public class Grid extends Observable {
         return true;
     }
 
-    private void checkingLines(Piece currentPiece) {
-        List<Integer> linesToCheck = new ArrayList<>();
-        for (int[] c : currentPiece.getCoordinates(currentPiece.getX(), currentPiece.getY())) {
-            int y = c[1];
-            if (!linesToCheck.contains(y)) {
-                linesToCheck.add(y);
-            }
-        }
+    private void checkingLines() {
         int countPoints = 0;
-        for (int y : linesToCheck) {
+        for (int y = 0; y < height; y++) {
             if (isLineComplete(y)) {
                 deleteLine(y);
                 countPoints += 10;
@@ -222,20 +215,18 @@ public class Grid extends Observable {
                 return;
             }
             // check end game
-            if (currentPiece.getY() == 1) {
+            if (currentPiece.getY() == 0) {
                 System.out.println("Game Over");
                 this.isGameOver = true;
                 return;
             }
             // we check if a line is complete
-            checkingLines(currentPiece);
+            checkingLines();
             // we create a new piece
             this.pieceManager.setCurrentPiece(this.pieceManager.getNextPiece().getFirst());
             this.pieceManager.getNextPiece().removeFirst();
             this.pieceManager.getNextPiece().addLast(initializePiece());
             this.setNewNextPiece(true);
-
-
         }
 
         currentPiece.setPos(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
