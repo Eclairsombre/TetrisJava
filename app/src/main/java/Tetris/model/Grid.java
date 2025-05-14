@@ -328,19 +328,6 @@ public class Grid extends Observable {
     public void nextLevel() {
         this.level = new Level(this.level.getLevel() + 1);
 
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                grid[y][x] = PieceColor.NONE;
-            }
-        }
-
-        // we create a new piece
-        this.pieceManager.setCurrentPiece(initializePiece());
-        this.pieceManager.getNextPiece().clear();
-        for (int i = 0; i < 3; i++) {
-            this.pieceManager.getNextPiece().addLast(initializePiece());
-        }
-
         setChanged();
         notifyObservers(level);
     }

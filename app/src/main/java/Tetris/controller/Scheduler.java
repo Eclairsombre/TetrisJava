@@ -14,8 +14,9 @@ public class Scheduler extends Thread {
     public void run() {
         while (running) {
             try {
-                Thread.sleep(pause);
                 r.run();
+                Thread.sleep(pause);
+
             } catch (InterruptedException e) {
                 break;
             }
