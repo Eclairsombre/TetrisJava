@@ -149,14 +149,21 @@ public class TetrisView extends JFrame implements Observer {
         repaint();
     }
 
+    private void updateLevel() {
+        dashBoardVue.updateLevel(game.getGrid().getLevel().getLevel());
+        repaint();
+    }
+
     @Override
     public void update(Observable o, Object arg) {
         try {
             if (arg instanceof Integer) {
                 updateScore();
+                updateLevel();
             } else {
                 SwingUtilities.invokeLater(() -> {
                     updateBoard();
+                    updateLevel();
                     if (game.getGrid().isNewNextPiece()) {
                         game.getGrid().setNewNextPiece(false);
                         updateNextPiece();
