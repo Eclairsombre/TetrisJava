@@ -13,7 +13,7 @@ public class Grid extends Observable {
     private int score;
     private final PieceColor[][] grid;
     private Piece currentPiece;
-    private Piece nextPiece;
+    private List<Piece> nextPiece;
     private boolean isNewNextPiece;
 
     public Grid(int width, int height) {
@@ -27,7 +27,8 @@ public class Grid extends Observable {
             }
         }
         this.currentPiece = initializePiece();
-        this.nextPiece = initializePiece();
+        this.nextPiece = new ArrayList<Piece>();
+        this.nextPiece.add(getNouvellePiece());
     }
 
     public int getScore() {
@@ -82,18 +83,19 @@ public class Grid extends Observable {
     }
 
     public PieceColor[][] getNextPiece() {
+        Piece firstNextPiece = this.nextPiece.getFirst();
         PieceColor[][] nextPieceGrid = new PieceColor[4][4];
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 nextPieceGrid[i][j] = PieceColor.NONE;
             }
         }
-        int[][] coords = nextPiece.getCoordinates(0, 0);
+        int[][] coords = firstNextPiece.getCoordinates(0, 0);
         for (int[] c : coords) {
             int x = c[0];
             int y = c[1];
             if (x >= 0 && x < 4 && y >= 0 && y < 4) {
-                nextPieceGrid[y][x] = nextPiece.getColor();
+                nextPieceGrid[y][x] = firstNextPiece.getColor();
             }
         }
         return nextPieceGrid;
@@ -213,8 +215,12 @@ public class Grid extends Observable {
             // we check if a line is complete
             checkingLines(currentPiece);
             // we create a new piece
-            this.currentPiece = this.nextPiece;
-            this.nextPiece = initializePiece();
+            this.currentPiece = this.nextPiece.getFirst();
+            this.nextPiece.removeFirst();
+            this.nextPiece.addLast(getNouvellePiece());
+            this.setNewNextPiece(true);
+
+
         }
 
         currentPiece.setPos(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
@@ -246,7 +252,7 @@ public class Grid extends Observable {
     }
 
     public PieceColor getNextPieceColor() {
-        return nextPiece.getColor();
+        return nextPiece.getFirst().getColor();
     }
 
     public PieceColor[][] getGrid() {
