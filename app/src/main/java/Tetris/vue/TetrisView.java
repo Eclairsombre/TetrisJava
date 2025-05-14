@@ -13,9 +13,9 @@ import java.util.Observer;
 
 @SuppressWarnings("deprecation")
 public class TetrisView extends JFrame implements Observer {
-    private final JPanel[][] cases;
-    private final JPanel[][] holdPieceCells;
-    private final JPanel[][][] nextPieceCells;
+    private final CustomJPanel[][] cases;
+    private final CustomJPanel[][] holdPieceCells;
+    private final CustomJPanel[][][] nextPieceCells;
     private final Game game;
     private final DashBoardView dashBoardVue = new DashBoardView();
 
@@ -24,10 +24,10 @@ public class TetrisView extends JFrame implements Observer {
         setTitle("Tetris");
         setSize(900, 1050);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        cases = new JPanel[game.getGrid().getHeight()][game.getGrid().getWidth()];
+        cases = new CustomJPanel[game.getGrid().getHeight()][game.getGrid().getWidth()];
         GameBoardView boardView = new GameBoardView(game.getGrid().getWidth(), game.getGrid().getHeight(), cases);
-        nextPieceCells = new JPanel[3][4][4];
-        holdPieceCells = new JPanel[4][4];
+        nextPieceCells = new CustomJPanel[3][4][4];
+        holdPieceCells = new CustomJPanel[4][4];
         JPanel templatePanel = new JPanel();
         PieceDisplayManager piecePanel = new PieceDisplayManager(nextPieceCells, holdPieceCells, 20, 20);
         JPanel eastPanel = new JPanel();
@@ -55,7 +55,6 @@ public class TetrisView extends JFrame implements Observer {
         musicPlayer.play();
 
     }
-
 
     private Color getColorCell(PieceColor color) {
         return switch (color) {
@@ -99,9 +98,7 @@ public class TetrisView extends JFrame implements Observer {
                             game.getGrid().echangeHoldAndCurrent();
                         }
                     }
-                    case KeyEvent.VK_ESCAPE -> {
-                        game.pauseGame();
-                    }
+                    case KeyEvent.VK_ESCAPE -> game.pauseGame();
                     default -> {
                         // Do nothing
                     }
