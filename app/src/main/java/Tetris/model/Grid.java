@@ -1,6 +1,9 @@
 package Tetris.model;
 
-import Tetris.model.Piece.*;
+import Tetris.model.Piece.Piece;
+import Tetris.model.Piece.PieceColor;
+import Tetris.model.Piece.PieceManager;
+import Tetris.model.Piece.PieceTemplate.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +15,8 @@ public class Grid extends Observable {
     private final int height;
     private int score;
     private final PieceColor[][] grid;
-    private Piece currentPiece;
-    private List<Piece> nextPiece;
-    private Piece holdPiece;
+    private PieceManager pieceManager;
+
     private boolean isNewNextPiece;
     public boolean isGameOver;
 
@@ -28,11 +30,13 @@ public class Grid extends Observable {
                 grid[y][x] = PieceColor.NONE;
             }
         }
-        this.currentPiece = initializePiece();
-        this.nextPiece = new ArrayList<>();
+        this.pieceManager = new PieceManager();
+        this.pieceManager.setCurrentPiece(initializePiece());
+        List<Piece> nextPiece = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            this.nextPiece.add(initializePiece());
+            nextPiece.add(initializePiece());
         }
+        this.pieceManager.setNextPiece(nextPiece);
     }
 
     public int getScore() {
@@ -87,7 +91,7 @@ public class Grid extends Observable {
     }
 
     public List<Piece> getNextPiece() {
-        return nextPiece;
+        return this.pieceManager.getNextPiece();
     }
 
     public Piece getNouvellePiece() {
@@ -112,6 +116,7 @@ public class Grid extends Observable {
     }
 
     private boolean isInCurrentPiece(int x, int y) {
+        Piece currentPiece = this.pieceManager.getCurrentPiece();
         int[][] coords = currentPiece.getCoordinates(currentPiece.getX(), currentPiece.getY());
         for (int[] c : coords) {
             if (c[0] == x && c[1] == y) {
@@ -184,6 +189,7 @@ public class Grid extends Observable {
     }
 
     public void movePiece(int x_move, int y_move, boolean fixPiece) {
+        Piece currentPiece = this.pieceManager.getCurrentPiece();
         int[][] nextCoords = currentPiece.getCoordinates(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
 
         if (checkCollision(nextCoords)) {
@@ -210,9 +216,9 @@ public class Grid extends Observable {
             // we check if a line is complete
             checkingLines(currentPiece);
             // we create a new piece
-            this.currentPiece = this.nextPiece.getFirst();
-            this.nextPiece.removeFirst();
-            this.nextPiece.addLast(initializePiece());
+            this.pieceManager.setCurrentPiece(this.pieceManager.getNextPiece().getFirst());
+            this.pieceManager.getNextPiece().removeFirst();
+            this.pieceManager.getNextPiece().addLast(initializePiece());
             this.setNewNextPiece(true);
 
 
@@ -223,6 +229,7 @@ public class Grid extends Observable {
     }
 
     public void rotatePiece(boolean isLeft) {
+        Piece currentPiece = this.pieceManager.getCurrentPiece();
         int[][] originalRotatedShape = currentPiece.getRotatedPosition(isLeft);
         int[][] rotatedShape = new int[originalRotatedShape.length][originalRotatedShape[0].length];
         for (int i = 0; i < originalRotatedShape.length; i++) {
@@ -267,31 +274,34 @@ public class Grid extends Observable {
             }
         }
         // we check if a line is complete
+        Piece currentPiece = this.pieceManager.getCurrentPiece();
         checkingLines(currentPiece);
         // we create a new piece
-        this.currentPiece = initializePiece();
-        this.nextPiece.clear();
+        this.pieceManager.setCurrentPiece(initializePiece());
+        this.pieceManager.getNextPiece().clear();
         for (int i = 0; i < 3; i++) {
-            this.nextPiece.addLast(initializePiece());
+            this.pieceManager.getNextPiece().addLast(initializePiece());
         }
         setChanged();
         notifyObservers(grid);
     }
 
     public Piece getCurrentPiece() {
-        return currentPiece;
+        return this.pieceManager.getCurrentPiece();
     }
 
     public void echangeHoldAndCurrent() {
-        if (holdPiece == null) {
-            holdPiece = currentPiece;
-            currentPiece = nextPiece.getFirst();
-            nextPiece.removeFirst();
-            nextPiece.addLast(initializePiece());
+        if (this.pieceManager.getHoldPiece() == null) {
+            this.pieceManager.setHoldPiece(this.pieceManager.getCurrentPiece());
+            this.pieceManager.setCurrentPiece(this.pieceManager.getNextPiece().getFirst());
+            this.pieceManager.getNextPiece().removeFirst();
+            this.pieceManager.getNextPiece().addLast(initializePiece());
+
         } else {
-            Piece temp = currentPiece;
-            currentPiece = holdPiece;
-            holdPiece = temp;
+            Piece temp = this.pieceManager.getCurrentPiece();
+            this.pieceManager.setCurrentPiece(this.pieceManager.getHoldPiece());
+            this.pieceManager.setHoldPiece(temp);
+
         }
         setChanged();
         notifyObservers(grid);

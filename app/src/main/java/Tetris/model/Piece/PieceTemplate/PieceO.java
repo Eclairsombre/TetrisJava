@@ -1,4 +1,7 @@
-package Tetris.model.Piece;
+package Tetris.model.Piece.PieceTemplate;
+
+import Tetris.model.Piece.Piece;
+import Tetris.model.Piece.PieceColor;
 
 public class PieceO extends Piece {
 
