@@ -19,11 +19,12 @@ public class Grid extends Observable {
     private final PieceManager pieceManager;
     private Level level;
     private int seconds;
-
     private boolean isNewNextPiece;
     public boolean isGameOver;
+    java.util.Random random;
 
     public Grid(int width, int height) {
+        random = new java.util.Random((int) (System.currentTimeMillis() % Integer.MAX_VALUE));
         this.width = width;
         this.height = height;
         this.score = 0;
@@ -42,16 +43,11 @@ public class Grid extends Observable {
             nextPiece.add(initializePiece());
         }
         this.pieceManager.setNextPiece(nextPiece);
-
         this.level = new Level(0);
     }
 
     public int getScore() {
         return score;
-    }
-
-    public int getLineDeleteCount() {
-        return lineDeleteCount;
     }
 
     public String getTime() {
@@ -115,7 +111,6 @@ public class Grid extends Observable {
 
     public Piece getNouvellePiece() {
         // make a semi-random choice of a piece to avoid too many duplicates
-        java.security.SecureRandom random = new java.security.SecureRandom();
         int idx = random.nextInt(7);
         try {
             return switch (idx) {
@@ -209,8 +204,7 @@ public class Grid extends Observable {
         Piece currentPiece = this.pieceManager.getCurrentPiece();
         int[][] nextCoords = currentPiece.getCoordinates(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
 
-        if (checkCollision(nextCoords)) {
-        } else {
+        if (!checkCollision(nextCoords)) {
             if (!fixPiece) {
                 return;
             }
@@ -257,14 +251,6 @@ public class Grid extends Observable {
             currentPiece.setShape(originalRotatedShape);
             signalVue();
         }
-    }
-
-    public PieceColor[][] getGrid() {
-        PieceColor[][] gridCopy = new PieceColor[height][width];
-        for (int i = 0; i < height; i++) {
-            System.arraycopy(grid[i], 0, gridCopy[i], 0, width);
-        }
-        return gridCopy;
     }
 
     public boolean isGameOver() {
@@ -325,9 +311,6 @@ public class Grid extends Observable {
         notifyObservers(level);
     }
 
-    public void setSeconds(int seconds) {
-        this.seconds = seconds;
-    }
     public void incrementSeconds() {
         this.seconds++;
     }
