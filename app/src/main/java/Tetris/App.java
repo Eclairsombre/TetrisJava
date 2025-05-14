@@ -7,12 +7,12 @@ import javax.swing.SwingUtilities;
 
 import Tetris.controller.Game;
 import Tetris.model.Grid;
-import Tetris.vue.Vue;
+import Tetris.vue.TetrisView;
 
 public class App {
     public static void main(String[] args) {
         Game game = new Game(new Grid(10, 30));
-        Vue tetris = new Vue(game);
+        TetrisView tetris = new TetrisView(game);
         SwingUtilities.invokeLater(tetris::start);
         game.getGrid().addObserver(tetris);
     }

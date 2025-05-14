@@ -13,7 +13,6 @@ public class Game extends Observable {
         this.grid = grid;
         this.scheduler = new Scheduler(grid.getLevel().getSpeed(), () -> movePieceDown(false));
         this.scheduler.start();
-
     }
 
     public Grid getGrid() {

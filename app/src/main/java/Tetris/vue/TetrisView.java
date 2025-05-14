@@ -12,23 +12,32 @@ import java.util.Observable;
 import java.util.Observer;
 
 @SuppressWarnings("deprecation")
-public class Vue extends JFrame implements Observer {
+public class TetrisView extends JFrame implements Observer {
     private final JPanel[][] cases;
-    private JLabel scoreLabel;
-    private JPanel[][] nextPieceCells;
-
+    private final JPanel[][][] nextPieceCells;
     private final Game game;
+    private final DashBoardView dashBoardVue = new DashBoardView();
 
-    public Vue(Game g) {
+    public TetrisView(Game g) {
         this.game = g;
         setTitle("Tetris");
         setSize(700, 1050);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         cases = new JPanel[game.getGrid().getHeight()][game.getGrid().getWidth()];
+        GameBoardView boardView = new GameBoardView(game.getGrid().getWidth(), game.getGrid().getHeight(), cases);
+        nextPieceCells = new JPanel[3][4][4];
+        PieceDisplayView[] nextPiecePanel = new PieceDisplayView[3];
+        JPanel PiecePanel = new JPanel();
+        PiecePanel.setPreferredSize(new Dimension(200, 600));
 
-        JPanel board = initPanelGame();
-        JPanel scorePanel = initScorePanel();
-        JPanel nextPiecePanel = initNextPiecePanel();
+        JLabel nextPieceLabel = new JLabel("Prochaine pièce", SwingConstants.CENTER);
+        nextPieceLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        PiecePanel.add(nextPieceLabel, BorderLayout.CENTER);
+        PiecePanel.setLayout(new GridLayout(4, 0, 0, 0));
+        for (int i = 0; i < 3; i++) {
+            nextPiecePanel[i] = new PieceDisplayView(nextPieceCells[i]);
+            PiecePanel.add(nextPiecePanel[i], BorderLayout.CENTER);
+        }
 
         JPanel westPanel = new JPanel();
         westPanel.setPreferredSize(new Dimension(20, 20));
@@ -39,75 +48,14 @@ public class Vue extends JFrame implements Observer {
         createEventListener(screen);
         screen.setLayout(new BorderLayout());
         screen.add(westPanel, BorderLayout.WEST);
-        screen.add(board, BorderLayout.CENTER);
-        screen.add(scorePanel, BorderLayout.NORTH);
-        screen.add(nextPiecePanel, BorderLayout.EAST);
-
+        screen.add(boardView, BorderLayout.CENTER);
+        screen.add(dashBoardVue, BorderLayout.NORTH);
+        screen.add(PiecePanel, BorderLayout.EAST);
 
         add(screen);
         setVisible(true);
     }
 
-    public JPanel initPanelGame() {
-        // Game board
-        JPanel board = new JPanel();
-        JPanel boardPanel = new JPanel();
-        boardPanel.setLayout(new GridLayout(game.getGrid().getHeight(), game.getGrid().getWidth(), 0, 0));
-        boardPanel.setPreferredSize(new Dimension(300, 900));
-        for (int y = 0; y < cases.length; y++) {
-            for (int x = 0; x < cases[y].length; x++) {
-                cases[y][x] = new JPanel();
-                cases[y][x].setBackground(getColorCell(x, y));
-                cases[y][x].setPreferredSize(new Dimension(20, 20));
-                boardPanel.setLayout(new GridLayout(30, 10, 0, 0));
-                boardPanel.add(cases[y][x]);
-            }
-        }
-
-        board.add(boardPanel);
-        board.setFocusable(false);
-        return board;
-    }
-
-
-    public JPanel initScorePanel() {
-        // Panel score
-        JPanel scorePanel = new JPanel();
-        scorePanel.setPreferredSize(new Dimension(200, 100));
-        scoreLabel = new JLabel("Score : " + game.getGrid().getScore(), SwingConstants.CENTER);
-        scoreLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        scorePanel.add(scoreLabel, BorderLayout.CENTER);
-        scorePanel.setFocusable(false);
-        return scorePanel;
-    }
-
-    public JPanel initNextPiecePanel() {
-        // Panel next piece
-        JPanel nextPiecePanel = new JPanel();
-        nextPiecePanel.setPreferredSize(new Dimension(200, 200));
-        nextPiecePanel.setLayout(new BorderLayout());
-
-        JPanel npPanel = new JPanel();
-        npPanel.setLayout(new GridLayout(4, 4, 0, 0));
-        nextPieceCells = new JPanel[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                nextPieceCells[j][i] = new JPanel();
-                nextPieceCells[j][i].setBackground(Color.LIGHT_GRAY);
-                nextPieceCells[j][i].setPreferredSize(new Dimension(40, 40));
-                npPanel.add(nextPieceCells[j][i]);
-            }
-        }
-        JLabel nextPieceLabel = new JLabel("Prochaine pièce", SwingConstants.CENTER);
-        nextPieceLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        nextPiecePanel.add(nextPieceLabel, BorderLayout.NORTH);
-
-        JPanel templatePanel = new JPanel();
-        templatePanel.add(npPanel);
-        nextPiecePanel.add(templatePanel);
-        nextPiecePanel.setFocusable(false);
-        return nextPiecePanel;
-    }
 
     private Color getColorCell(PieceColor color) {
         return switch (color) {
@@ -174,29 +122,30 @@ public class Vue extends JFrame implements Observer {
     }
 
     private void updateNextPiece() {
-        Piece nextPiece = game.getGrid().getNextPiece().getFirst();
-        int [][] coords = nextPiece.getShape();
-        Color color = getColorCell(nextPiece.getColor());
-        if (!(coords[3][0] == 1 && coords[3][1] == 3)) {
-            coords = nextPiece.getCoordinates(1, 1);
-        }
-        for (JPanel[] nextPieceCell : nextPieceCells) {
-            for (JPanel jPanel : nextPieceCell) {
-                jPanel.setBackground(Color.BLACK);
+        for (int i = 0; i < 3; i++) {
+            Piece nextPiece = game.getGrid().getNextPiece().get(i);
+            int[][] coords = nextPiece.getShape();
+            Color color = getColorCell(nextPiece.getColor());
+            if (!(coords[3][0] == 1 && coords[3][1] == 3)) {
+                coords = nextPiece.getCoordinates(1, 1);
+            }
+            for (JPanel[] nextPieceCell : nextPieceCells[i]) {
+                for (JPanel jPanel : nextPieceCell) {
+                    jPanel.setBackground(Color.BLACK);
+                }
+            }
+            for (int[] coord : coords) {
+                int x = coord[0];
+                int y = coord[1];
+                nextPieceCells[i][x][y].setBackground(color);
             }
         }
-        for (int[] coord : coords) {
-            int x = coord[0];
-            int y = coord[1];
-            if (x >= 0 && x < nextPieceCells.length && y >= 0 && y < nextPieceCells[0].length) {
-                nextPieceCells[x][y].setBackground(color);
-            }
-        }
+
         repaint();
     }
 
     private void updateScore() {
-        scoreLabel.setText("Score : " + game.getGrid().getScore());
+        dashBoardVue.updateScore(game.getGrid().getScore());
         repaint();
     }
 

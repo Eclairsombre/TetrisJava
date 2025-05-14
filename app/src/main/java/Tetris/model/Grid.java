@@ -16,7 +16,7 @@ public class Grid extends Observable {
     private int score;
     private int lineDeleteCount;
     private final PieceColor[][] grid;
-    private PieceManager pieceManager;
+    private final PieceManager pieceManager;
     private Level level;
 
     private boolean isNewNextPiece;
