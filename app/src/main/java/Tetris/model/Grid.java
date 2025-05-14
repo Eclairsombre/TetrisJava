@@ -45,6 +45,10 @@ public class Grid extends Observable {
         return score;
     }
 
+    public int getLineDeleteCount() {
+        return lineDeleteCount;
+    }
+
     public void updateScore(int points) {
         score += points;
         setChanged();
