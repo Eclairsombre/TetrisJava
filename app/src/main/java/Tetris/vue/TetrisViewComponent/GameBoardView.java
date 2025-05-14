@@ -1,10 +1,10 @@
-package Tetris.vue;
+package Tetris.vue.TetrisViewComponent;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class GameBoardView extends JPanel{
-    public GameBoardView(int width, int height, JPanel[][] cases) {
+    public GameBoardView(int width, int height, JPanel[][] cases, Color backgroundColor) {
         JPanel boardPanel = new JPanel();
         boardPanel.setLayout(new GridLayout(height, width, 0, 0));
         boardPanel.setPreferredSize(new Dimension(300, 900));
@@ -16,8 +16,15 @@ public class GameBoardView extends JPanel{
                 boardPanel.add(cases[y][x]);
             }
         }
-
+        boardPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.BLACK, 3),
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(Color.DARK_GRAY, 8),
+                        BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3)
+                )
+        ));
         add(boardPanel);
+        setBackground(backgroundColor);
         setFocusable(false);
     }
 }

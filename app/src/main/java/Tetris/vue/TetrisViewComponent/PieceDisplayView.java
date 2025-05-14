@@ -1,4 +1,4 @@
-package Tetris.vue;
+package Tetris.vue.TetrisViewComponent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,10 +14,14 @@ public class PieceDisplayView extends JPanel {
                 npPanel.add(nextPieceCells[j][i]);
             }
         }
-
-        JPanel templatePanel = new JPanel();
-        templatePanel.add(npPanel);
-        add(templatePanel);
+        npPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.BLACK, 3),
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(Color.DARK_GRAY, 8),
+                        BorderFactory.createLineBorder(Color.LIGHT_GRAY, 3)
+                )
+        ));
+        add(npPanel);
         setFocusable(false);
     }
 }

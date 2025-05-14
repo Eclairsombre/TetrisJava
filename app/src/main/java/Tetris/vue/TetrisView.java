@@ -3,6 +3,10 @@ package Tetris.vue;
 import Tetris.controller.Game;
 import Tetris.model.Piece.Piece;
 import Tetris.model.Piece.PieceColor;
+import Tetris.vue.TetrisViewComponent.CustomJPanel;
+import Tetris.vue.TetrisViewComponent.DashBoardView;
+import Tetris.vue.TetrisViewComponent.GameBoardView;
+import Tetris.vue.TetrisViewComponent.PieceDisplayManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,28 +21,29 @@ public class TetrisView extends JFrame implements Observer {
     private final CustomJPanel[][] holdPieceCells;
     private final CustomJPanel[][][] nextPieceCells;
     private final Game game;
-    private final DashBoardView dashBoardVue = new DashBoardView();
+    private final DashBoardView dashBoardVue;
 
     public TetrisView(Game g) {
         this.game = g;
         setTitle("Tetris");
         setSize(900, 1050);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Color backgroundColor = Color.LIGHT_GRAY;
+
         cases = new CustomJPanel[game.getGrid().getHeight()][game.getGrid().getWidth()];
-        GameBoardView boardView = new GameBoardView(game.getGrid().getWidth(), game.getGrid().getHeight(), cases);
+        GameBoardView boardView = new GameBoardView(game.getGrid().getWidth(), game.getGrid().getHeight(), cases, backgroundColor);
         nextPieceCells = new CustomJPanel[3][4][4];
         holdPieceCells = new CustomJPanel[4][4];
         JPanel templatePanel = new JPanel();
-        PieceDisplayManager piecePanel = new PieceDisplayManager(nextPieceCells, holdPieceCells, 20, 20);
-        JPanel eastPanel = new JPanel();
-        eastPanel.setPreferredSize(new Dimension(50, 20));
+        PieceDisplayManager piecePanel = new PieceDisplayManager(nextPieceCells, holdPieceCells, 20, 20, backgroundColor);
         templatePanel.add(piecePanel);
-        templatePanel.add(eastPanel);
+        templatePanel.setBackground(backgroundColor);
 
         JPanel westPanel = new JPanel();
         westPanel.setPreferredSize(new Dimension(50, 20));
         westPanel.setFocusable(false);
-
+        westPanel.setBackground(backgroundColor);
+        dashBoardVue = new DashBoardView(backgroundColor);
         JPanel screen = new JPanel();
         screen.setFocusable(true);
         createEventListener(screen);
@@ -53,7 +58,6 @@ public class TetrisView extends JFrame implements Observer {
 
         MusicPlayer musicPlayer = new MusicPlayer("data/music/tetris.wav");
         musicPlayer.play();
-
     }
 
     private Color getColorCell(PieceColor color) {

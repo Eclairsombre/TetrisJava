@@ -1,21 +1,22 @@
-package Tetris.vue;
+package Tetris.vue.TetrisViewComponent;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class DashBoardView extends JPanel {
     private final JLabel scoreLabel, levelLabel, timerLabel;
 
-    public DashBoardView() {
+    public DashBoardView(Color backgroundColor) {
         // Panel score
+        setBackground(backgroundColor);
+
         JPanel scorePanel = new JPanel();
         scorePanel.setPreferredSize(new Dimension(200, 100));
         scoreLabel = new JLabel("Score : 0", SwingConstants.CENTER);
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 24));
         scorePanel.add(scoreLabel, BorderLayout.CENTER);
         scorePanel.setFocusable(false);
+        scorePanel.setBackground(backgroundColor);
         add(scorePanel);
 
         // Panel level
@@ -25,6 +26,7 @@ public class DashBoardView extends JPanel {
         levelLabel.setFont(new Font("Arial", Font.BOLD, 24));
         levelPanel.add(levelLabel, BorderLayout.CENTER);
         levelPanel.setFocusable(false);
+        levelPanel.setBackground(backgroundColor);
         add(levelPanel);
 
         // Panel timer
@@ -34,6 +36,7 @@ public class DashBoardView extends JPanel {
         timerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         timerPanel.add(timerLabel, BorderLayout.CENTER);
         timerPanel.setFocusable(false);
+        timerPanel.setBackground(backgroundColor);
         add(timerPanel);
 
     }
