@@ -54,9 +54,9 @@ public class Grid extends Observable {
         return lineDeleteCount;
     }
 
-    public int getSeconds() {
-        return seconds;
-    }
+    public String getTime() {
+            return String.format("%02d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, seconds % 60);
+        }
 
     public void updateScore(int points) {
         score += points;

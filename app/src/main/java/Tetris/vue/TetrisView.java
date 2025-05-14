@@ -169,7 +169,7 @@ public class TetrisView extends JFrame implements Observer {
     }
 
     private void updateTimer() {
-        dashBoardVue.updateTimer(game.getGrid().getSeconds());
+        dashBoardVue.updateTimer(game.getGrid().getTime());
         repaint();
     }
 

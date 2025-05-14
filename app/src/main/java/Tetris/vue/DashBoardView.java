@@ -30,7 +30,7 @@ public class DashBoardView extends JPanel {
         // Panel timer
         JPanel timerPanel = new JPanel();
         timerPanel.setPreferredSize(new Dimension(300, 100));
-        timerLabel = new JLabel("Temps écoulé : 0s", SwingConstants.CENTER);
+        timerLabel = new JLabel("Temps écoulé : 00:00:00", SwingConstants.CENTER);
         timerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         timerPanel.add(timerLabel, BorderLayout.CENTER);
         timerPanel.setFocusable(false);
@@ -44,8 +44,8 @@ public class DashBoardView extends JPanel {
     public void updateLevel(int level) {
         levelLabel.setText("Niveau : " + (level+1));
     }
-    public void updateTimer(int time) {
-        timerLabel.setText("Temps écoulé : " + time + "s");
+    public void updateTimer(String time) {
+        timerLabel.setText("Temps écoulé : " + time);
     }
 
 }
