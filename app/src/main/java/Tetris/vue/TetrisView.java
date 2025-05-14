@@ -85,10 +85,13 @@ public class TetrisView extends JFrame implements Observer {
                     case KeyEvent.VK_RIGHT -> game.movePieceRight();
                     case KeyEvent.VK_Q -> game.rotatePieceLeft();
                     case KeyEvent.VK_D -> game.rotatePieceRight();
-                    case KeyEvent.VK_SPACE -> {
+                    case KeyEvent.VK_ENTER -> {
                         if (game.getGrid().isGameOver()) {
                             game.reset();
                         }
+                    }
+                    case KeyEvent.VK_SPACE -> {
+                        game.getGrid().echangeHoldAndCurrent();
                     }
                     default -> {
                         // Do nothing

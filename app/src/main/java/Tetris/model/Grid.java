@@ -210,20 +210,17 @@ public class Grid extends Observable {
         int[][] nextCoords = currentPiece.getCoordinates(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
 
         if (checkCollision(nextCoords)) {
-            for (int[] c : nextCoords) {
-                int x = c[0] - x_move;
-                int y = c[1] - y_move;
-                setCell(x, y, PieceColor.NONE);
-            }
-            for (int[] c : nextCoords) {
-                int x_next = c[0];
-                int y_next = c[1];
-                setCell(x_next, y_next, currentPiece.getColor());
-            }
         } else {
             if (!fixPiece) {
                 return;
             }
+
+            for (int[] c : nextCoords) {
+                int x = c[0] - x_move;
+                int y = c[1] - y_move;
+                setCell(x, y, currentPiece.getColor());
+            }
+
             // check end game
             if (currentPiece.getY() == 0) {
                 System.out.println("Game Over");
@@ -257,13 +254,7 @@ public class Grid extends Observable {
         }
 
         if (checkCollision(rotatedShape)) {
-            for (int[] c : currentPiece.getCoordinates(currentPiece.getX(), currentPiece.getY())) {
-                setCell(c[0], c[1], PieceColor.NONE);
-            }
             currentPiece.setShape(originalRotatedShape);
-            for (int[] c : currentPiece.getCoordinates(currentPiece.getX(), currentPiece.getY())) {
-                setCell(c[0], c[1], currentPiece.getColor());
-            }
             signalVue();
         }
     }
