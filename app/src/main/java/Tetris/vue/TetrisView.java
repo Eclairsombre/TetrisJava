@@ -50,6 +50,10 @@ public class TetrisView extends JFrame implements Observer {
 
         add(screen);
         setVisible(true);
+
+        MusicPlayer musicPlayer = new MusicPlayer("data/music/tetris.wav");
+        musicPlayer.play();
+
     }
 
 
