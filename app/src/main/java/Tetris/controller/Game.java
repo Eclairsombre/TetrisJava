@@ -1,17 +1,19 @@
 package Tetris.controller;
 
-import java.util.Observable;
-
 import Tetris.model.Grid;
+
+import java.util.Observable;
 
 @SuppressWarnings("deprecation")
 public class Game extends Observable {
     private final Grid grid;
-    private Scheduler scheduler = new Scheduler(700, () -> movePieceDown(false));
+    private Scheduler scheduler;
 
     public Game(Grid grid) {
         this.grid = grid;
+        this.scheduler = new Scheduler(grid.getLevel().getSpeed(), () -> movePieceDown(false));
         this.scheduler.start();
+
     }
 
     public Grid getGrid() {
@@ -23,6 +25,10 @@ public class Game extends Observable {
             System.out.println("Game Over");
             scheduler.stopThread();
         } else {
+            if (grid.getLevel().isNextLevel) {
+                resetScheduler(grid.getLevel().getSpeed());
+                grid.getLevel().isNextLevel = false;
+            }
             grid.movePiece(0, 1, true);
             if (increment_score) {
                 grid.updateScore(1);

@@ -17,6 +17,7 @@ public class Grid extends Observable {
     private int lineDeleteCount;
     private final PieceColor[][] grid;
     private PieceManager pieceManager;
+    private Level level;
 
     private boolean isNewNextPiece;
     public boolean isGameOver;
@@ -39,6 +40,8 @@ public class Grid extends Observable {
             nextPiece.add(initializePiece());
         }
         this.pieceManager.setNextPiece(nextPiece);
+
+        this.level = new Level(0);
     }
 
     public int getScore() {
@@ -184,6 +187,10 @@ public class Grid extends Observable {
         for (int x = 0; x < width; x++) {
             grid[0][x] = PieceColor.NONE;
         }
+
+        if (lineDeleteCount == 1) {
+            nextLevel();
+        }
     }
 
     private boolean isLineComplete(int y) {
@@ -274,15 +281,15 @@ public class Grid extends Observable {
 
     public void reset() {
         this.score = 0;
+        this.lineDeleteCount = 0;
+        this.level = new Level(0);
         this.isGameOver = false;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 grid[y][x] = PieceColor.NONE;
             }
         }
-        // we check if a line is complete
-        Piece currentPiece = this.pieceManager.getCurrentPiece();
-        checkingLines(currentPiece);
+
         // we create a new piece
         this.pieceManager.setCurrentPiece(initializePiece());
         this.pieceManager.getNextPiece().clear();
@@ -312,5 +319,29 @@ public class Grid extends Observable {
         }
         setChanged();
         notifyObservers(grid);
+    }
+
+    public Level getLevel() {
+        return level;
+    }
+
+    public void nextLevel() {
+        this.level = new Level(this.level.getLevel() + 1);
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                grid[y][x] = PieceColor.NONE;
+            }
+        }
+
+        // we create a new piece
+        this.pieceManager.setCurrentPiece(initializePiece());
+        this.pieceManager.getNextPiece().clear();
+        for (int i = 0; i < 3; i++) {
+            this.pieceManager.getNextPiece().addLast(initializePiece());
+        }
+
+        setChanged();
+        notifyObservers(level);
     }
 }
