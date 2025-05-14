@@ -21,6 +21,7 @@ public class Grid extends Observable {
     private int seconds;
     private boolean isNewNextPiece;
     public boolean isGameOver;
+    private boolean canHoldPiece;
     java.util.Random random;
 
     public Grid(int width, int height) {
@@ -30,6 +31,7 @@ public class Grid extends Observable {
         this.score = 0;
         this.lineDeleteCount = 0;
         this.seconds = 0;
+        this.canHoldPiece = false;
         this.grid = new PieceColor[height][width];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -111,6 +113,7 @@ public class Grid extends Observable {
 
     public Piece getNouvellePiece() {
         // make a semi-random choice of a piece to avoid too many duplicates
+        java.security.SecureRandom random = new java.security.SecureRandom();
         int idx = random.nextInt(7);
         try {
             return switch (idx) {
@@ -200,6 +203,11 @@ public class Grid extends Observable {
         return true;
     }
 
+    public boolean canHoldPiece() {
+        return canHoldPiece;
+    }
+
+
     public void movePiece(int x_move, int y_move, boolean fixPiece) {
         Piece currentPiece = this.pieceManager.getCurrentPiece();
         int[][] nextCoords = currentPiece.getCoordinates(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
@@ -228,7 +236,10 @@ public class Grid extends Observable {
             this.pieceManager.getNextPiece().removeFirst();
             this.pieceManager.getNextPiece().addLast(initializePiece());
             this.setNewNextPiece(true);
+
+            this.canHoldPiece = true;
         }
+
 
         currentPiece.setPos(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
         signalVue();
@@ -263,6 +274,7 @@ public class Grid extends Observable {
         this.seconds = 0;
         this.level = new Level(0);
         this.isGameOver = false;
+        this.canHoldPiece = false;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 grid[y][x] = PieceColor.NONE;
@@ -285,17 +297,24 @@ public class Grid extends Observable {
 
     public void echangeHoldAndCurrent() {
         if (this.pieceManager.getHoldPiece() == null) {
+            Piece piece = this.pieceManager.getCurrentPiece();
+            piece.setPos(3,1);
+            this.pieceManager.setCurrentPiece(piece);
             this.pieceManager.setHoldPiece(this.pieceManager.getCurrentPiece());
+
             this.pieceManager.setCurrentPiece(this.pieceManager.getNextPiece().getFirst());
             this.pieceManager.getNextPiece().removeFirst();
             this.pieceManager.getNextPiece().addLast(initializePiece());
 
         } else {
             Piece temp = this.pieceManager.getCurrentPiece();
+            temp.setPos(3,1);
             this.pieceManager.setCurrentPiece(this.pieceManager.getHoldPiece());
             this.pieceManager.setHoldPiece(temp);
 
         }
+        this.isNewNextPiece = true;
+        this.canHoldPiece = false;
         setChanged();
         notifyObservers(grid);
     }

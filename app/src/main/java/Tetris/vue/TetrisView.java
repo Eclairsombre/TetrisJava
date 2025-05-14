@@ -91,7 +91,9 @@ public class TetrisView extends JFrame implements Observer {
                         }
                     }
                     case KeyEvent.VK_SPACE -> {
-                        game.getGrid().echangeHoldAndCurrent();
+                        if(game.getGrid().canHoldPiece()) {
+                            game.getGrid().echangeHoldAndCurrent();
+                        }
                     }
                     default -> {
                         // Do nothing
