@@ -2,9 +2,11 @@ package Tetris.vue;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class DashBoardView extends JPanel {
-    private final JLabel scoreLabel, levelLabel;
+    private final JLabel scoreLabel, levelLabel, timerLabel;
 
     public DashBoardView() {
         // Panel score
@@ -24,6 +26,16 @@ public class DashBoardView extends JPanel {
         levelPanel.add(levelLabel, BorderLayout.CENTER);
         levelPanel.setFocusable(false);
         add(levelPanel);
+
+        // Panel timer
+        JPanel timerPanel = new JPanel();
+        timerPanel.setPreferredSize(new Dimension(300, 100));
+        timerLabel = new JLabel("Temps écoulé : 0s", SwingConstants.CENTER);
+        timerLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        timerPanel.add(timerLabel, BorderLayout.CENTER);
+        timerPanel.setFocusable(false);
+        add(timerPanel);
+
     }
 
     public void updateScore(int score) {
@@ -32,4 +44,8 @@ public class DashBoardView extends JPanel {
     public void updateLevel(int level) {
         levelLabel.setText("Niveau : " + (level+1));
     }
+    public void updateTimer(int time) {
+        timerLabel.setText("Temps écoulé : " + time + "s");
+    }
+
 }

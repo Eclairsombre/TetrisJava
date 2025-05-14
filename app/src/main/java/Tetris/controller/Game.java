@@ -7,12 +7,15 @@ import java.util.Observable;
 @SuppressWarnings("deprecation")
 public class Game extends Observable {
     private final Grid grid;
-    private Scheduler scheduler;
+    private Scheduler scheduler, timer;
 
     public Game(Grid grid) {
         this.grid = grid;
         this.scheduler = new Scheduler(grid.getLevel().getSpeed(), () -> movePieceDown(false));
         this.scheduler.start();
+
+        this.timer = new Scheduler(1000, grid::incrementSeconds);
+        this.timer.start();
     }
 
     public Grid getGrid() {
@@ -63,6 +66,10 @@ public class Game extends Observable {
         scheduler.stopThread();
         scheduler = new Scheduler(pause, () -> movePieceDown(false));
         scheduler.start();
+
+        timer.stopThread();
+        timer = new Scheduler(1000, grid::incrementSeconds);
+        timer.start();
     }
 
     public void reset() {

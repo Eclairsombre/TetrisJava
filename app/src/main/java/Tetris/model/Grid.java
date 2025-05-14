@@ -18,6 +18,7 @@ public class Grid extends Observable {
     private final PieceColor[][] grid;
     private final PieceManager pieceManager;
     private Level level;
+    private int seconds;
 
     private boolean isNewNextPiece;
     public boolean isGameOver;
@@ -27,6 +28,7 @@ public class Grid extends Observable {
         this.height = height;
         this.score = 0;
         this.lineDeleteCount = 0;
+        this.seconds = 0;
         this.grid = new PieceColor[height][width];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -50,6 +52,10 @@ public class Grid extends Observable {
 
     public int getLineDeleteCount() {
         return lineDeleteCount;
+    }
+
+    public int getSeconds() {
+        return seconds;
     }
 
     public void updateScore(int points) {
@@ -273,6 +279,7 @@ public class Grid extends Observable {
     public void reset() {
         this.score = 0;
         this.lineDeleteCount = 0;
+        this.seconds = 0;
         this.level = new Level(0);
         this.isGameOver = false;
         for (int x = 0; x < width; x++) {
@@ -321,5 +328,12 @@ public class Grid extends Observable {
 
         setChanged();
         notifyObservers(level);
+    }
+
+    public void setSeconds(int seconds) {
+        this.seconds = seconds;
+    }
+    public void incrementSeconds() {
+        this.seconds++;
     }
 }

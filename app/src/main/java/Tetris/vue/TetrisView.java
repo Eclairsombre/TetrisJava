@@ -154,16 +154,23 @@ public class TetrisView extends JFrame implements Observer {
         repaint();
     }
 
+    private void updateTimer() {
+        dashBoardVue.updateTimer(game.getGrid().getSeconds());
+        repaint();
+    }
+
     @Override
     public void update(Observable o, Object arg) {
         try {
             if (arg instanceof Integer) {
                 updateScore();
                 updateLevel();
+                updateTimer();
             } else {
                 SwingUtilities.invokeLater(() -> {
                     updateBoard();
                     updateLevel();
+                    updateTimer();
                     if (game.getGrid().isNewNextPiece()) {
                         game.getGrid().setNewNextPiece(false);
                         updateNextPiece();
