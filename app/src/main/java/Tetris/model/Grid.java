@@ -14,6 +14,7 @@ public class Grid extends Observable {
     private final PieceColor[][] grid;
     private Piece currentPiece;
     private List<Piece> nextPiece;
+    private Piece holdPiece;
     private boolean isNewNextPiece;
     public boolean isGameOver;
 
@@ -279,5 +280,20 @@ public class Grid extends Observable {
 
     public Piece getCurrentPiece() {
         return currentPiece;
+    }
+
+    public void echangeHoldAndCurrent() {
+        if (holdPiece == null) {
+            holdPiece = currentPiece;
+            currentPiece = nextPiece.getFirst();
+            nextPiece.removeFirst();
+            nextPiece.addLast(initializePiece());
+        } else {
+            Piece temp = currentPiece;
+            currentPiece = holdPiece;
+            holdPiece = temp;
+        }
+        setChanged();
+        notifyObservers(grid);
     }
 }
