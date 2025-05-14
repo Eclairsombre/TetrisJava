@@ -55,8 +55,8 @@ public class Grid extends Observable {
     }
 
     public String getTime() {
-            return String.format("%02d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, seconds % 60);
-        }
+        return String.format("%02d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, seconds % 60);
+    }
 
     public void updateScore(int points) {
         score += points;
@@ -153,7 +153,7 @@ public class Grid extends Observable {
         return false;
     }
 
-    public boolean checkCollision(int[][] shape) {
+    public boolean isValidPosition(int[][] shape) {
         List<int[]> pointsToCheck = new ArrayList<>();
         for (int[] pos : shape) {
             if (!isInCurrentPiece(pos[0], pos[1])) {
@@ -199,7 +199,7 @@ public class Grid extends Observable {
             grid[0][x] = PieceColor.NONE;
         }
 
-        if (lineDeleteCount == 1) {
+        if (lineDeleteCount % 10 == 0) {
             nextLevel();
         }
     }
@@ -222,7 +222,7 @@ public class Grid extends Observable {
         Piece currentPiece = this.pieceManager.getCurrentPiece();
         int[][] nextCoords = currentPiece.getCoordinates(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
 
-        if (!checkCollision(nextCoords)) {
+        if (!isValidPosition(nextCoords)) {
             if (!fixPiece) {
                 return;
             }
@@ -268,7 +268,7 @@ public class Grid extends Observable {
             c[1] += currentPiece.getY();
         }
 
-        if (checkCollision(rotatedShape)) {
+        if (isValidPosition(rotatedShape)) {
             currentPiece.setShape(originalRotatedShape);
             signalVue();
         }
@@ -308,7 +308,7 @@ public class Grid extends Observable {
     public void echangeHoldAndCurrent() {
         if (this.pieceManager.getHoldPiece() == null) {
             Piece piece = this.pieceManager.getCurrentPiece();
-            piece.setPos(3,1);
+            piece.setPos(3, 1);
             this.pieceManager.setCurrentPiece(piece);
             this.pieceManager.setHoldPiece(this.pieceManager.getCurrentPiece());
 
@@ -318,7 +318,7 @@ public class Grid extends Observable {
 
         } else {
             Piece temp = this.pieceManager.getCurrentPiece();
-            temp.setPos(3,1);
+            temp.setPos(3, 1);
             this.pieceManager.setCurrentPiece(this.pieceManager.getHoldPiece());
             this.pieceManager.setHoldPiece(temp);
 
@@ -342,5 +342,25 @@ public class Grid extends Observable {
 
     public void incrementSeconds() {
         this.seconds++;
+    }
+
+    public int getMaxHeightEmpty(Piece piece) {
+        int maxHeight = height - 1;
+        for (int i = 0; i < height; i++) {
+            if (!isValidPosition(piece.getCoordinates(piece.getX(), i))) {
+                maxHeight = i - 1;
+                break;
+            }
+        }
+        return maxHeight;
+    }
+
+    public void doRdrop() {
+        int move_to = getMaxHeightEmpty(getCurrentPiece());
+        for (int i = 0; i < move_to; i++) {
+            movePiece(0, 1, false);
+        }
+        movePiece(0, 1, true);
+        updateScore(30);
     }
 }

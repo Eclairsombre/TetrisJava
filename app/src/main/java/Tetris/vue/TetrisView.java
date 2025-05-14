@@ -90,6 +90,11 @@ public class TetrisView extends JFrame implements Observer {
                     case KeyEvent.VK_DOWN -> game.movePieceDown(true);
                     case KeyEvent.VK_LEFT -> game.movePieceLeft();
                     case KeyEvent.VK_RIGHT -> game.movePieceRight();
+                    case KeyEvent.VK_UP -> {
+                        if (!game.getGrid().isGameOver()) {
+                            game.doRdrop();
+                        }
+                    }
                     case KeyEvent.VK_Q -> game.rotatePieceLeft();
                     case KeyEvent.VK_D -> game.rotatePieceRight();
                     case KeyEvent.VK_ENTER -> {
@@ -117,16 +122,19 @@ public class TetrisView extends JFrame implements Observer {
                 cases[j][i].setBackground(getColorCell(i, j));
             }
         }
+
         Piece piece = game.getGrid().getCurrentPiece();
         int[][] coords = piece.getCoordinates(piece.getX(), piece.getY());
         Color color = getColorCell(piece.getColor());
-        for (int[] coord : coords) {
-            int x = coord[0];
-            int y = coord[1];
-            if (x >= 0 && x < game.getGrid().getWidth() && y >= 0 && y < game.getGrid().getHeight()) {
-                cases[y][x].setBackground(color);
-            }
+        int RDropMove = game.getGrid().getMaxHeightEmpty(piece);
+        int[][] RDropCoords = piece.getCoordinates(piece.getX(), RDropMove);
+
+        for (int i = 0; i < 4; i++) {
+            int x = coords[i][0];
+            cases[RDropCoords[i][1]][x].setBackground(Color.GRAY);
+            cases[coords[i][1]][x].setBackground(color);
         }
+
         repaint();
     }
 
