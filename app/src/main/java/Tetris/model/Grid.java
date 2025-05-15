@@ -246,6 +246,8 @@ public class Grid extends Observable {
                 System.out.println("Game Over");
                 this.isGameOver = true;
                 this.saveScore();
+                signalVue();
+
                 return;
             }
             // we check if a line is complete

@@ -23,6 +23,7 @@ public class TetrisView extends JFrame implements Observer {
     private final Game game;
     private final DashBoardView dashBoardVue;
     private JPanel scorePanel;
+    private GameOverPopup gameOverPopup;
 
     public TetrisView(Game g) {
         this.game = g;
@@ -30,7 +31,7 @@ public class TetrisView extends JFrame implements Observer {
         setSize(900, 1050);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Color backgroundColor = Color.LIGHT_GRAY;
-
+        gameOverPopup = new GameOverPopup(this, game);
         cases = new CustomJPanel[game.getGrid().getHeight()][game.getGrid().getWidth()];
         GameBoardView boardView = new GameBoardView(game.getGrid().getWidth(), game.getGrid().getHeight(), cases, backgroundColor);
         nextPieceCells = new CustomJPanel[3][4][4];
@@ -113,11 +114,7 @@ public class TetrisView extends JFrame implements Observer {
                     }
                     case KeyEvent.VK_Q -> game.rotatePieceLeft();
                     case KeyEvent.VK_D -> game.rotatePieceRight();
-                    case KeyEvent.VK_ENTER -> {
-                        if (game.getGrid().isGameOver()) {
-                            game.reset();
-                        }
-                    }
+
                     case KeyEvent.VK_SPACE -> {
                         if(game.getGrid().canHoldPiece()) {
                             game.getGrid().echangeHoldAndCurrent();
@@ -210,6 +207,14 @@ public class TetrisView extends JFrame implements Observer {
         repaint();
     }
 
+    private void showGameOverPopup() {
+            gameOverPopup.setVisible(true);
+            gameOverPopup.setFocusable(true);
+            gameOverPopup.setFocusableWindowState(true);
+            gameOverPopup.requestFocus();
+
+    }
+
     @Override
     public void update(Observable o, Object arg) {
         try {
@@ -218,6 +223,10 @@ public class TetrisView extends JFrame implements Observer {
                 updateLevel();
                 updateTimer();
             } else {
+                if(game.getGrid().isGameOver()) {
+                    showGameOverPopup();
+                    return;
+                }
                 SwingUtilities.invokeLater(() -> {
                     updateBoard();
                     updateLevel();
@@ -226,6 +235,8 @@ public class TetrisView extends JFrame implements Observer {
                         game.getGrid().setNewNextPiece(false);
                         updateNextPiece();
                     }
+
+
                     repaint();
                 });
             }
