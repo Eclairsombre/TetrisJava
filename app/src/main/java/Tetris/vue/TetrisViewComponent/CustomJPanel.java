@@ -4,7 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 
 public class CustomJPanel extends JPanel {
-    CustomJPanel(Color color) {
+    private static float ratio;
+
+    CustomJPanel(Color color, float ratio) {
+        this.ratio = ratio;
         this.setBackground(color);
     }
 
@@ -21,5 +24,11 @@ public class CustomJPanel extends JPanel {
                         )
                 )
         ));
+    }
+
+    @Override
+    public void setPreferredSize(Dimension preferredSize) {
+        preferredSize.setSize(preferredSize.getWidth() * ratio, preferredSize.getHeight() * ratio);
+        super.setSize(preferredSize);
     }
 }

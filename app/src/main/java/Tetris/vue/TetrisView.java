@@ -22,21 +22,21 @@ public class TetrisView extends JFrame implements Observer {
     private final CustomJPanel[][][] nextPieceCells;
     private final Game game;
     private final DashBoardView dashBoardVue;
-    private JPanel scorePanel;
     private GameOverPopup gameOverPopup;
+    private final GameBoardView boardView;
 
     public TetrisView(Game g) {
         this.game = g;
         setTitle("Tetris");
-        setSize(900, 1050);
+        setSize(800, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Color backgroundColor = Color.LIGHT_GRAY;
         cases = new CustomJPanel[game.getGrid().getHeight()][game.getGrid().getWidth()];
-        GameBoardView boardView = new GameBoardView(game.getGrid().getWidth(), game.getGrid().getHeight(), cases, backgroundColor);
+        boardView = new GameBoardView(game.getGrid().getWidth(), game.getGrid().getHeight(), cases, backgroundColor);
         nextPieceCells = new CustomJPanel[3][4][4];
         holdPieceCells = new CustomJPanel[4][4];
         JPanel templatePanel = new JPanel();
-        PieceDisplayManager piecePanel = new PieceDisplayManager(nextPieceCells, holdPieceCells, 20, 20, backgroundColor);
+        PieceDisplayManager piecePanel = new PieceDisplayManager(nextPieceCells, holdPieceCells, 20, 20, backgroundColor, game.getGrid().getFileWriterAndReader().readFromFile());
         templatePanel.add(piecePanel);
         templatePanel.setBackground(backgroundColor);
 
@@ -54,26 +54,12 @@ public class TetrisView extends JFrame implements Observer {
         screen.add(dashBoardVue, BorderLayout.NORTH);
         screen.add(templatePanel, BorderLayout.EAST);
 
-        scorePanel = new JPanel();
-        scorePanel.setLayout(new BoxLayout(scorePanel, BoxLayout.Y_AXIS));
-        scorePanel.setBorder(BorderFactory.createTitledBorder("Meilleurs Scores"));
-        scorePanel.setBackground(Color.LIGHT_GRAY);
-
-        String[] scores = game.getGrid().getFileWriterAndReader().readFromFile();
-        for (int i = 0; i < Math.min(5, scores.length); i++) {
-            JLabel scoreLabel = new JLabel(scores[i]);
-            scorePanel.add(scoreLabel);
-        }
-
-
-        scorePanel.setBounds(600, 750, 230, 100);
-        add(scorePanel);
-
         add(screen);
         setVisible(true);
 
         MusicPlayer musicPlayer = new MusicPlayer("data/music/tetris.wav");
         musicPlayer.play();
+        paint(getGraphics());
     }
 
     private Color getColorCell(PieceColor color) {
@@ -102,24 +88,28 @@ public class TetrisView extends JFrame implements Observer {
         panel.addKeyListener(new KeyAdapter() {
             @Override
             public synchronized void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    game.pauseGame();
+                    return;
+                }
+                if (game.isPaused()) {
+                    return;
+                }
+                if (game.getGrid().isGameOver()) {
+                    return;
+                }
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_DOWN -> game.movePieceDown(true);
                     case KeyEvent.VK_LEFT -> game.movePieceLeft();
                     case KeyEvent.VK_RIGHT -> game.movePieceRight();
-                    case KeyEvent.VK_UP -> {
-                        if (!game.getGrid().isGameOver()) {
-                            game.doRdrop();
-                        }
-                    }
+                    case KeyEvent.VK_UP -> game.doRdrop();
                     case KeyEvent.VK_Q -> game.rotatePieceLeft();
                     case KeyEvent.VK_D -> game.rotatePieceRight();
-
                     case KeyEvent.VK_SPACE -> {
-                        if(game.getGrid().canHoldPiece()) {
+                        if (game.getGrid().canHoldPiece()) {
                             game.getGrid().echangeHoldAndCurrent();
                         }
                     }
-                    case KeyEvent.VK_ESCAPE -> game.pauseGame();
                     default -> {
                         // Do nothing
                     }
@@ -146,8 +136,6 @@ public class TetrisView extends JFrame implements Observer {
             cases[RDropCoords[i][1]][x].setBackground(Color.GRAY);
             cases[coords[i][1]][x].setBackground(color);
         }
-
-        repaint();
     }
 
     private void updateNextPiece() {
@@ -207,10 +195,10 @@ public class TetrisView extends JFrame implements Observer {
     }
 
     private void showGameOverPopup() {
-            gameOverPopup.setVisible(true);
-            gameOverPopup.setFocusable(true);
-            gameOverPopup.setFocusableWindowState(true);
-            gameOverPopup.requestFocus();
+        gameOverPopup.setVisible(true);
+        gameOverPopup.setFocusable(true);
+        gameOverPopup.setFocusableWindowState(true);
+        gameOverPopup.requestFocus();
 
     }
 
@@ -222,7 +210,7 @@ public class TetrisView extends JFrame implements Observer {
                 updateLevel();
                 updateTimer();
             } else {
-                if(game.getGrid().isGameOver()) {
+                if (game.getGrid().isGameOver()) {
                     this.gameOverPopup = new GameOverPopup(this, game);
                     showGameOverPopup();
                     return;
@@ -235,7 +223,6 @@ public class TetrisView extends JFrame implements Observer {
                         game.getGrid().setNewNextPiece(false);
                         updateNextPiece();
                     }
-
 
                     repaint();
                 });
