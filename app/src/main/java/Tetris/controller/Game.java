@@ -8,12 +8,11 @@ import java.util.Observable;
 public class Game extends Observable {
     private final Grid grid;
     private Scheduler scheduler, timer;
-    private boolean isPaused = false;
 
     public Game(Grid grid) {
         this.grid = grid;
         this.scheduler = new Scheduler(grid.getLevel().getSpeed(), () -> movePieceDown(false));
-        this.timer = new Scheduler(1000, grid::incrementSeconds);
+        this.timer = new Scheduler(1000, () -> {});
     }
 
     public void startGame() {
@@ -22,21 +21,17 @@ public class Game extends Observable {
     }
 
     public boolean isPaused() {
-        return isPaused;
+        return grid.isPaused();
     }
 
     public void pauseGame() {
-        if (scheduler.isAlive() && timer.isAlive()) {
+        if (scheduler.isAlive()) {
             scheduler.stopThread();
-            timer.stopThread();
-            isPaused = true;
         } else {
             scheduler = new Scheduler(grid.getLevel().getSpeed(), () -> movePieceDown(false));
-            timer = new Scheduler(1000, grid::incrementSeconds);
             scheduler.start();
-            timer.start();
-            isPaused = false;
         }
+        grid.setPaused(!grid.isPaused());
     }
 
     public Grid getGrid() {
@@ -49,8 +44,8 @@ public class Game extends Observable {
             scheduler.stopThread();
         } else {
             if (grid.getLevel().isNextLevel) {
-                resetScheduler(grid.getLevel().getSpeed());
                 grid.getLevel().isNextLevel = false;
+                resetScheduler(grid.getLevel().getSpeed());
             }
             grid.movePiece(0, 1, true);
             if (increment_score) {

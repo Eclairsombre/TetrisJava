@@ -28,13 +28,13 @@ public class HomePage extends JFrame implements Observer {
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 24));
         add(welcomeLabel, BorderLayout.CENTER);
 
-        JButton startButton = new JButton("Jouer");
-        startButton.setFont(new Font("Arial", Font.PLAIN, 18));
-        startButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                startGame();
-            }
+        Button startButton = new Button("Jouer", () -> {
+            game.startGame(); // Démarre les threads
+            TetrisView tetrisView = new TetrisView(game,musicPath);
+            SwingUtilities.invokeLater(tetrisView::start);
+            game.getGrid().addObserver(tetrisView);
+
+            dispose();
         });
 
         // Nouveau bouton pour choisir la musique
@@ -45,7 +45,9 @@ public class HomePage extends JFrame implements Observer {
             public void actionPerformed(ActionEvent e) {
                 musicPath = MusicChoosePage.chooseMusic(HomePage.this);
             }
-        });
+            });
+
+        add(startButton, BorderLayout.SOUTH);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(startButton);
@@ -53,15 +55,6 @@ public class HomePage extends JFrame implements Observer {
         add(buttonPanel, BorderLayout.SOUTH);
 
         setVisible(true);
-    }
-
-    private void startGame() {
-        game.startGame(); // Démarre les threads
-        TetrisView tetrisView = new TetrisView(game,musicPath);
-        SwingUtilities.invokeLater(tetrisView::start);
-        game.getGrid().addObserver(tetrisView);
-
-        dispose();
     }
 
     @Override

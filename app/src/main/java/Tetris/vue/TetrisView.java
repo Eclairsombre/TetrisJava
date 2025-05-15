@@ -3,6 +3,7 @@ package Tetris.vue;
 import Tetris.controller.Game;
 import Tetris.model.Piece.Piece;
 import Tetris.model.Piece.PieceColor;
+import Tetris.model.StatsValues;
 import Tetris.vue.TetrisViewComponent.CustomJPanel;
 import Tetris.vue.TetrisViewComponent.DashBoardView;
 import Tetris.vue.TetrisViewComponent.GameBoardView;
@@ -23,16 +24,15 @@ public class TetrisView extends JFrame implements Observer {
     private final Game game;
     private final DashBoardView dashBoardVue;
     private GameOverPopup gameOverPopup;
-    private final GameBoardView boardView;
 
-    public TetrisView(Game g, String musicPath) {
+    public TetrisView(Game g) {
         this.game = g;
         setTitle("Tetris");
-        setSize(800, 800);
+        setSize(1000, 1000);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Color backgroundColor = Color.LIGHT_GRAY;
         cases = new CustomJPanel[game.getGrid().getHeight()][game.getGrid().getWidth()];
-        boardView = new GameBoardView(game.getGrid().getWidth(), game.getGrid().getHeight(), cases, backgroundColor);
+        GameBoardView boardView = new GameBoardView(game.getGrid().getWidth(), game.getGrid().getHeight(), cases, backgroundColor);
         nextPieceCells = new CustomJPanel[3][4][4];
         holdPieceCells = new CustomJPanel[4][4];
         JPanel templatePanel = new JPanel();
@@ -179,21 +179,6 @@ public class TetrisView extends JFrame implements Observer {
         repaint();
     }
 
-    private void updateScore() {
-        dashBoardVue.updateScore(game.getGrid().getScore());
-        repaint();
-    }
-
-    private void updateLevel() {
-        dashBoardVue.updateLevel(game.getGrid().getLevel().getLevel());
-        repaint();
-    }
-
-    private void updateTimer() {
-        dashBoardVue.updateTimer(game.getGrid().getTime());
-        repaint();
-    }
-
     public void updateLineDeleteCount() {
         dashBoardVue.updateLineDeleteCount(game.getGrid().getLineDeleteCount());
         repaint();
@@ -207,15 +192,20 @@ public class TetrisView extends JFrame implements Observer {
 
     }
 
+    private void updateStats() {
+        dashBoardVue.updateScore(game.getGrid().getScore());
+        dashBoardVue.updateLevel(game.getGrid().getLevel().getLevel());
+        dashBoardVue.updateTimer(game.getGrid().getTime());
+        repaint();
+    }
+
     @Override
     public void update(Observable o, Object arg) {
         try {
-            if (arg instanceof Integer) {
-                updateScore();
-                updateLevel();
-                updateTimer();
+            if (arg instanceof StatsValues) {
+                updateStats();
                 updateLineDeleteCount();
-            } else {
+            } else { // we update the board and the next piece if needed
                 if (game.getGrid().isGameOver()) {
                     this.gameOverPopup = new GameOverPopup(this, game);
                     showGameOverPopup();
@@ -223,9 +213,6 @@ public class TetrisView extends JFrame implements Observer {
                 }
                 SwingUtilities.invokeLater(() -> {
                     updateBoard();
-                    updateLevel();
-                    updateTimer();
-                    updateLineDeleteCount();
                     if (game.getGrid().isNewNextPiece()) {
                         game.getGrid().setNewNextPiece(false);
                         updateNextPiece();

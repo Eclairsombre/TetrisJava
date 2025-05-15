@@ -17,7 +17,6 @@ public class PieceDisplayManager extends JPanel {
         holdPiecePanel.setBackground(background);
         add(holdPiecePanel, BorderLayout.SOUTH);
 
-
         JPanel NPPanel = new JPanel();
         NPPanel.setLayout(new BoxLayout(NPPanel, BoxLayout.Y_AXIS));
         JLabel nextPieceLabel = new JLabel("NEXT", SwingConstants.CENTER);

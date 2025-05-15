@@ -13,30 +13,24 @@ import java.util.Observable;
 public class Grid extends Observable {
     private final int width;
     private final int height;
-    private int score;
-    private int lineDeleteCount;
     private final PieceColor[][] grid;
     private final PieceManager pieceManager;
-    private Level level;
-    private int seconds;
     private boolean isNewNextPiece;
     public boolean isGameOver;
     private boolean canHoldPiece;
     java.util.Random random;
+    private boolean isPaused = false;
+    public FileWriterAndReader fileWriterAndReader = new FileWriterAndReader(
+            "app/src/main/resources/score.txt"
+    );
     private final List<Integer> lastPiece;
-    private FileWriterAndReader fileWriterAndReader;
+    private final StatsValues statsValues = new StatsValues();
 
     public Grid(int width, int height) {
-        this.fileWriterAndReader = new FileWriterAndReader(
-                "app/src/main/resources/score.txt"
-                );
+        this.height = height;
         random = new java.util.Random((int) (System.currentTimeMillis() % Integer.MAX_VALUE));
         this.lastPiece = new ArrayList<>(List.of(0, 0));
         this.width = width;
-        this.height = height;
-        this.score = 0;
-        this.lineDeleteCount = 0;
-        this.seconds = 0;
         this.canHoldPiece = false;
         this.grid = new PieceColor[height][width];
         for (int x = 0; x < width; x++) {
@@ -51,21 +45,20 @@ public class Grid extends Observable {
             nextPiece.add(initializePiece());
         }
         this.pieceManager.setNextPiece(nextPiece);
-        this.level = new Level(0);
+        this.pieceManager.setNextPiece(nextPiece);
     }
 
     public int getScore() {
-        return score;
+        return statsValues.score;
     }
 
     public String getTime() {
-        return String.format("%02d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, seconds % 60);
+        return String.format("%02d:%02d:%02d", statsValues.seconds / 3600, (statsValues.seconds % 3600) / 60, statsValues.seconds % 60);
     }
 
     public void updateScore(int points) {
-        score += points;
-        setChanged();
-        notifyObservers(score);
+        statsValues.score += points;
+        signalStatsChange();
     }
 
     private Piece initializePiece() {
@@ -93,9 +86,14 @@ public class Grid extends Observable {
         }
     }
 
-    public void signalVue() {
+    public void signalGridChange() {
         setChanged();
         notifyObservers(grid);
+    }
+
+    public void signalStatsChange() {
+        setChanged();
+        notifyObservers(statsValues);
     }
 
     public PieceColor getCell(int x, int y) {
@@ -190,13 +188,12 @@ public class Grid extends Observable {
         }
         if (countPoints > 0) {
             updateScore(countPoints * countPoints); // to favorize double, triple, etc.
-            setChanged();
-            notifyObservers(countPoints * countPoints);
+            signalStatsChange();
         }
     }
 
     private void deleteLine(int y) {
-        lineDeleteCount++;
+        statsValues.lineDeleteCount++;
         for (int x = 0; x < width; x++) {
             setCell(x, y, PieceColor.NONE);
         }
@@ -207,9 +204,10 @@ public class Grid extends Observable {
             grid[0][x] = PieceColor.NONE;
         }
 
-        if (lineDeleteCount % 10 == 0) {
+        if (statsValues.lineDeleteCount % 10 == 0) {
             nextLevel();
         }
+        signalStatsChange();
     }
 
     private boolean isLineComplete(int y) {
@@ -225,6 +223,13 @@ public class Grid extends Observable {
         return canHoldPiece;
     }
 
+    public boolean isPaused() {
+        return isPaused;
+    }
+
+    public void setPaused(boolean paused) {
+        isPaused = paused;
+    }
 
     public void movePiece(int x_move, int y_move, boolean fixPiece) {
         Piece currentPiece = this.pieceManager.getCurrentPiece();
@@ -246,7 +251,7 @@ public class Grid extends Observable {
                 System.out.println("Game Over");
                 this.isGameOver = true;
                 this.saveScore();
-                signalVue();
+                signalGridChange();
 
                 return;
             }
@@ -263,7 +268,7 @@ public class Grid extends Observable {
 
 
         currentPiece.setPos(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
-        signalVue();
+        signalGridChange();
     }
 
     public void rotatePiece(boolean isLeft) {
@@ -281,7 +286,7 @@ public class Grid extends Observable {
 
         if (isValidPosition(rotatedShape)) {
             currentPiece.setShape(originalRotatedShape);
-            signalVue();
+            signalGridChange();
         }
     }
 
@@ -290,10 +295,10 @@ public class Grid extends Observable {
     }
 
     public void reset() {
-        this.score = 0;
-        this.lineDeleteCount = 0;
-        this.seconds = 0;
-        this.level = new Level(0);
+        statsValues.score = 0;
+        statsValues.lineDeleteCount = 0;
+        statsValues.seconds = 0;
+        statsValues.level = new Level(0);
         this.isGameOver = false;
         this.canHoldPiece = false;
         for (int x = 0; x < width; x++) {
@@ -308,8 +313,8 @@ public class Grid extends Observable {
         for (int i = 0; i < 3; i++) {
             this.pieceManager.getNextPiece().addLast(initializePiece());
         }
-        setChanged();
-        notifyObservers(grid);
+        signalGridChange();
+        signalStatsChange();
     }
 
     public Piece getCurrentPiece() {
@@ -336,23 +341,23 @@ public class Grid extends Observable {
         }
         this.isNewNextPiece = true;
         this.canHoldPiece = false;
-        setChanged();
-        notifyObservers(grid);
+        signalGridChange();
     }
 
     public Level getLevel() {
-        return level;
+        return statsValues.level;
     }
 
     public void nextLevel() {
-        this.level = new Level(this.level.getLevel() + 1);
-
-        setChanged();
-        notifyObservers(level);
+        statsValues.level = new Level(statsValues.level.getLevel() + 1);
+        signalStatsChange();
     }
 
     public void incrementSeconds() {
-        this.seconds++;
+        if (!isPaused) {
+            statsValues.seconds++;
+            signalStatsChange();
+        }
     }
 
     public int getMaxHeightEmpty(Piece piece) {
@@ -377,7 +382,7 @@ public class Grid extends Observable {
 
     public void saveScore() {
         String[] lines = fileWriterAndReader.readFromFile();
-        String nouvelleLigne ="Level :" + level.getLevel()+1 + " , " + score + " , " + getTime();
+        String nouvelleLigne ="Level :" + statsValues.level.getLevel()+1 + " , " + statsValues.score + " , " + getTime();
         java.util.List<String> allScores = new java.util.ArrayList<>();
 
         for (String line : lines) {
