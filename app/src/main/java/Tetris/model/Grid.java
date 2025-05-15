@@ -377,7 +377,7 @@ public class Grid extends Observable {
 
     public void saveScore() {
         String[] lines = fileWriterAndReader.readFromFile();
-        String nouvelleLigne = java.time.LocalDate.now() + " , Level :" + level.getLevel() + " , " + score + " , " + getTime();
+        String nouvelleLigne = java.time.LocalDate.now() + " , Level :" + level.getLevel()+1 + " , " + score + " , " + getTime();
         java.util.List<String> allScores = new java.util.ArrayList<>();
 
         for (String line : lines) {
