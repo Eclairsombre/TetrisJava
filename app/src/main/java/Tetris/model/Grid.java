@@ -24,8 +24,12 @@ public class Grid extends Observable {
     private boolean canHoldPiece;
     java.util.Random random;
     private final List<Integer> lastPiece;
+    private FileWriterAndReader fileWriterAndReader;
 
     public Grid(int width, int height) {
+        this.fileWriterAndReader = new FileWriterAndReader(
+                "app/src/main/resources/score.txt"
+                );
         random = new java.util.Random((int) (System.currentTimeMillis() % Integer.MAX_VALUE));
         this.lastPiece = new ArrayList<>(List.of(0, 0));
         this.width = width;
@@ -237,6 +241,7 @@ public class Grid extends Observable {
             if (currentPiece.getY() == 0) {
                 System.out.println("Game Over");
                 this.isGameOver = true;
+                this.saveScore();
                 return;
             }
             // we check if a line is complete
@@ -362,5 +367,38 @@ public class Grid extends Observable {
         }
         movePiece(0, 1, true);
         updateScore(30);
+    }
+
+    public void saveScore() {
+        String[] lines = fileWriterAndReader.readFromFile();
+        String nouvelleLigne = java.time.LocalDate.now() + " , Level :" + level.getLevel() + " , " + score + " , " + getTime();
+        java.util.List<String> allScores = new java.util.ArrayList<>();
+
+        for (String line : lines) {
+            if (line != null && !line.trim().isEmpty() && line.split(" , ").length >= 3) {
+                allScores.add(line);
+            }
+        }
+
+        allScores.add(nouvelleLigne);
+
+        allScores.sort((a, b) -> {
+            try {
+                String[] partsA = a.split(" , ");
+                String[] partsB = b.split(" , ");
+
+                if (partsA.length < 3 || partsB.length < 3) {
+                    return 0;
+                }
+
+                int scoreA = Integer.parseInt(partsA[2].trim());
+                int scoreB = Integer.parseInt(partsB[2].trim());
+                return Integer.compare(scoreB, scoreA);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        });
+
+        fileWriterAndReader.writeToFile(allScores);
     }
 }
