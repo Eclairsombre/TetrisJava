@@ -31,7 +31,6 @@ public class TetrisView extends JFrame implements Observer {
         setSize(900, 1050);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Color backgroundColor = Color.LIGHT_GRAY;
-        gameOverPopup = new GameOverPopup(this, game);
         cases = new CustomJPanel[game.getGrid().getHeight()][game.getGrid().getWidth()];
         GameBoardView boardView = new GameBoardView(game.getGrid().getWidth(), game.getGrid().getHeight(), cases, backgroundColor);
         nextPieceCells = new CustomJPanel[3][4][4];
@@ -224,6 +223,7 @@ public class TetrisView extends JFrame implements Observer {
                 updateTimer();
             } else {
                 if(game.getGrid().isGameOver()) {
+                    this.gameOverPopup = new GameOverPopup(this, game);
                     showGameOverPopup();
                     return;
                 }
