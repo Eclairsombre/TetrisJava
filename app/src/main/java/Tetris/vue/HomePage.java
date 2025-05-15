@@ -16,7 +16,7 @@ public class HomePage extends JFrame implements Observer {
 
     public HomePage(Game game) {
         setTitle("Accueil - Tetris");
-        setSize(900, 800);
+        setSize(900, 1050);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -53,4 +53,6 @@ public class HomePage extends JFrame implements Observer {
     public void start() {
         setVisible(true);
     }
+
+
 }

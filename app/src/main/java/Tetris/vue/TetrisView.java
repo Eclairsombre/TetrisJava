@@ -22,6 +22,7 @@ public class TetrisView extends JFrame implements Observer {
     private final CustomJPanel[][][] nextPieceCells;
     private final Game game;
     private final DashBoardView dashBoardVue;
+    private JPanel scorePanel;
 
     public TetrisView(Game g) {
         this.game = g;
@@ -52,6 +53,21 @@ public class TetrisView extends JFrame implements Observer {
         screen.add(boardView, BorderLayout.CENTER);
         screen.add(dashBoardVue, BorderLayout.NORTH);
         screen.add(templatePanel, BorderLayout.EAST);
+
+        scorePanel = new JPanel();
+        scorePanel.setLayout(new BoxLayout(scorePanel, BoxLayout.Y_AXIS));
+        scorePanel.setBorder(BorderFactory.createTitledBorder("Meilleurs Scores"));
+        scorePanel.setBackground(Color.LIGHT_GRAY);
+
+        String[] scores = game.getGrid().getFileWriterAndReader().readFromFile();
+        for (int i = 0; i < Math.min(5, scores.length); i++) {
+            JLabel scoreLabel = new JLabel(scores[i]);
+            scorePanel.add(scoreLabel);
+        }
+
+
+        scorePanel.setBounds(600, 750, 230, 100);
+        add(scorePanel);
 
         add(screen);
         setVisible(true);

@@ -83,6 +83,10 @@ public class Grid extends Observable {
         return height;
     }
 
+    public FileWriterAndReader getFileWriterAndReader() {
+        return fileWriterAndReader;
+    }
+
     public void setCell(int x, int y, PieceColor value) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             grid[y][x] = value;
