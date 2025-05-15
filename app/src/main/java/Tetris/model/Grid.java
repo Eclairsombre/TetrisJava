@@ -407,4 +407,8 @@ public class Grid extends Observable {
 
         fileWriterAndReader.writeToFile(allScores);
     }
+
+    public int getLineDeleteCount() {
+        return lineDeleteCount;
+    }
 }

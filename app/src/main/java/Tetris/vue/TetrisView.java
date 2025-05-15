@@ -194,6 +194,11 @@ public class TetrisView extends JFrame implements Observer {
         repaint();
     }
 
+    public void updateLineDeleteCount() {
+        dashBoardVue.updateLineDeleteCount(game.getGrid().getLineDeleteCount());
+        repaint();
+    }
+
     private void showGameOverPopup() {
         gameOverPopup.setVisible(true);
         gameOverPopup.setFocusable(true);
@@ -209,6 +214,7 @@ public class TetrisView extends JFrame implements Observer {
                 updateScore();
                 updateLevel();
                 updateTimer();
+                updateLineDeleteCount();
             } else {
                 if (game.getGrid().isGameOver()) {
                     this.gameOverPopup = new GameOverPopup(this, game);
@@ -219,6 +225,7 @@ public class TetrisView extends JFrame implements Observer {
                     updateBoard();
                     updateLevel();
                     updateTimer();
+                    updateLineDeleteCount();
                     if (game.getGrid().isNewNextPiece()) {
                         game.getGrid().setNewNextPiece(false);
                         updateNextPiece();

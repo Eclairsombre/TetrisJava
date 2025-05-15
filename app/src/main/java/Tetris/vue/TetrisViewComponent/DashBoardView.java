@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class DashBoardView extends JPanel {
-    private final JLabel scoreLabel, levelLabel, timerLabel;
+    private final JLabel scoreLabel, levelLabel, timerLabel, lineDeleteCountLabel;
 
     public DashBoardView(Color backgroundColor) {
         // Panel score
@@ -35,6 +35,16 @@ public class DashBoardView extends JPanel {
         timerPanel.setFocusable(false);
         timerPanel.setBackground(backgroundColor);
         add(timerPanel);
+
+        //Panel line delete count
+        JPanel lineDeleteCountPanel = new JPanel();
+        lineDeleteCountLabel = new JLabel("Lignes supprimées : 0", SwingConstants.CENTER);
+        lineDeleteCountLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        lineDeleteCountPanel.add(lineDeleteCountLabel, BorderLayout.CENTER);
+        lineDeleteCountPanel.setFocusable(false);
+        lineDeleteCountPanel.setBackground(backgroundColor);
+        add(lineDeleteCountPanel);
+
     }
 
     public void updateScore(int score) {
@@ -46,5 +56,9 @@ public class DashBoardView extends JPanel {
     public void updateTimer(String time) {
         timerLabel.setText("Temps écoulé : " + time);
     }
+    public void updateLineDeleteCount(int lineDeleteCount) {
+        lineDeleteCountLabel.setText("Lignes supprimées : " + lineDeleteCount);
+    }
+
 
 }
