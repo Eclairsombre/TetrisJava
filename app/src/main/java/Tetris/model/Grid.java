@@ -3,35 +3,23 @@ package Tetris.model;
 import Tetris.model.Piece.Piece;
 import Tetris.model.Piece.PieceColor;
 import Tetris.model.Piece.PieceManager;
-import Tetris.model.Piece.PieceTemplate.*;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Observable;
 
 @SuppressWarnings("deprecation")
 public class Grid extends Observable {
     private final int width;
     private final int height;
+    private boolean isPaused = false;
     private final PieceColor[][] grid;
     private final PieceManager pieceManager;
-    private boolean isNewNextPiece;
-    public boolean isGameOver;
-    private boolean canHoldPiece;
-    java.util.Random random;
-    private boolean isPaused = false;
+    private final StatsValues statsValues = new StatsValues();
     public FileWriterAndReader fileWriterAndReader = new FileWriterAndReader(
             "app/src/main/resources/score.txt"
     );
-    private final List<Integer> lastPiece;
-    private final StatsValues statsValues = new StatsValues();
 
     public Grid(int width, int height) {
         this.height = height;
-        random = new java.util.Random((int) (System.currentTimeMillis() % Integer.MAX_VALUE));
-        this.lastPiece = new ArrayList<>(List.of(0, 0));
         this.width = width;
-        this.canHoldPiece = false;
         this.grid = new PieceColor[height][width];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -39,33 +27,6 @@ public class Grid extends Observable {
             }
         }
         this.pieceManager = new PieceManager();
-        this.pieceManager.setCurrentPiece(initializePiece());
-        List<Piece> nextPiece = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            nextPiece.add(initializePiece());
-        }
-        this.pieceManager.setNextPiece(nextPiece);
-        this.pieceManager.setNextPiece(nextPiece);
-    }
-
-    public int getScore() {
-        return statsValues.score;
-    }
-
-    public String getTime() {
-        return String.format("%02d:%02d:%02d", statsValues.seconds / 3600, (statsValues.seconds % 3600) / 60, statsValues.seconds % 60);
-    }
-
-    public void updateScore(int points) {
-        statsValues.score += points;
-        signalStatsChange();
-    }
-
-    private Piece initializePiece() {
-        Piece p = getNouvellePiece();
-        this.isNewNextPiece = true;
-        p.setPos(3, 0);
-        return p;
     }
 
     public int getWidth() {
@@ -80,71 +41,40 @@ public class Grid extends Observable {
         return fileWriterAndReader;
     }
 
-    public void setCell(int x, int y, PieceColor value) {
-        if (x >= 0 && x < width && y >= 0 && y < height) {
-            grid[y][x] = value;
+    public void signalChange(String type) {
+        setChanged();
+        notifyObservers(type);
+    }
+
+    public StatsValues getStatsValues() {
+        return statsValues;
+    }
+
+    public void updateScore(int points) {
+        statsValues.score += points;
+        signalChange("stats");
+    }
+
+    public void nextLevel() {
+        statsValues.level = new Level(statsValues.level.getLevel() + 1);
+        signalChange("level");
+    }
+
+    public void incrementSeconds() {
+        if (!isPaused) {
+            statsValues.incrementSeconds();
+            signalChange("timer");
         }
     }
 
-    public void signalGridChange() {
-        setChanged();
-        notifyObservers(grid);
+    public PieceManager getPieceManager() {
+        return this.pieceManager;
     }
 
-    public void signalStatsChange() {
-        setChanged();
-        notifyObservers(statsValues);
-    }
-
-    public PieceColor getCell(int x, int y) {
-        if (x >= 0 && x < width && y >= 0 && y < height) {
-            return grid[y][x];
-        }
-        return null;
-    }
-
-    public boolean isNewNextPiece() {
-        return isNewNextPiece;
-    }
-
-    public void setNewNextPiece(boolean isNewNextPiece) {
-        this.isNewNextPiece = isNewNextPiece;
-    }
-
-    public List<Piece> getNextPiece() {
-        return this.pieceManager.getNextPiece();
-    }
-
-    public Piece getHoldPiece() {
-        return this.pieceManager.getHoldPiece();
-    }
-
-    public Piece getNouvellePiece() {
-        // make a semi-random choice of a piece to avoid too many duplicates
-        java.security.SecureRandom random = new java.security.SecureRandom();
-        int idx = random.nextInt(7);
-        for (int i = 0; i < lastPiece.size(); i++) {
-            if (!lastPiece.contains(idx)) {
-                break;
-            }
-            idx = random.nextInt(7); // re-roll if the piece is already in the last 3
-        } // if the piece is in the last 3 again, we select it anyway
-        lastPiece.removeFirst();
-        lastPiece.add(idx);
-        try {
-            return switch (idx) {
-                case 0 -> new PieceI(PieceColor.RED);
-                case 1 -> new PieceJ(PieceColor.ORANGE);
-                case 2 -> new PieceL(PieceColor.BLUE);
-                case 3 -> new PieceO(PieceColor.YELLOW);
-                case 4 -> new PieceS(PieceColor.GREEN);
-                case 5 -> new PieceT(PieceColor.CYAN);
-                case 6 -> new PieceZ(PieceColor.PINK);
-                default -> throw new IllegalArgumentException("Invalid piece index: " + idx);
-            };
-        } catch (Exception e) {
-            System.err.println("Error creating piece: " + e.getMessage());
-            return null;
+    public void exchangeHoldAndCurrent() {
+        if (pieceManager.exchangeHoldAndCurrent()) { // the exchange is possible and done
+            signalChange("grid");
+            signalChange("nextPiece");
         }
     }
 
@@ -159,22 +89,30 @@ public class Grid extends Observable {
         return false;
     }
 
-    public boolean isValidPosition(int[][] shape) {
-        List<int[]> pointsToCheck = new ArrayList<>();
-        for (int[] pos : shape) {
-            if (!isInCurrentPiece(pos[0], pos[1])) {
-                pointsToCheck.add(pos);
-            }
+    public PieceColor getCell(int x, int y) {
+        if (x >= 0 && x < width && y >= 0 && y < height) {
+            return grid[y][x];
         }
+        return null;
+    }
 
-        for (int[] c : pointsToCheck) {
+    public void setCell(int x, int y, PieceColor value) {
+        if (x >= 0 && x < width && y >= 0 && y < height) {
+            grid[y][x] = value;
+        }
+    }
+
+    public boolean isValidPosition(int[][] pieceCoords) {
+        for (int[] c : pieceCoords) {
             int x_next = c[0];
             int y_next = c[1];
+            if (isInCurrentPiece(x_next, y_next)) {
+                continue;
+            }
             if (x_next < 0 || x_next >= width || y_next >= height || (y_next >= 0 && !(grid[y_next][x_next] == PieceColor.NONE))) {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -187,8 +125,8 @@ public class Grid extends Observable {
             }
         }
         if (countPoints > 0) {
-            updateScore(countPoints * countPoints); // to favorize double, triple, etc.
-            signalStatsChange();
+            updateScore(countPoints * countPoints); // pow to favorize double, triple, etc.
+            signalChange("stats");
         }
     }
 
@@ -200,14 +138,11 @@ public class Grid extends Observable {
         for (int i = y; i > 0; i--) {
             if (width >= 0) System.arraycopy(grid[i - 1], 0, grid[i], 0, width);
         }
-        for (int x = 0; x < width; x++) {
-            grid[0][x] = PieceColor.NONE;
-        }
-
         if (statsValues.lineDeleteCount % 10 == 0) {
-            nextLevel();
+            nextLevel(); // signalChange("level");
         }
-        signalStatsChange();
+        signalChange("stats");
+        // signalChange("grid"); after this function because we call it in the movePiece method
     }
 
     private boolean isLineComplete(int y) {
@@ -219,56 +154,60 @@ public class Grid extends Observable {
         return true;
     }
 
-    public boolean canHoldPiece() {
-        return canHoldPiece;
+    public int getMaxHeightEmpty(Piece piece) {
+        int maxHeight = height - 1;
+        for (int i = 0; i < height; i++) {
+            if (!isValidPosition(piece.getCoordinates(piece.getX(), i))) {
+                maxHeight = i - 1;
+                break;
+            }
+        }
+        return maxHeight;
     }
 
-    public boolean isPaused() {
-        return isPaused;
-    }
-
-    public void setPaused(boolean paused) {
-        isPaused = paused;
+    public void doRdrop() {
+        int move_to = getMaxHeightEmpty(pieceManager.getCurrentPiece());
+        for (int i = 0; i < move_to; i++) {
+            movePiece(0, 1, false);
+        }
+        movePiece(0, 1, true);
+        updateScore(30);
     }
 
     public void movePiece(int x_move, int y_move, boolean fixPiece) {
+        if (isPaused) {
+            return;
+        }
+
         Piece currentPiece = this.pieceManager.getCurrentPiece();
         int[][] nextCoords = currentPiece.getCoordinates(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
 
-        if (!isValidPosition(nextCoords)) {
-            if (!fixPiece) {
-                return;
-            }
-
-            for (int[] c : nextCoords) {
-                int x = c[0] - x_move;
-                int y = c[1] - y_move;
-                setCell(x, y, currentPiece.getColor());
-            }
-
-            // check end game
-            if (currentPiece.getY() == 0) {
-                System.out.println("Game Over");
-                this.isGameOver = true;
-                this.saveScore();
-                signalGridChange();
-
-                return;
-            }
-            // we check if a line is complete
-            checkingLines();
-            // we create a new piece
-            this.pieceManager.setCurrentPiece(this.pieceManager.getNextPiece().getFirst());
-            this.pieceManager.getNextPiece().removeFirst();
-            this.pieceManager.getNextPiece().addLast(initializePiece());
-            this.setNewNextPiece(true);
-
-            this.canHoldPiece = true;
+        if (isValidPosition(nextCoords)) {
+            currentPiece.setPos(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
+            signalChange("grid");
+            return;
+        }
+        if (!fixPiece) {
+            return;
         }
 
+        // fix the piece
+        for (int[] c : nextCoords) {
+            int x = c[0] - x_move;
+            int y = c[1] - y_move;
+            setCell(x, y, currentPiece.getColor());
+        }
 
-        currentPiece.setPos(currentPiece.getX() + x_move, currentPiece.getY() + y_move);
-        signalGridChange();
+        // check end game
+        if (currentPiece.getY() == 0) {
+            this.saveScore();
+            signalChange("gameOver");
+            return;
+        }
+        checkingLines();
+        this.pieceManager.changePiece();
+        signalChange("nextPiece");
+        signalChange("grid");
     }
 
     public void rotatePiece(boolean isLeft) {
@@ -286,103 +225,34 @@ public class Grid extends Observable {
 
         if (isValidPosition(rotatedShape)) {
             currentPiece.setShape(originalRotatedShape);
-            signalGridChange();
+            signalChange("grid");
         }
     }
 
-    public boolean isGameOver() {
-        return isGameOver;
+    public boolean isPaused() {
+        return isPaused;
+    }
+
+    public void setPaused(boolean paused) {
+        isPaused = paused;
     }
 
     public void reset() {
-        statsValues.score = 0;
-        statsValues.lineDeleteCount = 0;
-        statsValues.seconds = 0;
-        statsValues.level = new Level(0);
-        this.isGameOver = false;
-        this.canHoldPiece = false;
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                grid[y][x] = PieceColor.NONE;
-            }
+        this.isPaused = false;
+        statsValues.reset();
+        this.pieceManager.reset();
+        for (PieceColor[] row : grid) {
+            java.util.Arrays.fill(row, PieceColor.NONE);
         }
-
-        // we create a new piece
-        this.pieceManager.setCurrentPiece(initializePiece());
-        this.pieceManager.getNextPiece().clear();
-        for (int i = 0; i < 3; i++) {
-            this.pieceManager.getNextPiece().addLast(initializePiece());
-        }
-        signalGridChange();
-        signalStatsChange();
-    }
-
-    public Piece getCurrentPiece() {
-        return this.pieceManager.getCurrentPiece();
-    }
-
-    public void echangeHoldAndCurrent() {
-        if (this.pieceManager.getHoldPiece() == null) {
-            Piece piece = this.pieceManager.getCurrentPiece();
-            piece.setPos(3, 1);
-            this.pieceManager.setCurrentPiece(piece);
-            this.pieceManager.setHoldPiece(this.pieceManager.getCurrentPiece());
-
-            this.pieceManager.setCurrentPiece(this.pieceManager.getNextPiece().getFirst());
-            this.pieceManager.getNextPiece().removeFirst();
-            this.pieceManager.getNextPiece().addLast(initializePiece());
-
-        } else {
-            Piece temp = this.pieceManager.getCurrentPiece();
-            temp.setPos(3, 1);
-            this.pieceManager.setCurrentPiece(this.pieceManager.getHoldPiece());
-            this.pieceManager.setHoldPiece(temp);
-
-        }
-        this.isNewNextPiece = true;
-        this.canHoldPiece = false;
-        signalGridChange();
-    }
-
-    public Level getLevel() {
-        return statsValues.level;
-    }
-
-    public void nextLevel() {
-        statsValues.level = new Level(statsValues.level.getLevel() + 1);
-        signalStatsChange();
-    }
-
-    public void incrementSeconds() {
-        if (!isPaused) {
-            statsValues.seconds++;
-            signalStatsChange();
-        }
-    }
-
-    public int getMaxHeightEmpty(Piece piece) {
-        int maxHeight = height - 1;
-        for (int i = 0; i < height; i++) {
-            if (!isValidPosition(piece.getCoordinates(piece.getX(), i))) {
-                maxHeight = i - 1;
-                break;
-            }
-        }
-        return maxHeight;
-    }
-
-    public void doRdrop() {
-        int move_to = getMaxHeightEmpty(getCurrentPiece());
-        for (int i = 0; i < move_to; i++) {
-            movePiece(0, 1, false);
-        }
-        movePiece(0, 1, true);
-        updateScore(30);
+        signalChange("grid");
+        signalChange("nextPiece");
+        signalChange("stats");
     }
 
     public void saveScore() {
         String[] lines = fileWriterAndReader.readFromFile();
-        String nouvelleLigne ="Level :" + statsValues.level.getLevel()+1 + " , " + statsValues.score + " , " + getTime();
+        // TODO : Check if it really works for the level, I have a doubt (see score.txt)
+        String nouvelleLigne = "Level :" + statsValues.level.getLevel() + 1 + " , " + statsValues.score + " , " + statsValues.getTime();
         java.util.List<String> allScores = new java.util.ArrayList<>();
 
         for (String line : lines) {
@@ -392,7 +262,6 @@ public class Grid extends Observable {
         }
 
         allScores.add(nouvelleLigne);
-
         allScores.sort((a, b) -> {
             try {
                 String[] partsA = a.split(" , ");
@@ -411,9 +280,5 @@ public class Grid extends Observable {
         });
 
         fileWriterAndReader.writeToFile(allScores);
-    }
-
-    public int getLineDeleteCount() {
-        return lineDeleteCount;
     }
 }

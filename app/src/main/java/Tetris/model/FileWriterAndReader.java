@@ -1,13 +1,12 @@
 package Tetris.model;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
 public class FileWriterAndReader {
-    private String path;
+    private final String path;
 
     public FileWriterAndReader(String path) {
         this.path = path;
@@ -15,7 +14,6 @@ public class FileWriterAndReader {
 
     public void writeToFile(List<String> content) {
         try {
-
             FileWriter file = new FileWriter(this.path);
             for (String line : content) {
                 file.write(line + "\n");
@@ -24,7 +22,6 @@ public class FileWriterAndReader {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     public String[] readFromFile() {
@@ -36,10 +33,7 @@ public class FileWriterAndReader {
                 stringBuilder.append((char) character);
             }
             fileReader.close();
-            String[] lines = stringBuilder.toString().split("\n");
-            return lines;
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            return stringBuilder.toString().split("\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

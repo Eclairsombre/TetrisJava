@@ -5,16 +5,16 @@ import java.awt.*;
 
 public class PieceDisplayView extends JPanel {
     public PieceDisplayView(JPanel[][] nextPieceCells, int width, int height, float ratio) {
+        int length = 4;
         JPanel npPanel = new JPanel();
-        npPanel.setLayout(new GridLayout(4, 4, 0, 0));
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                nextPieceCells[j][i] = new CustomJPanel(Color.BLACK, ratio);
+        npPanel.setLayout(new GridLayout(length, length, 0, 0));
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < length; j++) {
+                nextPieceCells[j][i] = new CustomJPanel(Color.BLACK);
                 nextPieceCells[j][i].setPreferredSize(new Dimension(width, height));
                 npPanel.add(nextPieceCells[j][i]);
             }
         }
-
         npPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.BLACK, 3),
                 BorderFactory.createCompoundBorder(
@@ -23,8 +23,8 @@ public class PieceDisplayView extends JPanel {
                 )
         ));
         npPanel.setPreferredSize(new Dimension(
-                Math.round(width * 4 * ratio),
-                Math.round(height * 4 * ratio)
+                Math.round(width * length * ratio),
+                Math.round(height * length * ratio)
         ));
         add(npPanel);
         setFocusable(false);

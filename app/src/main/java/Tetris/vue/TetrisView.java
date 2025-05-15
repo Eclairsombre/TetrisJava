@@ -3,7 +3,6 @@ package Tetris.vue;
 import Tetris.controller.Game;
 import Tetris.model.Piece.Piece;
 import Tetris.model.Piece.PieceColor;
-import Tetris.model.StatsValues;
 import Tetris.vue.TetrisViewComponent.CustomJPanel;
 import Tetris.vue.TetrisViewComponent.DashBoardView;
 import Tetris.vue.TetrisViewComponent.GameBoardView;
@@ -24,8 +23,9 @@ public class TetrisView extends JFrame implements Observer {
     private final Game game;
     private final DashBoardView dashBoardVue;
     private GameOverPopup gameOverPopup;
+    private final MusicPlayer musicPlayer;
 
-    public TetrisView(Game g) {
+    public TetrisView(Game g, String musicPath) {
         this.game = g;
         setTitle("Tetris");
         setSize(1000, 1000);
@@ -33,6 +33,7 @@ public class TetrisView extends JFrame implements Observer {
         Color backgroundColor = Color.LIGHT_GRAY;
         cases = new CustomJPanel[game.getGrid().getHeight()][game.getGrid().getWidth()];
         GameBoardView boardView = new GameBoardView(game.getGrid().getWidth(), game.getGrid().getHeight(), cases, backgroundColor);
+
         nextPieceCells = new CustomJPanel[3][4][4];
         holdPieceCells = new CustomJPanel[4][4];
         JPanel templatePanel = new JPanel();
@@ -57,9 +58,17 @@ public class TetrisView extends JFrame implements Observer {
         add(screen);
         setVisible(true);
 
-        MusicPlayer musicPlayer = new MusicPlayer(musicPath);
+        musicPlayer = new MusicPlayer(musicPath);
         musicPlayer.play();
-        paint(getGraphics());
+
+        SwingUtilities.invokeLater(() -> { // to fix or remove to solve the problem if no clue found
+            updateNextPiece();
+            updateBoard();
+        });
+    }
+
+    public MusicPlayer getMusicPlayer() {
+        return musicPlayer;
     }
 
     private Color getColorCell(PieceColor color) {
@@ -95,9 +104,6 @@ public class TetrisView extends JFrame implements Observer {
                 if (game.isPaused()) {
                     return;
                 }
-                if (game.getGrid().isGameOver()) {
-                    return;
-                }
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_DOWN -> game.movePieceDown(true);
                     case KeyEvent.VK_LEFT -> game.movePieceLeft();
@@ -105,11 +111,7 @@ public class TetrisView extends JFrame implements Observer {
                     case KeyEvent.VK_UP -> game.doRdrop();
                     case KeyEvent.VK_Q -> game.rotatePieceLeft();
                     case KeyEvent.VK_D -> game.rotatePieceRight();
-                    case KeyEvent.VK_SPACE -> {
-                        if (game.getGrid().canHoldPiece()) {
-                            game.getGrid().echangeHoldAndCurrent();
-                        }
-                    }
+                    case KeyEvent.VK_SPACE -> game.getGrid().exchangeHoldAndCurrent();
                     default -> {
                         // Do nothing
                     }
@@ -124,8 +126,8 @@ public class TetrisView extends JFrame implements Observer {
                 cases[j][i].setBackground(getColorCell(i, j));
             }
         }
-
-        Piece piece = game.getGrid().getCurrentPiece();
+        // TODO : avoid getGrid() in the loop
+        Piece piece = game.getGrid().getPieceManager().getCurrentPiece();
         int[][] coords = piece.getCoordinates(piece.getX(), piece.getY());
         Color color = getColorCell(piece.getColor());
         int RDropMove = game.getGrid().getMaxHeightEmpty(piece);
@@ -140,7 +142,7 @@ public class TetrisView extends JFrame implements Observer {
 
     private void updateNextPiece() {
         for (int i = 0; i < 3; i++) {
-            Piece nextPiece = game.getGrid().getNextPiece().get(i);
+            Piece nextPiece = game.getGrid().getPieceManager().getNextPiece().get(i);
             int[][] coords = nextPiece.getShape();
             Color color = getColorCell(nextPiece.getColor());
             if (!(coords[3][0] == 1 && coords[3][1] == 3)) {
@@ -162,7 +164,7 @@ public class TetrisView extends JFrame implements Observer {
                 holdPieceCells[i][j].setBackground(Color.BLACK);
             }
         }
-        Piece holdPiece = game.getGrid().getHoldPiece();
+        Piece holdPiece = game.getGrid().getPieceManager().getHoldPiece();
         if (holdPiece != null) {
             int[][] coords = holdPiece.getShape();
             Color color = getColorCell(holdPiece.getColor());
@@ -179,47 +181,33 @@ public class TetrisView extends JFrame implements Observer {
         repaint();
     }
 
-    public void updateLineDeleteCount() {
-        dashBoardVue.updateLineDeleteCount(game.getGrid().getLineDeleteCount());
-        repaint();
-    }
-
     private void showGameOverPopup() {
         gameOverPopup.setVisible(true);
         gameOverPopup.setFocusable(true);
         gameOverPopup.setFocusableWindowState(true);
         gameOverPopup.requestFocus();
-
-    }
-
-    private void updateStats() {
-        dashBoardVue.updateScore(game.getGrid().getScore());
-        dashBoardVue.updateLevel(game.getGrid().getLevel().getLevel());
-        dashBoardVue.updateTimer(game.getGrid().getTime());
-        repaint();
     }
 
     @Override
     public void update(Observable o, Object arg) {
         try {
-            if (arg instanceof StatsValues) {
-                updateStats();
-                updateLineDeleteCount();
-            } else { // we update the board and the next piece if needed
-                if (game.getGrid().isGameOver()) {
+            if (!(arg instanceof String)) {
+                System.err.println("Error: arg is not a String");
+                return;
+            }
+            switch ((String) arg) {
+                case "pause" -> game.pauseGame();
+                case "timer" -> dashBoardVue.updateTimerLabel(game.getGrid().getStatsValues().getTime());
+                case "stats" -> dashBoardVue.updateStats(game.getGrid().getStatsValues());
+                case "grid" -> SwingUtilities.invokeLater(this::updateBoard);
+                case "level" -> game.updateLevel();
+                case "gameOver" -> {
+                    game.stopGame();
                     this.gameOverPopup = new GameOverPopup(this, game);
                     showGameOverPopup();
-                    return;
                 }
-                SwingUtilities.invokeLater(() -> {
-                    updateBoard();
-                    if (game.getGrid().isNewNextPiece()) {
-                        game.getGrid().setNewNextPiece(false);
-                        updateNextPiece();
-                    }
-
-                    repaint();
-                });
+                case "nextPiece" -> SwingUtilities.invokeLater(this::updateNextPiece);
+                default -> System.err.println("Error: arg is not a valid String");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

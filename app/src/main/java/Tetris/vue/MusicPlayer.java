@@ -18,7 +18,7 @@ public class MusicPlayer {
             clip = AudioSystem.getClip();
             clip.open(ais);
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-            e.printStackTrace();
+            System.err.println("Erreur lors de la lecture du fichier audio : " + e.getMessage());
         }
     }
 

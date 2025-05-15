@@ -8,11 +8,12 @@ import java.util.Observable;
 public class Game extends Observable {
     private final Grid grid;
     private Scheduler scheduler, timer;
+    private final Runnable runnable = () -> movePieceDown(true);
 
     public Game(Grid grid) {
         this.grid = grid;
-        this.scheduler = new Scheduler(grid.getLevel().getSpeed(), () -> movePieceDown(false));
-        this.timer = new Scheduler(1000, () -> {});
+        this.scheduler = new Scheduler(grid.getStatsValues().level.getSpeed(), () -> movePieceDown(false));
+        this.timer = new Scheduler(1000, grid::incrementSeconds);
     }
 
     public void startGame() {
@@ -28,7 +29,7 @@ public class Game extends Observable {
         if (scheduler.isAlive()) {
             scheduler.stopThread();
         } else {
-            scheduler = new Scheduler(grid.getLevel().getSpeed(), () -> movePieceDown(false));
+            scheduler = new Scheduler(grid.getStatsValues().level.getSpeed(), runnable);
             scheduler.start();
         }
         grid.setPaused(!grid.isPaused());
@@ -39,18 +40,9 @@ public class Game extends Observable {
     }
 
     public void movePieceDown(boolean increment_score) {
-        if (grid.isGameOver()) {
-            System.out.println("Game Over");
-            scheduler.stopThread();
-        } else {
-            if (grid.getLevel().isNextLevel) {
-                grid.getLevel().isNextLevel = false;
-                resetScheduler(grid.getLevel().getSpeed());
-            }
-            grid.movePiece(0, 1, true);
-            if (increment_score) {
-                grid.updateScore(1);
-            }
+        grid.movePiece(0, 1, true);
+        if (increment_score) {
+            grid.updateScore(1);
         }
     }
 
@@ -72,7 +64,7 @@ public class Game extends Observable {
 
     public void resetScheduler(long pause) {
         scheduler.stopThread();
-        scheduler = new Scheduler(pause, () -> movePieceDown(false));
+        scheduler = new Scheduler(pause, runnable);
         scheduler.start();
 
         timer.stopThread();
@@ -81,13 +73,21 @@ public class Game extends Observable {
     }
 
     public void reset() {
-        grid.reset();
         resetScheduler(700);
-        setChanged();
-        notifyObservers();
+        grid.reset();
     }
 
     public void doRdrop() {
         grid.doRdrop();
+    }
+
+    public void updateLevel() {
+        resetScheduler(grid.getStatsValues().level.getSpeed());
+    }
+
+    public void stopGame() {
+        scheduler.stopThread();
+        timer.stopThread();
+        grid.setPaused(true);
     }
 }

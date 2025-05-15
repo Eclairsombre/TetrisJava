@@ -9,6 +9,7 @@ public class MusicChoosePage extends JDialog {
     private String selectedMusicPath;
     private MusicPlayer previewPlayer;
 
+    // TODO : Make this page beautiful
     public MusicChoosePage(Frame parent) {
         super(parent, "Choisir la musique", true);
         setSize(400, 250);
@@ -24,11 +25,7 @@ public class MusicChoosePage extends JDialog {
                 : new String[]{"Aucune musique trouvée"};
 
         JComboBox<String> comboBox = new JComboBox<>(musicNames);
-        JButton playButton = new JButton("Play");
-        JButton stopButton = new JButton("Stop");
-        JButton okButton = new JButton("OK");
-
-        playButton.addActionListener(e -> {
+        Button playButton = new Button("Play", () -> {
             int idx = comboBox.getSelectedIndex();
             if (files != null && idx >= 0 && idx < files.length) {
                 String path = "data/music/" + files[idx].getName();
@@ -38,9 +35,9 @@ public class MusicChoosePage extends JDialog {
             }
         });
 
-        stopButton.addActionListener(e -> stopPreview());
+        Button stopButton = new Button("Stop", this::stopPreview);
 
-        okButton.addActionListener(e -> {
+        Button okButton = new Button("OK", () -> {
             int idx = comboBox.getSelectedIndex();
             if (files != null && idx >= 0 && idx < files.length) {
                 selectedMusicPath = "data/music/" + files[idx].getName();
@@ -72,7 +69,6 @@ public class MusicChoosePage extends JDialog {
     }
 
     public static String chooseMusic(Frame parent) {
-        // Toujours afficher la page de sélection
         MusicChoosePage dialog = new MusicChoosePage(parent);
         dialog.setVisible(true);
         return dialog.selectedMusicPath != null ? dialog.selectedMusicPath : "data/music/tetris.wav";

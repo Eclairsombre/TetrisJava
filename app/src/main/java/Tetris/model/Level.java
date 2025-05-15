@@ -3,7 +3,6 @@ package Tetris.model;
 public class Level {
     private final int level;
     private final long speed;
-    public boolean isNextLevel = true;
 
     public Level(int level) {
         this.level = level;
@@ -14,7 +13,6 @@ public class Level {
         } else {
             this.speed = 10;
         }
-
     }
 
     public int getLevel() {
@@ -24,5 +22,4 @@ public class Level {
     public long getSpeed() {
         return speed;
     }
-
 }

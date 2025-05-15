@@ -1,9 +1,8 @@
 package Tetris.controller;
 
 public class Scheduler extends Thread {
-    Runnable r;
-    long pause;// Thread-safe scheduler
-    boolean running = true;
+    private final Runnable r;
+    private final long pause;
 
     public Scheduler(long pause, Runnable runnable) {
         this.r = runnable;
@@ -12,11 +11,10 @@ public class Scheduler extends Thread {
 
     @Override
     public void run() {
-        while (running) {
+        while (true) {
             try {
                 r.run();
                 Thread.sleep(pause);
-
             } catch (InterruptedException e) {
                 break;
             }

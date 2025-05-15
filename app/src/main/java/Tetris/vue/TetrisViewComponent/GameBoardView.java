@@ -20,7 +20,7 @@ public class GameBoardView extends JPanel {
         boardPanel.setLayout(new GridLayout(height, width, 0, 0));
         for (int y = 0; y < cases.length; y++) {
             for (int x = 0; x < cases[y].length; x++) {
-                cases[y][x] = new CustomJPanel(Color.BLACK, 1);
+                cases[y][x] = new CustomJPanel(Color.BLACK);
                 boardPanel.add(cases[y][x]);
             }
         }
@@ -48,7 +48,7 @@ public class GameBoardView extends JPanel {
         new_height = length / ratio * this.height;
         boardPanel.setPreferredSize(new Dimension(
                 new_width,
-                new_height - offset // random offset to make it look good
+                new_height - offset // TODO : random offset to make it look good -> to fix
         ));
         revalidate();
     }
