@@ -25,7 +25,7 @@ public class TetrisView extends JFrame implements Observer {
     private GameOverPopup gameOverPopup;
     private final GameBoardView boardView;
 
-    public TetrisView(Game g) {
+    public TetrisView(Game g, String musicPath) {
         this.game = g;
         setTitle("Tetris");
         setSize(800, 800);
@@ -57,7 +57,7 @@ public class TetrisView extends JFrame implements Observer {
         add(screen);
         setVisible(true);
 
-        MusicPlayer musicPlayer = new MusicPlayer("data/music/tetris.wav");
+        MusicPlayer musicPlayer = new MusicPlayer(musicPath);
         musicPlayer.play();
         paint(getGraphics());
     }
