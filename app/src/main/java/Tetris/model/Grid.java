@@ -377,11 +377,11 @@ public class Grid extends Observable {
 
     public void saveScore() {
         String[] lines = fileWriterAndReader.readFromFile();
-        String nouvelleLigne = java.time.LocalDate.now() + " , Level :" + level.getLevel()+1 + " , " + score + " , " + getTime();
+        String nouvelleLigne ="Level :" + level.getLevel()+1 + " , " + score + " , " + getTime();
         java.util.List<String> allScores = new java.util.ArrayList<>();
 
         for (String line : lines) {
-            if (line != null && !line.trim().isEmpty() && line.split(" , ").length >= 3) {
+            if (line != null && !line.trim().isEmpty() && line.split(" , ").length >= 2) {
                 allScores.add(line);
             }
         }
@@ -393,12 +393,12 @@ public class Grid extends Observable {
                 String[] partsA = a.split(" , ");
                 String[] partsB = b.split(" , ");
 
-                if (partsA.length < 3 || partsB.length < 3) {
+                if (partsA.length < 2 || partsB.length < 2) {
                     return 0;
                 }
 
-                int scoreA = Integer.parseInt(partsA[2].trim());
-                int scoreB = Integer.parseInt(partsB[2].trim());
+                int scoreA = Integer.parseInt(partsA[1].trim());
+                int scoreB = Integer.parseInt(partsB[1].trim());
                 return Integer.compare(scoreB, scoreA);
             } catch (NumberFormatException e) {
                 return 0;
