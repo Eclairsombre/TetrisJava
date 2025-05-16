@@ -12,8 +12,8 @@ import java.util.Observer;
 @SuppressWarnings("deprecation")
 public class Game extends Observable {
     private final Grid grid;
-    private Scheduler scheduler, timer;
     private final Runnable runnable = () -> movePieceDown(true);
+    private Scheduler scheduler, timer;
 
     public Game(Grid grid) {
         this.grid = grid;
@@ -22,6 +22,12 @@ public class Game extends Observable {
     }
 
     public void startGame() {
+        if (scheduler.isAlive()) {
+            scheduler.stopThread();
+        }
+        if (timer.isAlive()) {
+            timer.stopThread();
+        }
         this.scheduler.start();
         this.timer.start();
     }
@@ -65,17 +71,31 @@ public class Game extends Observable {
 
     public void resetScheduler(long pause) {
         scheduler.stopThread();
-        scheduler = new Scheduler(pause, runnable);
-        scheduler.start();
-
         timer.stopThread();
+
+        scheduler = new Scheduler(pause, () -> movePieceDown(false));
         timer = new Scheduler(1000, grid::incrementSeconds);
+
+        scheduler.start();
         timer.start();
     }
 
     public void reset() {
-        resetScheduler(700);
+        if (scheduler.isAlive()) {
+            scheduler.stopThread();
+        }
+
+        if (timer.isAlive()) {
+            timer.stopThread();
+        }
+
+        scheduler = new Scheduler(700, () -> movePieceDown(false));
+        timer = new Scheduler(1000, grid::incrementSeconds);
+
         grid.reset();
+
+        scheduler.start();
+        timer.start();
     }
 
     public void doRdrop() {
@@ -83,7 +103,7 @@ public class Game extends Observable {
     }
 
     public void updateLevel() {
-        resetScheduler(grid.getStatsValues().level.getSpeed());
+        scheduler.setPause(grid.getStatsValues().level.getSpeed());
     }
 
     public void stopGame() {

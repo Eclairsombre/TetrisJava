@@ -2,7 +2,7 @@ package Tetris.controller;
 
 public class Scheduler extends Thread {
     private final Runnable r;
-    private final long pause;
+    private long pause;
 
     public Scheduler(long pause, Runnable runnable) {
         this.r = runnable;
@@ -23,5 +23,9 @@ public class Scheduler extends Thread {
 
     public void stopThread() {
         this.interrupt();
+    }
+
+    public void setPause(long pause) {
+        this.pause = pause;
     }
 }

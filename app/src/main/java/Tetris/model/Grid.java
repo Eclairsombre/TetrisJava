@@ -252,7 +252,6 @@ public class Grid extends Observable {
 
     public void saveScore() {
         String[] lines = fileWriterAndReader.readFromFile();
-        // TODO : Check if it really works for the level, I have a doubt (see score.txt)
         String nouvelleLigne = "Level :" + (statsValues.level.getLevel() + 1) + " , " + statsValues.score + " , " + statsValues.getTime();
         java.util.List<String> allScores = new java.util.ArrayList<>();
 
