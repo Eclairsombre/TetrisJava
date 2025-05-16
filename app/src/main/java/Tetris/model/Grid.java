@@ -3,19 +3,20 @@ package Tetris.model;
 import Tetris.model.Piece.Piece;
 import Tetris.model.Piece.PieceColor;
 import Tetris.model.Piece.PieceManager;
+
 import java.util.Observable;
 
 @SuppressWarnings("deprecation")
 public class Grid extends Observable {
     private final int width;
     private final int height;
-    private boolean isPaused = false;
     private final PieceColor[][] grid;
     private final PieceManager pieceManager;
     private final StatsValues statsValues = new StatsValues();
     public FileWriterAndReader fileWriterAndReader = new FileWriterAndReader(
             "app/src/main/resources/score.txt"
     );
+    private boolean isPaused = false;
 
     public Grid(int width, int height) {
         this.height = height;
@@ -252,7 +253,7 @@ public class Grid extends Observable {
     public void saveScore() {
         String[] lines = fileWriterAndReader.readFromFile();
         // TODO : Check if it really works for the level, I have a doubt (see score.txt)
-        String nouvelleLigne = "Level :" + statsValues.level.getLevel() + 1 + " , " + statsValues.score + " , " + statsValues.getTime();
+        String nouvelleLigne = "Level :" + (statsValues.level.getLevel() + 1) + " , " + statsValues.score + " , " + statsValues.getTime();
         java.util.List<String> allScores = new java.util.ArrayList<>();
 
         for (String line : lines) {
