@@ -199,7 +199,10 @@ public class TetrisView extends JFrame implements Observer {
                 case "pause" -> game.pauseGame();
                 case "timer" -> dashBoardVue.updateTimerLabel(game.getGrid().getStatsValues().getTime());
                 case "stats" -> dashBoardVue.updateStats(game.getGrid().getStatsValues());
-                case "grid" -> SwingUtilities.invokeLater(this::updateBoard);
+                case "grid" -> SwingUtilities.invokeLater(() -> {
+                    this.updateBoard();
+                    this.repaint();
+                });
                 case "level" -> game.updateLevel();
                 case "gameOver" -> {
                     game.stopGame();
