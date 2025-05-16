@@ -22,7 +22,7 @@ public class TetrisView extends JFrame implements Observer {
     private final CustomJPanel[][][] nextPieceCells;
     private final Game game;
     private final DashBoardView dashBoardVue;
-    private GameOverPopup gameOverPopup;
+    private final GameOverPopup gameOverPopup;
     private final MusicPlayer musicPlayer;
     private final int widthGrid;
     private final int heightGrid;
@@ -38,6 +38,7 @@ public class TetrisView extends JFrame implements Observer {
         cases = new CustomJPanel[heightGrid][widthGrid];
         GameBoardView boardView = new GameBoardView(widthGrid, heightGrid, cases, backgroundColor);
 
+        this.gameOverPopup = new GameOverPopup(this, this.game);
         nextPieceCells = new CustomJPanel[3][4][4];
         holdPieceCells = new CustomJPanel[4][4];
         JPanel templatePanel = new JPanel();
@@ -208,8 +209,9 @@ public class TetrisView extends JFrame implements Observer {
                 case "level" -> this.game.updateLevel();
                 case "gameOver" -> {
                     this.game.stopGame();
-                    this.gameOverPopup = new GameOverPopup(this, this.game);
-                    showGameOverPopup();
+                    if (!this.gameOverPopup.isVisible()) {
+                        showGameOverPopup();
+                    }
                 }
                 case "nextPiece" -> SwingUtilities.invokeLater(this::updateNextPiece);
                 default -> System.err.println("Error: arg is not a valid String");

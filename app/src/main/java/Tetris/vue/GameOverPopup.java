@@ -13,6 +13,7 @@ public class GameOverPopup extends JDialog {
     public GameOverPopup(TetrisView parent, Game game) {
         super(parent, "Game Over", true);
         this.parentView = parent;
+        setFocusable(false); // To avoid focus issues
 
         setSize(400, 300);
         setLocationRelativeTo(parent);
@@ -56,10 +57,10 @@ public class GameOverPopup extends JDialog {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         Button retryButton = new Button("Rejouer", () -> {
-            dispose();
             // TODO : seems to have sometimes two Threads scheduler running at the same time when restart
             // TODO : also have sometimes two screen of the gameOverPopup
             // I think it come from the move piece endGame call which is not thread safe
+            setVisible(false);
             game.reset();
         });
 
