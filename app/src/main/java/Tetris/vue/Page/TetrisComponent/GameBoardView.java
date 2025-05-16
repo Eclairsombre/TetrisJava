@@ -1,4 +1,4 @@
-package Tetris.vue.TetrisViewComponent;
+package Tetris.vue.Page.TetrisComponent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,7 +48,7 @@ public class GameBoardView extends JPanel {
         new_height = length / ratio * this.height;
         boardPanel.setPreferredSize(new Dimension(
                 new_width,
-                new_height - offset // TODO : random offset to make it look good -> to fix
+                new_height - offset
         ));
         revalidate();
     }

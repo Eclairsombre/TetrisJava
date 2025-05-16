@@ -1,12 +1,12 @@
-package Tetris.vue;
+package Tetris.vue.Page;
 
 import Tetris.controller.Game;
 import Tetris.model.Piece.Piece;
 import Tetris.model.Piece.PieceColor;
-import Tetris.vue.TetrisViewComponent.CustomJPanel;
-import Tetris.vue.TetrisViewComponent.DashBoardView;
-import Tetris.vue.TetrisViewComponent.GameBoardView;
-import Tetris.vue.TetrisViewComponent.PieceDisplayManager;
+import Tetris.vue.Page.TetrisComponent.CustomJPanel;
+import Tetris.vue.Page.TetrisComponent.DashBoardView;
+import Tetris.vue.Page.TetrisComponent.GameBoardView;
+import Tetris.vue.Page.TetrisComponent.PieceDisplayManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +14,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 @SuppressWarnings("deprecation")
-public class TetrisView extends JPanel implements Observer {
+public class TetrisPage extends JPanel implements Observer {
     private final CustomJPanel[][] cases;
     private final CustomJPanel[][] holdPieceCells;
     private final CustomJPanel[][][] nextPieceCells;
@@ -25,31 +25,28 @@ public class TetrisView extends JPanel implements Observer {
     Runnable changeToGameOver;
     Runnable changeToPause;
 
-    public TetrisView(Game g, Runnable changeToGameOver, Runnable changeToPause) {
+    public TetrisPage(Game g, Runnable changeToGameOver, Runnable changeToPause) {
+        Color backgroundColor = Color.LIGHT_GRAY;
         this.changeToGameOver = changeToGameOver;
         this.changeToPause = changeToPause;
-        this.game = g;
-        Color backgroundColor = Color.LIGHT_GRAY;
+        game = g;
+
         widthGrid = game.getLengthGrid()[0];
         heightGrid = game.getLengthGrid()[1];
-        cases = new CustomJPanel[heightGrid][widthGrid];
-        GameBoardView boardView = new GameBoardView(widthGrid, heightGrid, cases, backgroundColor);
-
         nextPieceCells = new CustomJPanel[3][4][4];
         holdPieceCells = new CustomJPanel[4][4];
+        cases = new CustomJPanel[heightGrid][widthGrid];
+
+        GameBoardView boardView = new GameBoardView(widthGrid, heightGrid, cases, backgroundColor);
+
+        dashBoardVue = new DashBoardView(backgroundColor);
+
         JPanel templatePanel = new JPanel();
         PieceDisplayManager piecePanel = new PieceDisplayManager(nextPieceCells, holdPieceCells, 20, 20, backgroundColor, game.getFileWriterAndReader().readFromFile());
         templatePanel.add(piecePanel);
         templatePanel.setBackground(backgroundColor);
 
-        JPanel westPanel = new JPanel();
-        westPanel.setPreferredSize(new Dimension(50, 20));
-        westPanel.setFocusable(false);
-        westPanel.setBackground(backgroundColor);
-        dashBoardVue = new DashBoardView(backgroundColor);
-        setFocusable(true);
         setLayout(new BorderLayout());
-        add(westPanel, BorderLayout.WEST);
         add(boardView, BorderLayout.CENTER);
         add(dashBoardVue, BorderLayout.NORTH);
         add(templatePanel, BorderLayout.EAST);

@@ -1,25 +1,26 @@
-package Tetris.vue;
+package Tetris.vue.Page;
 
 import Tetris.controller.Game;
 import Tetris.model.StatsValues;
+import Tetris.vue.BasicComponent.Button;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class PausePopup extends JPanel {
+public class PopupPage extends JPanel {
     private final JLabel scoreLabel, levelLabel, timeLabel;
 
-    public PausePopup(Game game, Button resumeButton, Button menuButton) {
-        setFocusable(false);
+    public PopupPage(String text, Color color, Game game, Tetris.vue.BasicComponent.Button actionButton, Button backHomeButton) {
+        setFocusable(false); // To avoid focus issues
 
-        setSize(400, 300);
+        setSize(400, 250);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
 
-        JLabel gameOverLabel = new JLabel("PAUSE", SwingConstants.CENTER);
+        JLabel gameOverLabel = new JLabel(text, SwingConstants.CENTER);
         gameOverLabel.setFont(new Font("Arial", Font.BOLD, 36));
-        gameOverLabel.setForeground(Color.BLACK);
+        gameOverLabel.setForeground(color);
         mainPanel.add(gameOverLabel, BorderLayout.NORTH);
 
         JPanel infoPanel = new JPanel();
@@ -50,8 +51,8 @@ public class PausePopup extends JPanel {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        buttonPanel.add(resumeButton);
-        buttonPanel.add(menuButton);
+        buttonPanel.add(actionButton);
+        buttonPanel.add(backHomeButton);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(mainPanel);

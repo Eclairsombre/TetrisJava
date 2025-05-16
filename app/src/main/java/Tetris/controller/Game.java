@@ -13,11 +13,11 @@ import java.util.Observer;
 @SuppressWarnings("deprecation")
 public class Game extends Observable {
     private final Grid grid;
-    private final Runnable runnable = () -> movePieceDown(true);
+    private final Runnable runnable = () -> movePieceDown(false);
     private Scheduler scheduler, timer;
 
-    public Game(Grid grid) {
-        this.grid = grid;
+    public Game() {
+        this.grid = new Grid(10, 25);
         reset();
     }
 

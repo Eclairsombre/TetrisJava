@@ -1,4 +1,4 @@
-package Tetris.vue;
+package Tetris.vue.BasicComponent;
 
 import javax.sound.sampled.*;
 import java.io.BufferedInputStream;

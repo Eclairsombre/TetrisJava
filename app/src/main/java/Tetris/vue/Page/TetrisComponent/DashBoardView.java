@@ -1,6 +1,7 @@
-package Tetris.vue.TetrisViewComponent;
+package Tetris.vue.Page.TetrisComponent;
 
 import Tetris.model.StatsValues;
+import Tetris.vue.BasicComponent.TextView;
 
 import javax.swing.*;
 import java.awt.*;

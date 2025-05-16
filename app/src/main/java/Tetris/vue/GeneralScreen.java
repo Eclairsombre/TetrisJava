@@ -1,17 +1,24 @@
 package Tetris.vue;
 
 import Tetris.controller.Game;
-import Tetris.model.Grid;
+import Tetris.vue.BasicComponent.Button;
+import Tetris.vue.BasicComponent.MusicPlayer;
+import Tetris.vue.Page.HomePage;
+import Tetris.vue.Page.MusicChoosePage;
+import Tetris.vue.Page.PopupPage;
+import Tetris.vue.Page.TetrisPage;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ComponentAdapter;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public class GeneralScreen extends JFrame {
     HomePage homePage;
-    TetrisView tetrisView;
-    GameOverPopup gameOverPopup;
-    PausePopup pausePopup;
+    TetrisPage tetrisPage;
+    PopupPage gameOverPopup;
+    PopupPage pausePopup;
     String selectedPage = "homePage";
     Game game;
     String musicPath = "data/music/tetris.wav";
@@ -21,7 +28,7 @@ public class GeneralScreen extends JFrame {
     public GeneralScreen() {
         setFocusable(true);
 
-        game = new Game(new Grid(10, 25));
+        game = new Game();
         musicPlayer = new MusicPlayer(musicPath);
 
         musicChoosePage = new MusicChoosePage(() -> {
@@ -30,8 +37,8 @@ public class GeneralScreen extends JFrame {
         });
 
         homePage = new HomePage(
-                new Button("Jouer", () -> setPage("tetrisView")),
-                new Button("Choisir la musique", () -> setPage("musicChoosePage"))
+                new Tetris.vue.BasicComponent.Button("Jouer", () -> setPage("tetrisView")),
+                new Tetris.vue.BasicComponent.Button("Choisir la musique", () -> setPage("musicChoosePage"))
         );
 
         Runnable changeToGameOver = () -> {
@@ -45,17 +52,17 @@ public class GeneralScreen extends JFrame {
             setPage("pause");
         };
 
-        tetrisView = new TetrisView(game, changeToGameOver, changeToPause);
-        tetrisView.start();
-        game.addGridObserver(tetrisView);
+        tetrisPage = new TetrisPage(game, changeToGameOver, changeToPause);
+        tetrisPage.start();
+        game.addGridObserver(tetrisPage);
 
-        gameOverPopup = new GameOverPopup(game,
-                new Button("Retour au menu", () -> setPage("homePage")),
-                new Button("Rejouer", () -> setPage("tetrisView"))
+        gameOverPopup = new PopupPage("GAME OVER", Color.RED, game,
+                new Tetris.vue.BasicComponent.Button("Rejouer", () -> setPage("tetrisView")),
+                new Tetris.vue.BasicComponent.Button("Retour au menu", () -> setPage("homePage"))
         );
 
-        pausePopup = new PausePopup(game,
-                new Button("Revenir au jeu", () -> {
+        pausePopup = new PopupPage("PAUSE", Color.BLACK, game,
+                new Tetris.vue.BasicComponent.Button("Revenir au jeu", () -> {
                     setPage("tetrisView");
                     game.resumeGame();
                 }),
@@ -74,44 +81,65 @@ public class GeneralScreen extends JFrame {
 
     public void setPage(String page) {
         String previousPage = selectedPage;
-        System.out.println("Change page to " + page);
+        this.getContentPane().removeAll();
+
         switch (page) {
             case "homePage" -> {
-                this.getContentPane().removeAll();
                 musicPlayer.stop();
                 add(homePage);
             }
             case "tetrisView" -> {
-                this.getContentPane().removeAll();
                 if (previousPage.equals("gameOver") || previousPage.equals("homePage")) {
-                    musicPlayer.stop();
                     if (previousPage.equals("homePage")) {
                         musicPlayer.reset();
+                    } else {
+                        musicPlayer.stop();
                     }
                     game.reset();
                 }
-                add(tetrisView);
+                add(tetrisPage);
                 musicPlayer.play();
-                tetrisView.updateBoard();
-                tetrisView.updateNextPiece();
+                tetrisPage.updateBoard();
+                tetrisPage.updateNextPiece();
             }
-            case "gameOver" -> {
-                this.getContentPane().removeAll();
-                add(gameOverPopup);
-            }
+            case "gameOver" -> add(getJLayeredPane(tetrisPage, gameOverPopup));
+            case "musicChoosePage" -> add(getJLayeredPane(homePage, musicChoosePage));
             case "pause" -> {
-                this.getContentPane().removeAll();
                 musicPlayer.stop();
-                add(pausePopup);
-            }
-            case "musicChoosePage" -> {
-                this.getContentPane().removeAll();
-                add(musicChoosePage);
+                add(getJLayeredPane(tetrisPage, pausePopup));
             }
         }
         selectedPage = page;
         this.repaint();
         this.revalidate();
+    }
+
+    private JLayeredPane getJLayeredPane(JPanel background, JPanel foreground) {
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(getSize());
+        layeredPane.setLayout(null);
+
+        layeredPane.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                prepareLayeredPane(background, foreground);
+            }
+        });
+        prepareLayeredPane(background, foreground);
+
+        layeredPane.add(background, Integer.valueOf(0));
+        layeredPane.add(foreground, Integer.valueOf(1));
+        return layeredPane;
+    }
+
+    private void prepareLayeredPane(JPanel background, JPanel foreground) {
+        background.setBounds(0, 0, getWidth(), getHeight());
+        foreground.setBounds(
+                getWidth() / 2 - foreground.getWidth() / 2,
+                getHeight() / 2 - foreground.getHeight() / 4,
+                foreground.getWidth(),
+                foreground.getHeight()
+        );
     }
 
     public void createEventListener() {

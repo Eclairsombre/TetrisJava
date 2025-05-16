@@ -1,4 +1,7 @@
-package Tetris.vue;
+package Tetris.vue.Page;
+
+import Tetris.vue.BasicComponent.Button;
+import Tetris.vue.BasicComponent.MusicPlayer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +12,6 @@ public class MusicChoosePage extends JPanel {
     private MusicPlayer previewPlayer;
     private String paths = "data/music/tetris.wav";
 
-    // TODO : Make this page beautiful
     public MusicChoosePage(Runnable returnToMenu) {
         setSize(400, 250);
         File musicDir = new File("app/src/main/resources/data/music/");
@@ -17,14 +19,17 @@ public class MusicChoosePage extends JPanel {
             musicDir = new File("data/music/");
         }
         File[] files = musicDir.listFiles((dir, name) -> name.endsWith(".wav") || name.endsWith(".mp3"));
-        String[] musicNames = (files != null && files.length > 0)
-                ? java.util.Arrays.stream(files).map(File::getName).toArray(String[]::new)
-                : new String[]{"Aucune musique trouvée"};
+        String[] columnNames = {"Nom du fichier"};
+        Object[][] data = (files != null && files.length > 0)
+                ? java.util.Arrays.stream(files).map(f -> new Object[]{f.getName()}).toArray(Object[][]::new)
+                : new Object[][]{{"Aucune musique trouvée"}};
 
-        JComboBox<String> comboBox = new JComboBox<>(musicNames);
+        JTable table = new JTable(data, columnNames);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane comboBox = new JScrollPane(table);
 
-        Button playButton = new Button("Play", () -> {
-            int idx = comboBox.getSelectedIndex();
+        Tetris.vue.BasicComponent.Button playButton = new Tetris.vue.BasicComponent.Button("Play", () -> {
+            int idx = table.getSelectedRow();
             if (files != null && idx >= 0 && idx < files.length) {
                 String path = "data/music/" + files[idx].getName();
                 stopPreview();
@@ -33,10 +38,10 @@ public class MusicChoosePage extends JPanel {
             }
         });
 
-        Button stopButton = new Button("Stop", this::stopPreview);
+        Tetris.vue.BasicComponent.Button stopButton = new Tetris.vue.BasicComponent.Button("Stop", this::stopPreview);
 
-        Button okButton = new Button("OK", () -> {
-            int idx = comboBox.getSelectedIndex();
+        Tetris.vue.BasicComponent.Button okButton = new Button("OK", () -> {
+            int idx = table.getSelectedRow();
             if (files != null && idx >= 0 && idx < files.length) {
                 saveMusicPath("data/music/" + files[idx].getName());
                 paths = "data/music/" + files[idx].getName();

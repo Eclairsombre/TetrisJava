@@ -1,4 +1,4 @@
-package Tetris.vue.TetrisViewComponent;
+package Tetris.vue.BasicComponent;
 
 import javax.swing.*;
 import java.awt.*;
