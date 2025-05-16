@@ -1,25 +1,18 @@
 package Tetris.vue;
 
 import Tetris.controller.Game;
-import Tetris.model.Grid;
 import Tetris.model.StatsValues;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class GameOverPopup extends JDialog {
-    private final TetrisView parentView;
+public class GameOverPopup extends JPanel {
     private final JLabel scoreLabel, levelLabel, timeLabel;
 
-    public GameOverPopup(TetrisView parent, Game game) {
-        super(parent, "Game Over", true);
-        this.parentView = parent;
+    public GameOverPopup(Game game,  Button returnMenu, Button retryButton) {
         setFocusable(false); // To avoid focus issues
 
         setSize(400, 300);
-        setLocationRelativeTo(parent);
-        setResizable(false);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
@@ -57,26 +50,8 @@ public class GameOverPopup extends JDialog {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        Button retryButton = new Button("Rejouer", () -> {
-            // TODO : seems to have sometimes two Threads scheduler running at the same time when restart
-            // TODO : also have sometimes two screen of the gameOverPopup
-            // I think it come from the move piece endGame call which is not thread safe
-            setVisible(false);
-            game.reset();
-        });
-
-        Button menuButton = new Button("Menu Principal", () -> {
-            dispose();
-            parentView.getMusicPlayer().stop();
-            parentView.dispose();
-            // TODO : try to avoid creating a new game object and import Game
-            Game newGame = new Game(new Grid(game.getLengthGrid()[0], game.getLengthGrid()[1]));
-            HomePage homePage = new HomePage(newGame);
-            homePage.start();
-        });
-
         buttonPanel.add(retryButton);
-        buttonPanel.add(menuButton);
+        buttonPanel.add(returnMenu);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(mainPanel);

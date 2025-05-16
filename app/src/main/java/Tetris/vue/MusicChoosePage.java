@@ -5,16 +5,13 @@ import java.awt.*;
 import java.io.File;
 import java.util.prefs.Preferences;
 
-public class MusicChoosePage extends JDialog {
-    private String selectedMusicPath;
+public class MusicChoosePage extends JPanel {
     private MusicPlayer previewPlayer;
+    private String paths = "data/music/tetris.wav";
 
     // TODO : Make this page beautiful
-    public MusicChoosePage(Frame parent) {
-        super(parent, "Choisir la musique", true);
+    public MusicChoosePage(Runnable returnToMenu) {
         setSize(400, 250);
-        setLocationRelativeTo(parent);
-
         File musicDir = new File("app/src/main/resources/data/music/");
         if (!musicDir.exists() || !musicDir.isDirectory()) {
             musicDir = new File("data/music/");
@@ -25,6 +22,7 @@ public class MusicChoosePage extends JDialog {
                 : new String[]{"Aucune musique trouvée"};
 
         JComboBox<String> comboBox = new JComboBox<>(musicNames);
+
         Button playButton = new Button("Play", () -> {
             int idx = comboBox.getSelectedIndex();
             if (files != null && idx >= 0 && idx < files.length) {
@@ -40,11 +38,11 @@ public class MusicChoosePage extends JDialog {
         Button okButton = new Button("OK", () -> {
             int idx = comboBox.getSelectedIndex();
             if (files != null && idx >= 0 && idx < files.length) {
-                selectedMusicPath = "data/music/" + files[idx].getName();
-                saveMusicPath(selectedMusicPath);
+                saveMusicPath("data/music/" + files[idx].getName());
+                paths = "data/music/" + files[idx].getName();
             }
             stopPreview();
-            setVisible(false);
+            returnToMenu.run();
         });
 
         setLayout(new BorderLayout());
@@ -68,14 +66,12 @@ public class MusicChoosePage extends JDialog {
         }
     }
 
-    public static String chooseMusic(Frame parent) {
-        MusicChoosePage dialog = new MusicChoosePage(parent);
-        dialog.setVisible(true);
-        return dialog.selectedMusicPath != null ? dialog.selectedMusicPath : "data/music/tetris.wav";
-    }
-
     private void saveMusicPath(String path) {
         Preferences prefs = Preferences.userNodeForPackage(MusicChoosePage.class);
         prefs.put("selectedMusicPath", path);
+    }
+
+    public String getPath() {
+        return paths;
     }
 }

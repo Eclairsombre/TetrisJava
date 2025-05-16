@@ -3,17 +3,10 @@
  */
 package Tetris;
 
-import javax.swing.SwingUtilities;
-
-import Tetris.controller.Game;
-import Tetris.model.Grid;
-import Tetris.vue.HomePage;
+import Tetris.vue.GeneralScreen;
 
 public class App {
     public static void main(String[] args) {
-        Game game = new Game(new Grid(10, 25));
-        HomePage tetris = new HomePage(game);
-        SwingUtilities.invokeLater(tetris::start);
-        game.addGridObserver(tetris);
+        new GeneralScreen();
     }
 }

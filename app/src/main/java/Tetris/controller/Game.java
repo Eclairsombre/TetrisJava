@@ -18,19 +18,25 @@ public class Game extends Observable {
 
     public Game(Grid grid) {
         this.grid = grid;
-        this.scheduler = new Scheduler(grid.getStatsValues().level.getSpeed(), () -> movePieceDown(false));
-        this.timer = new Scheduler(1000, grid::incrementSeconds);
+        reset();
     }
 
-    public void startGame() {
-        if (scheduler.isAlive()) {
+    public void reset() {
+        if (scheduler != null && scheduler.isAlive()) {
             scheduler.stopThread();
         }
-        if (timer.isAlive()) {
+
+        if (timer != null && timer.isAlive()) {
             timer.stopThread();
         }
-        this.scheduler.start();
-        this.timer.start();
+
+        scheduler = new Scheduler(700, () -> movePieceDown(false));
+        timer = new Scheduler(1000, grid::incrementSeconds);
+
+        grid.reset();
+
+        scheduler.start();
+        timer.start();
     }
 
     public boolean isPaused() {
@@ -73,35 +79,6 @@ public class Game extends Observable {
 
     public void rotatePieceRight() {
         grid.rotatePiece(false);
-    }
-
-    public void resetScheduler(long pause) {
-        scheduler.stopThread();
-        timer.stopThread();
-
-        scheduler = new Scheduler(pause, () -> movePieceDown(false));
-        timer = new Scheduler(1000, grid::incrementSeconds);
-
-        scheduler.start();
-        timer.start();
-    }
-
-    public void reset() {
-        if (scheduler.isAlive()) {
-            scheduler.stopThread();
-        }
-
-        if (timer.isAlive()) {
-            timer.stopThread();
-        }
-
-        scheduler = new Scheduler(700, () -> movePieceDown(false));
-        timer = new Scheduler(1000, grid::incrementSeconds);
-
-        grid.reset();
-
-        scheduler.start();
-        timer.start();
     }
 
     public void doRdrop() {

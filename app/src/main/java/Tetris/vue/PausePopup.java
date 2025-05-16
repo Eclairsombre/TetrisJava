@@ -1,25 +1,18 @@
 package Tetris.vue;
 
 import Tetris.controller.Game;
-import Tetris.model.Grid;
 import Tetris.model.StatsValues;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class PausePopup extends JDialog {
-    private final TetrisView parentView;
+public class PausePopup extends JPanel {
     private final JLabel scoreLabel, levelLabel, timeLabel;
 
-    public PausePopup(TetrisView parent, Game game) {
-        super(parent, "Pause", true);
-        this.parentView = parent;
+    public PausePopup(Game game, Button resumeButton, Button menuButton) {
         setFocusable(false);
 
         setSize(400, 300);
-        setLocationRelativeTo(parent);
-        setResizable(false);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
@@ -32,7 +25,6 @@ public class PausePopup extends JDialog {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         StatsValues statsValues = game.getStatsValues();
-
 
         scoreLabel = new JLabel("Score: " + statsValues.score, SwingConstants.CENTER);
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 24));
@@ -57,21 +49,6 @@ public class PausePopup extends JDialog {
         mainPanel.add(infoPanel, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-
-        Button resumeButton = new Button("Resume", () -> {
-            setVisible(false);
-
-            game.resumeGame();
-        });
-
-        Button menuButton = new Button("Menu Principal", () -> {
-            dispose();
-            parentView.getMusicPlayer().stop();
-            parentView.dispose();
-            // TODO : try to avoid creating a new game object and import Game
-            Game newGame = new Game(new Grid(game.getLengthGrid()[0], game.getLengthGrid()[1]));
-            HomePage homePage = new HomePage(newGame);
-        });
 
         buttonPanel.add(resumeButton);
         buttonPanel.add(menuButton);

@@ -34,4 +34,10 @@ public class MusicPlayer {
             clip.stop();
         }
     }
+
+    public void reset() {
+        if (clip != null) {
+            clip.setFramePosition(0); // Rewind to the beginning
+        }
+    }
 }

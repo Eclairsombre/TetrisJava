@@ -10,37 +10,31 @@ import Tetris.vue.TetrisViewComponent.PieceDisplayManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.util.Observable;
 import java.util.Observer;
 
 @SuppressWarnings("deprecation")
-public class TetrisView extends JFrame implements Observer {
+public class TetrisView extends JPanel implements Observer {
     private final CustomJPanel[][] cases;
     private final CustomJPanel[][] holdPieceCells;
     private final CustomJPanel[][][] nextPieceCells;
     private final Game game;
     private final DashBoardView dashBoardVue;
-    private final GameOverPopup gameOverPopup;
-    private final PausePopup pausePopup;
-    private final MusicPlayer musicPlayer;
     private final int widthGrid;
     private final int heightGrid;
+    Runnable changeToGameOver;
+    Runnable changeToPause;
 
-    public TetrisView(Game g, String musicPath) {
+    public TetrisView(Game g, Runnable changeToGameOver, Runnable changeToPause) {
+        this.changeToGameOver = changeToGameOver;
+        this.changeToPause = changeToPause;
         this.game = g;
-        setTitle("Tetris");
-        setSize(1000, 1000);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Color backgroundColor = Color.LIGHT_GRAY;
         widthGrid = game.getLengthGrid()[0];
         heightGrid = game.getLengthGrid()[1];
         cases = new CustomJPanel[heightGrid][widthGrid];
         GameBoardView boardView = new GameBoardView(widthGrid, heightGrid, cases, backgroundColor);
 
-        gameOverPopup = new GameOverPopup(this, this.game);
-        pausePopup = new PausePopup(this, this.game);
         nextPieceCells = new CustomJPanel[3][4][4];
         holdPieceCells = new CustomJPanel[4][4];
         JPanel templatePanel = new JPanel();
@@ -53,29 +47,18 @@ public class TetrisView extends JFrame implements Observer {
         westPanel.setFocusable(false);
         westPanel.setBackground(backgroundColor);
         dashBoardVue = new DashBoardView(backgroundColor);
-        JPanel screen = new JPanel();
-        screen.setFocusable(true);
-        createEventListener(screen);
-        screen.setLayout(new BorderLayout());
-        screen.add(westPanel, BorderLayout.WEST);
-        screen.add(boardView, BorderLayout.CENTER);
-        screen.add(dashBoardVue, BorderLayout.NORTH);
-        screen.add(templatePanel, BorderLayout.EAST);
-
-        add(screen);
+        setFocusable(true);
+        setLayout(new BorderLayout());
+        add(westPanel, BorderLayout.WEST);
+        add(boardView, BorderLayout.CENTER);
+        add(dashBoardVue, BorderLayout.NORTH);
+        add(templatePanel, BorderLayout.EAST);
         setVisible(true);
-
-        musicPlayer = new MusicPlayer(musicPath);
-        musicPlayer.play();
 
         SwingUtilities.invokeLater(() -> { // to fix or remove to solve the problem if no clue found
             updateNextPiece();
             updateBoard();
         });
-    }
-
-    public MusicPlayer getMusicPlayer() {
-        return musicPlayer;
     }
 
     private Color getColorCell(PieceColor color) {
@@ -100,34 +83,7 @@ public class TetrisView extends JFrame implements Observer {
         setVisible(true);
     }
 
-    public void createEventListener(JPanel panel) {
-        panel.addKeyListener(new KeyAdapter() {
-            @Override
-            public synchronized void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    game.pauseGame();
-                    return;
-                }
-                if (game.isPaused()) {
-                    return;
-                }
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_DOWN -> game.movePieceDown(true);
-                    case KeyEvent.VK_LEFT -> game.movePieceLeft();
-                    case KeyEvent.VK_RIGHT -> game.movePieceRight();
-                    case KeyEvent.VK_UP -> game.doRdrop();
-                    case KeyEvent.VK_Q -> game.rotatePieceLeft();
-                    case KeyEvent.VK_D -> game.rotatePieceRight();
-                    case KeyEvent.VK_SPACE -> game.exchangeHoldAndCurrent();
-                    default -> {
-                        // Do nothing
-                    }
-                }
-            }
-        });
-    }
-
-    private void updateBoard() {
+    public void updateBoard() {
         for (int i = 0; i < widthGrid; i++) {
             for (int j = 0; j < heightGrid; j++) {
                 cases[j][i].setBackground(getColorCell(i, j));
@@ -148,7 +104,7 @@ public class TetrisView extends JFrame implements Observer {
         this.repaint();
     }
 
-    private void updateNextPiece() {
+    public void updateNextPiece() {
         for (int i = 0; i < 3; i++) {
             Piece nextPiece = game.getPieceManager().getNextPiece().get(i);
             int[][] coords = nextPiece.getShape();
@@ -189,20 +145,6 @@ public class TetrisView extends JFrame implements Observer {
         repaint();
     }
 
-    private void showGameOverPopup() {
-        gameOverPopup.setVisible(true);
-        gameOverPopup.setFocusable(true);
-        gameOverPopup.setFocusableWindowState(true);
-        gameOverPopup.requestFocus();
-    }
-
-    public void showPausePopup() {
-        pausePopup.setVisible(true);
-        pausePopup.setFocusable(true);
-        pausePopup.setFocusableWindowState(true);
-        pausePopup.requestFocus();
-    }
-
     @Override
     public void update(Observable o, Object arg) {
         try {
@@ -211,23 +153,12 @@ public class TetrisView extends JFrame implements Observer {
                 return;
             }
             switch ((String) arg) {
-                case "pause" -> {
-                    pausePopup.updateStats(this.game.getStatsValues());
-                    if (!this.pausePopup.isVisible()) {
-                        showPausePopup();
-                    }
-                }
+                case "pause" -> changeToPause.run();
                 case "timer" -> dashBoardVue.updateTimerLabel(this.game.getStatsValues().getTime());
                 case "stats" -> dashBoardVue.updateStats(this.game.getStatsValues());
                 case "grid" -> SwingUtilities.invokeLater(this::updateBoard);
                 case "level" -> this.game.updateLevel();
-                case "gameOver" -> {
-                    gameOverPopup.updateStats(this.game.getStatsValues());
-                    this.game.stopGame();
-                    if (!this.gameOverPopup.isVisible()) {
-                        showGameOverPopup();
-                    }
-                }
+                case "gameOver" -> changeToGameOver.run();
                 case "nextPiece" -> SwingUtilities.invokeLater(this::updateNextPiece);
                 default -> System.err.println("Error: arg is not a valid String");
             }

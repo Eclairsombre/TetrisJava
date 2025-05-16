@@ -8,7 +8,7 @@ public class GameBoardView extends JPanel {
     int width;
     int height;
     JPanel boardPanel;
-    int ratio = 14;
+    int ratio = 13;
     int offset = 20;
 
     public GameBoardView(int width, int height, JPanel[][] cases, Color backgroundColor) {
