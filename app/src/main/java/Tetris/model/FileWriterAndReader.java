@@ -15,8 +15,8 @@ public class FileWriterAndReader {
     public void writeToFile(List<String> content) {
         try {
             FileWriter file = new FileWriter(this.path);
-            for (String line : content) {
-                file.write(line + "\n");
+            for (int i = 0; i < Math.min(5, content.size()); i++) {
+                file.write(content.get(i) + "\n");
             }
             file.close();
         } catch (IOException e) {

@@ -20,6 +20,7 @@ public class TetrisPage extends JPanel implements Observer {
     private final CustomJPanel[][][] nextPieceCells;
     private final Game game;
     private final DashBoardView dashBoardVue;
+    private final PieceDisplayManager piecePanel;
     private final int widthGrid;
     private final int heightGrid;
     Runnable changeToGameOver;
@@ -42,7 +43,7 @@ public class TetrisPage extends JPanel implements Observer {
         dashBoardVue = new DashBoardView(backgroundColor);
 
         JPanel templatePanel = new JPanel();
-        PieceDisplayManager piecePanel = new PieceDisplayManager(nextPieceCells, holdPieceCells, 20, 20, backgroundColor, game.getFileWriterAndReader().readFromFile());
+        piecePanel = new PieceDisplayManager(nextPieceCells, holdPieceCells, 20, 20, backgroundColor, game.getFileWriterAndReader());
         templatePanel.add(piecePanel);
         templatePanel.setBackground(backgroundColor);
 
@@ -155,7 +156,10 @@ public class TetrisPage extends JPanel implements Observer {
                 case "stats" -> dashBoardVue.updateStats(this.game.getStatsValues());
                 case "grid" -> SwingUtilities.invokeLater(this::updateBoard);
                 case "level" -> this.game.updateLevel();
-                case "gameOver" -> changeToGameOver.run();
+                case "gameOver" -> {
+                    piecePanel.updateBestScores();
+                    changeToGameOver.run();
+                }
                 case "nextPiece" -> SwingUtilities.invokeLater(this::updateNextPiece);
                 default -> System.err.println("Error: arg is not a valid String");
             }

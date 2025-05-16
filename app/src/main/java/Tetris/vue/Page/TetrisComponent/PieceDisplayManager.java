@@ -1,10 +1,14 @@
 package Tetris.vue.Page.TetrisComponent;
 
+import Tetris.model.FileWriterAndReader;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class PieceDisplayManager extends JPanel {
-    public PieceDisplayManager(JPanel[][][] nextPiecesTabs, JPanel[][] holdPieceCells, int width, int height, Color background, String[] scores) {
+    FileWriterAndReader fileWriterAndReader;
+    JPanel scorePanel = new JPanel();
+    public PieceDisplayManager(JPanel[][][] nextPiecesTabs, JPanel[][] holdPieceCells, int width, int height, Color background, FileWriterAndReader FWAR) {
         LayoutManager layout = new BoxLayout(this, BoxLayout.Y_AXIS);
         setLayout(layout);
 
@@ -32,18 +36,26 @@ public class PieceDisplayManager extends JPanel {
         NPPanel.setBackground(background);
 
         add(NPPanel);
-        JPanel scorePanel = new JPanel();
         scorePanel.setLayout(new GridLayout(5, 1));
         scorePanel.setBorder(BorderFactory.createTitledBorder("Meilleurs Scores"));
         scorePanel.setBackground(Color.LIGHT_GRAY);
         scorePanel.setBounds(600, 750, 230, 100);
         add(scorePanel);
 
-        for (int i = 0; i < Math.min(5, scores.length); i++) {
-            JLabel scoreLabel = new JLabel(scores[i]);
-            scorePanel.add(scoreLabel);
-        }
+        fileWriterAndReader = FWAR;
+        updateBestScores();
 
         setBackground(background);
+    }
+
+    public void updateBestScores() {
+        scorePanel.removeAll();
+        String[] scores = fileWriterAndReader.readFromFile();
+        for (String score : scores) {
+            JLabel scoreLabel = new JLabel(score);
+            scorePanel.add(scoreLabel);
+        }
+        repaint();
+        revalidate();
     }
 }
