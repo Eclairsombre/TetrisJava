@@ -7,14 +7,14 @@ import Tetris.model.StatsValues;
 import javax.swing.*;
 import java.awt.*;
 
-public class GameOverPopup extends JDialog {
+public class PausePopup extends JDialog {
     private final TetrisView parentView;
     private final JLabel scoreLabel, levelLabel, timeLabel;
 
-    public GameOverPopup(TetrisView parent, Game game) {
-        super(parent, "Game Over", true);
+    public PausePopup(TetrisView parent, Game game) {
+        super(parent, "Pause", true);
         this.parentView = parent;
-        setFocusable(false); // To avoid focus issues
+        setFocusable(false);
 
         setSize(400, 300);
         setLocationRelativeTo(parent);
@@ -24,14 +24,15 @@ public class GameOverPopup extends JDialog {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
 
-        JLabel gameOverLabel = new JLabel("GAME OVER", SwingConstants.CENTER);
+        JLabel gameOverLabel = new JLabel("PAUSE", SwingConstants.CENTER);
         gameOverLabel.setFont(new Font("Arial", Font.BOLD, 36));
-        gameOverLabel.setForeground(Color.RED);
+        gameOverLabel.setForeground(Color.BLACK);
         mainPanel.add(gameOverLabel, BorderLayout.NORTH);
 
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         StatsValues statsValues = game.getStatsValues();
+
 
         scoreLabel = new JLabel("Score: " + statsValues.score, SwingConstants.CENTER);
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 24));
@@ -57,12 +58,10 @@ public class GameOverPopup extends JDialog {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        Button retryButton = new Button("Rejouer", () -> {
-            // TODO : seems to have sometimes two Threads scheduler running at the same time when restart
-            // TODO : also have sometimes two screen of the gameOverPopup
-            // I think it come from the move piece endGame call which is not thread safe
+        Button resumeButton = new Button("Resume", () -> {
             setVisible(false);
-            game.reset();
+
+            game.resumeGame();
         });
 
         Button menuButton = new Button("Menu Principal", () -> {
@@ -72,10 +71,9 @@ public class GameOverPopup extends JDialog {
             // TODO : try to avoid creating a new game object and import Game
             Game newGame = new Game(new Grid(game.getLengthGrid()[0], game.getLengthGrid()[1]));
             HomePage homePage = new HomePage(newGame);
-            homePage.start();
         });
 
-        buttonPanel.add(retryButton);
+        buttonPanel.add(resumeButton);
         buttonPanel.add(menuButton);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 

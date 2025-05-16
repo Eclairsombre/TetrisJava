@@ -23,6 +23,7 @@ public class TetrisView extends JFrame implements Observer {
     private final Game game;
     private final DashBoardView dashBoardVue;
     private final GameOverPopup gameOverPopup;
+    private final PausePopup pausePopup;
     private final MusicPlayer musicPlayer;
     private final int widthGrid;
     private final int heightGrid;
@@ -38,7 +39,8 @@ public class TetrisView extends JFrame implements Observer {
         cases = new CustomJPanel[heightGrid][widthGrid];
         GameBoardView boardView = new GameBoardView(widthGrid, heightGrid, cases, backgroundColor);
 
-        this.gameOverPopup = new GameOverPopup(this, this.game);
+        gameOverPopup = new GameOverPopup(this, this.game);
+        pausePopup = new PausePopup(this, this.game);
         nextPieceCells = new CustomJPanel[3][4][4];
         holdPieceCells = new CustomJPanel[4][4];
         JPanel templatePanel = new JPanel();
@@ -194,6 +196,13 @@ public class TetrisView extends JFrame implements Observer {
         gameOverPopup.requestFocus();
     }
 
+    public void showPausePopup() {
+        pausePopup.setVisible(true);
+        pausePopup.setFocusable(true);
+        pausePopup.setFocusableWindowState(true);
+        pausePopup.requestFocus();
+    }
+
     @Override
     public void update(Observable o, Object arg) {
         try {
@@ -202,12 +211,18 @@ public class TetrisView extends JFrame implements Observer {
                 return;
             }
             switch ((String) arg) {
-                case "pause" -> this.game.pauseGame();
+                case "pause" -> {
+                    pausePopup.updateStats(this.game.getStatsValues());
+                    if (!this.pausePopup.isVisible()) {
+                        showPausePopup();
+                    }
+                }
                 case "timer" -> dashBoardVue.updateTimerLabel(this.game.getStatsValues().getTime());
                 case "stats" -> dashBoardVue.updateStats(this.game.getStatsValues());
                 case "grid" -> SwingUtilities.invokeLater(this::updateBoard);
                 case "level" -> this.game.updateLevel();
                 case "gameOver" -> {
+                    gameOverPopup.updateStats(this.game.getStatsValues());
                     this.game.stopGame();
                     if (!this.gameOverPopup.isVisible()) {
                         showGameOverPopup();

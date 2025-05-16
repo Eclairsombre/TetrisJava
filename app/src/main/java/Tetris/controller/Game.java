@@ -6,6 +6,7 @@ import Tetris.model.Piece.Piece;
 import Tetris.model.Piece.PieceColor;
 import Tetris.model.Piece.PieceManager;
 import Tetris.model.StatsValues;
+
 import java.util.Observable;
 import java.util.Observer;
 
@@ -39,11 +40,16 @@ public class Game extends Observable {
     public void pauseGame() {
         if (scheduler.isAlive()) {
             scheduler.stopThread();
-        } else {
+        }
+        grid.setPaused(true);
+    }
+
+    public void resumeGame() {
+        if (!scheduler.isAlive()) {
             scheduler = new Scheduler(grid.getStatsValues().level.getSpeed(), runnable);
             scheduler.start();
         }
-        grid.setPaused(!grid.isPaused());
+        grid.setPaused(false);
     }
 
     public void movePieceDown(boolean increment_score) {
@@ -109,7 +115,6 @@ public class Game extends Observable {
     public void stopGame() {
         scheduler.stopThread();
         timer.stopThread();
-        grid.setPaused(true);
     }
 
     public int[] getLengthGrid() {

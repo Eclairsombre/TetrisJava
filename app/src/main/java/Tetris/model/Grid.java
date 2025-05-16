@@ -236,6 +236,9 @@ public class Grid extends Observable {
 
     public void setPaused(boolean paused) {
         isPaused = paused;
+        if (paused) {
+            signalChange("pause");
+        }
     }
 
     public void reset() {
