@@ -1,8 +1,13 @@
 package Tetris.controller;
 
+import Tetris.model.FileWriterAndReader;
 import Tetris.model.Grid;
-
+import Tetris.model.Piece.Piece;
+import Tetris.model.Piece.PieceColor;
+import Tetris.model.Piece.PieceManager;
+import Tetris.model.StatsValues;
 import java.util.Observable;
+import java.util.Observer;
 
 @SuppressWarnings("deprecation")
 public class Game extends Observable {
@@ -33,10 +38,6 @@ public class Game extends Observable {
             scheduler.start();
         }
         grid.setPaused(!grid.isPaused());
-    }
-
-    public Grid getGrid() {
-        return grid;
     }
 
     public void movePieceDown(boolean increment_score) {
@@ -89,5 +90,37 @@ public class Game extends Observable {
         scheduler.stopThread();
         timer.stopThread();
         grid.setPaused(true);
+    }
+
+    public int[] getLengthGrid() {
+        return new int[]{grid.getWidth(), grid.getHeight()};
+    }
+
+    public FileWriterAndReader getFileWriterAndReader() {
+        return grid.getFileWriterAndReader();
+    }
+
+    public PieceColor getGridCell(int x, int y) {
+        return grid.getCell(x, y);
+    }
+
+    public void exchangeHoldAndCurrent() {
+        grid.exchangeHoldAndCurrent();
+    }
+
+    public StatsValues getStatsValues() {
+        return grid.getStatsValues();
+    }
+
+    public PieceManager getPieceManager() {
+        return grid.getPieceManager();
+    }
+
+    public int getMaxHeightEmpty(Piece piece) {
+        return grid.getMaxHeightEmpty(piece);
+    }
+
+    public void addGridObserver(Observer obj) {
+        this.grid.addObserver(obj);
     }
 }

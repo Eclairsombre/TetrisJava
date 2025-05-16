@@ -29,7 +29,7 @@ public class GameOverPopup extends JDialog {
 
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-        StatsValues statsValues = game.getGrid().getStatsValues();
+        StatsValues statsValues = game.getStatsValues();
 
         JLabel scoreLabel = new JLabel("Score: " + statsValues.score, SwingConstants.CENTER);
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 24));
@@ -67,8 +67,8 @@ public class GameOverPopup extends JDialog {
             dispose();
             parentView.getMusicPlayer().stop();
             parentView.dispose();
-            // TODO : try to avoid creating a new game object and import Game and Grid object in the view
-            Game newGame = new Game(new Grid(game.getGrid().getWidth(), game.getGrid().getHeight()));
+            // TODO : try to avoid creating a new game object and import Game
+            Game newGame = new Game(new Grid(game.getLengthGrid()[0], game.getLengthGrid()[1]));
             HomePage homePage = new HomePage(newGame);
             homePage.start();
         });

@@ -25,7 +25,7 @@ public class HomePage extends JFrame implements Observer {
             game.startGame(); // Start threads
             TetrisView tetrisView = new TetrisView(game, musicPath);
             SwingUtilities.invokeLater(tetrisView::start);
-            game.getGrid().addObserver(tetrisView);
+            game.addGridObserver(tetrisView);
             dispose();
         });
 
