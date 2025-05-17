@@ -8,7 +8,6 @@ public class Scheduler extends Thread {
     public Scheduler(long pause, Runnable runnable) {
         this.r = runnable;
         this.pause = pause;
-        System.out.println("Scheduler started with pause: " + pause);
     }
 
     @Override

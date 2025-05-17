@@ -1,6 +1,7 @@
 package Tetris.vue;
 
 import Tetris.controller.Game;
+import Tetris.controller.InputController;
 import Tetris.model.Piece.Piece;
 import Tetris.model.Piece.PieceColor;
 import Tetris.vue.TetrisViewComponent.CustomJPanel;
@@ -10,8 +11,6 @@ import Tetris.vue.TetrisViewComponent.PieceDisplayManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -27,9 +26,12 @@ public class TetrisView extends JFrame implements Observer {
     private final MusicPlayer musicPlayer;
     private final int widthGrid;
     private final int heightGrid;
+    private InputController inputController;
+
 
     public TetrisView(Game g, String musicPath) {
         this.game = g;
+
         setTitle("Tetris");
         setSize(1000, 1000);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -55,18 +57,32 @@ public class TetrisView extends JFrame implements Observer {
         dashBoardVue = new DashBoardView(backgroundColor);
         JPanel screen = new JPanel();
         screen.setFocusable(true);
-        createEventListener(screen);
         screen.setLayout(new BorderLayout());
         screen.add(westPanel, BorderLayout.WEST);
         screen.add(boardView, BorderLayout.CENTER);
         screen.add(dashBoardVue, BorderLayout.NORTH);
         screen.add(templatePanel, BorderLayout.EAST);
 
+        inputController = new InputController(game, screen);
+
+
         add(screen);
         setVisible(true);
 
         musicPlayer = new MusicPlayer(musicPath);
         musicPlayer.play();
+
+        JToggleButton aiToggle = new JToggleButton("Mode IA Off");
+        aiToggle.addActionListener(e -> {
+            if (aiToggle.isSelected()) {
+                aiToggle.setText("Mode IA On");
+                switchToAIMode();
+            } else {
+                aiToggle.setText("Mode IA Off");
+                switchToHumanMode();
+            }
+        });
+        dashBoardVue.add(aiToggle);
 
         SwingUtilities.invokeLater(() -> { // to fix or remove to solve the problem if no clue found
             updateNextPiece();
@@ -76,6 +92,14 @@ public class TetrisView extends JFrame implements Observer {
 
     public MusicPlayer getMusicPlayer() {
         return musicPlayer;
+    }
+
+    public void switchToHumanMode() {
+        inputController.setHumanControlled();
+    }
+
+    public void switchToAIMode() {
+        inputController.setAIControlled();
     }
 
     private Color getColorCell(PieceColor color) {
@@ -100,32 +124,6 @@ public class TetrisView extends JFrame implements Observer {
         setVisible(true);
     }
 
-    public void createEventListener(JPanel panel) {
-        panel.addKeyListener(new KeyAdapter() {
-            @Override
-            public synchronized void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    game.pauseGame();
-                    return;
-                }
-                if (game.isPaused()) {
-                    return;
-                }
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_DOWN -> game.movePieceDown(true);
-                    case KeyEvent.VK_LEFT -> game.movePieceLeft();
-                    case KeyEvent.VK_RIGHT -> game.movePieceRight();
-                    case KeyEvent.VK_UP -> game.doRdrop();
-                    case KeyEvent.VK_Q -> game.rotatePieceLeft();
-                    case KeyEvent.VK_D -> game.rotatePieceRight();
-                    case KeyEvent.VK_SPACE -> game.exchangeHoldAndCurrent();
-                    default -> {
-                        // Do nothing
-                    }
-                }
-            }
-        });
-    }
 
     private void updateBoard() {
         for (int i = 0; i < widthGrid; i++) {
