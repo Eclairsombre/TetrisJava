@@ -1,6 +1,7 @@
 package Tetris.vue.Page;
 
 import Tetris.controller.Game;
+import Tetris.controller.InputController;
 import Tetris.model.Piece.Piece;
 import Tetris.model.Piece.PieceColor;
 import Tetris.vue.Page.TetrisComponent.CustomJPanel;
@@ -27,6 +28,8 @@ public class TetrisPage extends JPanel implements Observer {
     private final int heightGrid;
     Runnable changeToGameOver;
     Runnable changeToPause;
+    private InputController inputController;
+
 
     public TetrisPage(Game g, Runnable changeToGameOver, Runnable changeToPause) {
         Color backgroundColor = Color.LIGHT_GRAY;
@@ -53,12 +56,33 @@ public class TetrisPage extends JPanel implements Observer {
         add(boardView, BorderLayout.CENTER);
         add(dashBoardVue, BorderLayout.NORTH);
         add(templatePanel, BorderLayout.EAST);
+        inputController = new InputController(game, this);
         setVisible(true);
+
+        JToggleButton aiToggle = new JToggleButton("Mode IA Off");
+        aiToggle.addActionListener(e -> {
+            if (aiToggle.isSelected()) {
+                aiToggle.setText("Mode IA On");
+                switchToAIMode();
+            } else {
+                aiToggle.setText("Mode IA Off");
+                switchToHumanMode();
+            }
+        });
+        dashBoardVue.add(aiToggle);
 
         SwingUtilities.invokeLater(() -> { // to fix or remove to solve the problem if no clue found
             updateNextPiece();
             updateBoard();
         });
+    }
+
+    public void switchToHumanMode() {
+        inputController.setHumanControlled();
+    }
+
+    public void switchToAIMode() {
+        inputController.setAIControlled();
     }
 
     private Color getColorCell(PieceColor color) {

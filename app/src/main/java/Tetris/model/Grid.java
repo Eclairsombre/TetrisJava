@@ -479,4 +479,289 @@ public class Grid extends Observable {
 
         fileWriterAndReader.writeToFile(allScores);
     }
+
+    public int[] getBestMove() {
+        Piece currentPiece = pieceManager.getCurrentPiece();
+        int bestScore = Integer.MIN_VALUE;
+        int bestX = currentPiece.getX();
+        int bestY = currentPiece.getY();
+        int bestRotation = 0;
+
+        int[][] originalShape = currentPiece.getShape();
+
+        for (int rotation = 0; rotation < 4; rotation++) {
+
+            int[][] rotatedShape = currentPiece.getShape();
+            if (rotation > 0) {
+
+                for (int r = 0; r < rotation; r++) {
+                    rotatedShape = applyRotation(rotatedShape, false); // false pour rotation à droite
+                }
+            }
+
+
+            for (int x = -1; x < width; x++) {
+
+                if (isValidPositionForShape(rotatedShape, x, currentPiece.getY())) {
+
+                    int maxY = findMaxY(rotatedShape, x);
+
+
+                    int score = evaluatePosition(currentPiece, x, maxY, rotatedShape);
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestX = x;
+                        bestY = maxY;
+                        bestRotation = rotation;
+                    }
+                }
+            }
+        }
+
+
+        currentPiece.setShape(originalShape);
+
+
+        return calculateMoves(currentPiece.getX(), currentPiece.getY(), bestX, bestY, bestRotation);
+    }
+
+
+    private boolean isValidPositionForShape(int[][] shape, int x, int y) {
+        for (int[] point : shape) {
+            int testX = point[0] + x;
+            int testY = point[1] + y;
+            if (testX < 0 || testX >= width || testY < 0 || testY >= height ||
+                    (testY >= 0 && testX >= 0 && testX < width && testY < height &&
+                            grid[testY][testX] != PieceColor.NONE)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private int findMaxY(int[][] shape, int x) {
+        int y = 0;
+        while (y < height) {
+            if (!isValidPositionForShape(shape, x, y + 1)) {
+                break;
+            }
+            y++;
+        }
+        return y;
+    }
+
+
+    private int[][] applyRotation(int[][] shape, boolean isLeft) {
+
+        int[][] rotated = new int[shape.length][2];
+        for (int i = 0; i < shape.length; i++) {
+            if (isLeft) {
+
+                rotated[i][0] = -shape[i][1];
+                rotated[i][1] = shape[i][0];
+            } else {
+
+                rotated[i][0] = shape[i][1];
+                rotated[i][1] = -shape[i][0];
+            }
+        }
+        return rotated;
+    }
+
+
+    private int[] calculateMoves(int startX, int startY, int targetX, int targetY, int rotations) {
+
+        java.util.List<Integer> moves = new java.util.ArrayList<>();
+
+
+        for (int i = 0; i < rotations; i++) {
+            moves.add(1);
+        }
+
+
+        int dx = targetX - startX;
+        while (dx != 0) {
+            if (dx < 0) {
+                moves.add(2);
+                dx++;
+            } else {
+                moves.add(3);
+                dx--;
+            }
+        }
+
+
+        moves.add(5);
+
+
+        int[] result = new int[moves.size()];
+        for (int i = 0; i < moves.size(); i++) {
+            result[i] = moves.get(i);
+        }
+
+        return result;
+    }
+
+
+    private int evaluatePosition(Piece piece, int x, int y, int[][] shape) {
+        int score = 0;
+
+
+        int maxHeight = getMaxHeightAfterPlacement(x, y, shape);
+        int completeLines = getCompleteLinesAfterPlacement(x, y, shape);
+        int holes = getHoleAfterPlacement(x, y, shape);
+        int bumpiness = getBumpinessAfterPlacement(x, y, shape);
+
+
+        score -= maxHeight * 500;
+        System.out.println(maxHeight);
+        score += completeLines * 1000;
+
+        score -= holes * 500;
+        score -= bumpiness * 300;
+        return score;
+    }
+
+
+    private int getMaxHeightAfterPlacement(int x, int y, int[][] shape) {
+        int maxHeight = 0;
+
+        for (int[] point : shape) {
+            int testY = point[1] + y;
+            maxHeight = Math.max(maxHeight, height - testY);
+        }
+
+        boolean[][] tempGrid = new boolean[height][width];
+        for (int r = 0; r < height; r++) {
+            for (int c = 0; c < width; c++) {
+                tempGrid[r][c] = grid[r][c] != PieceColor.NONE;
+            }
+        }
+
+        for (int[] point : shape) {
+            int testX = point[0] + x;
+            int testY = point[1] + y;
+            if (testX >= 0 && testX < width && testY >= 0 && testY < height) {
+                tempGrid[testY][testX] = true;
+            }
+        }
+
+        for (int col = 0; col < width; col++) {
+            for (int row = 0; row < height; row++) {
+                if (tempGrid[row][col]) {
+                    int colHeight = height - row;
+                    maxHeight = Math.max(maxHeight, colHeight);
+                    break;
+                }
+            }
+        }
+
+        return maxHeight;
+    }
+
+    public int getCompleteLinesAfterPlacement(int x, int y, int[][] shape) {
+        int completeLines = 0;
+
+
+        PieceColor[][] tempGrid = new PieceColor[height][width];
+        for (int r = 0; r < height; r++) {
+            System.arraycopy(grid[r], 0, tempGrid[r], 0, width);
+        }
+
+        for (int[] point : shape) {
+            int testX = point[0] + x;
+            int testY = point[1] + y;
+            if (testX >= 0 && testX < width && testY >= 0 && testY < height) {
+                tempGrid[testY][testX] = pieceManager.getCurrentPiece().getColor();
+            }
+        }
+
+        for (int row = 0; row < height; row++) {
+            boolean isComplete = true;
+            for (int col = 0; col < width; col++) {
+                if (tempGrid[row][col] == PieceColor.NONE) {
+                    isComplete = false;
+                    break;
+                }
+            }
+            if (isComplete) {
+                completeLines++;
+            }
+        }
+
+        return completeLines;
+    }
+
+    public int getHoleAfterPlacement(int x, int y, int[][] shape) {
+        int holeCount = 0;
+
+        PieceColor[][] tempGrid = new PieceColor[height][width];
+        for (int r = 0; r < height; r++) {
+            System.arraycopy(grid[r], 0, tempGrid[r], 0, width);
+        }
+
+
+        for (int[] point : shape) {
+            int testX = point[0] + x;
+            int testY = point[1] + y;
+            if (testX >= 0 && testX < width && testY >= 0 && testY < height) {
+                tempGrid[testY][testX] = pieceManager.getCurrentPiece().getColor();
+            }
+        }
+
+
+        for (int col = 0; col < width; col++) {
+            boolean blockFound = false;
+            for (int row = 0; row < height; row++) {
+                if (tempGrid[row][col] != PieceColor.NONE) {
+                    blockFound = true;
+                } else if (blockFound) {
+                    holeCount++;
+                }
+            }
+        }
+
+        return holeCount;
+    }
+
+    public int getBumpinessAfterPlacement(int x, int y, int[][] shape) {
+        int bumpiness = 0;
+
+
+        PieceColor[][] tempGrid = new PieceColor[height][width];
+        for (int r = 0; r < height; r++) {
+            System.arraycopy(grid[r], 0, tempGrid[r], 0, width);
+        }
+
+
+        for (int[] point : shape) {
+            int testX = point[0] + x;
+            int testY = point[1] + y;
+            if (testX >= 0 && testX < width && testY >= 0 && testY < height) {
+                tempGrid[testY][testX] = pieceManager.getCurrentPiece().getColor();
+            }
+        }
+
+
+        int[] heights = new int[width];
+        for (int col = 0; col < width; col++) {
+            for (int row = height - 1; row >= 0; row--) {
+                if (tempGrid[row][col] != PieceColor.NONE) {
+                    heights[col] = height - row;
+                    break;
+                }
+            }
+        }
+
+
+        for (int i = 1; i < heights.length; i++) {
+            bumpiness += Math.abs(heights[i] - heights[i - 1]);
+        }
+
+        return bumpiness;
+    }
+
 }
+

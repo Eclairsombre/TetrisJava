@@ -16,6 +16,7 @@ public class Game extends Observable {
     private final Grid grid;
     private final Runnable runnable = () -> movePieceDown(false);
     private Scheduler scheduler, timer;
+    private boolean aiMode = false;
 
     public Game(boolean debugMode, int debugPos) {
         this.debugMode = debugMode;
@@ -126,6 +127,10 @@ public class Game extends Observable {
 
     public void addGridObserver(Observer obj) {
         this.grid.addObserver(obj);
+    }
+
+    public int[] getBestMove() {
+        return grid.getBestMove();
     }
 
     public void fixPiece() {
