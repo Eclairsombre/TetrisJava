@@ -12,12 +12,14 @@ import java.util.Observer;
 
 @SuppressWarnings("deprecation")
 public class Game extends Observable {
+    private final boolean debugMode;
     private final Grid grid;
     private final Runnable runnable = () -> movePieceDown(false);
     private Scheduler scheduler, timer;
 
-    public Game() {
-        this.grid = new Grid(10, 25);
+    public Game(boolean debugMode) {
+        this.debugMode = debugMode;
+        this.grid = new Grid(10, 25, debugMode);
         reset();
     }
 
@@ -33,7 +35,7 @@ public class Game extends Observable {
         scheduler = new Scheduler(700, () -> movePieceDown(false));
         timer = new Scheduler(1000, grid::incrementSeconds);
 
-        grid.reset();
+        grid.reset(debugMode);
 
         scheduler.start();
         timer.start();
@@ -59,7 +61,7 @@ public class Game extends Observable {
     }
 
     public void movePieceDown(boolean increment_score) {
-        grid.movePiece(0, 1, true);
+        grid.movePiece(0, 1, !debugMode);
         if (increment_score) {
             grid.updateScore(1);
         }

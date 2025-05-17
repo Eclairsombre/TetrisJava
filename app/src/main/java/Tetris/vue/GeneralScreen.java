@@ -24,11 +24,12 @@ public class GeneralScreen extends JFrame {
     String musicPath = "data/music/tetris.wav";
     MusicChoosePage musicChoosePage;
     MusicPlayer musicPlayer;
+    boolean debugMode;
 
-    public GeneralScreen() {
+    public GeneralScreen(boolean debugMode) {
         setFocusable(true);
-
-        game = new Game();
+        this.debugMode = debugMode;
+        game = new Game(debugMode);
         musicPlayer = new MusicPlayer(musicPath);
 
         musicChoosePage = new MusicChoosePage(() -> {

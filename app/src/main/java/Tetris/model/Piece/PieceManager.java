@@ -14,8 +14,8 @@ public class PieceManager {
     private Piece holdPiece;
     private final SecureRandom random = new java.security.SecureRandom();
 
-    public PieceManager() {
-        reset();
+    public PieceManager(boolean debugMode) {
+        reset(debugMode);
     }
 
     public Piece getCurrentPiece() {
@@ -86,8 +86,13 @@ public class PieceManager {
         canHoldPiece = true;
     }
 
-    public void reset() {
-        currentPiece = initializePiece();
+    public void reset(boolean debugMode) {
+        if (debugMode) {
+            currentPiece = new PieceT(PieceColor.CYAN);
+            currentPiece.setPos(3, 0);
+        } else {
+            currentPiece = initializePiece();
+        }
         holdPiece = null;
         lastPiece = new ArrayList<>(List.of(-1, -1, -1));
         nextPiece.clear();

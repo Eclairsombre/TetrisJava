@@ -7,6 +7,19 @@ import Tetris.vue.GeneralScreen;
 
 public class App {
     public static void main(String[] args) {
-        new GeneralScreen();
+        if (args.length > 0) {
+            if (args[0].equals("-debug")) {
+                System.out.println("Debug mode activated");
+                new GeneralScreen(true);
+            } else if (args[0].equals("-help")) {
+                System.out.println("Usage: java -jar Tetris.jar [-debug]");
+                System.exit(0);
+            } else {
+                System.out.println("Invalid argument. Use -help for usage information.");
+                System.exit(1);
+            }
+        } else {
+            new GeneralScreen(false);
+        }
     }
 }

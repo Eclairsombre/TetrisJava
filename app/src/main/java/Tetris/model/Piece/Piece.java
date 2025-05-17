@@ -79,4 +79,14 @@ public class Piece {
 
         return rotatedShape;
     }
+
+    public int maxYCoord() {
+        int maxY = shape[0][1];
+        for (int i = 1; i < 4; i++) {
+            if (shape[i][1] > maxY) {
+                maxY = shape[i][1];
+            }
+        }
+        return maxY + y;
+    }
 }

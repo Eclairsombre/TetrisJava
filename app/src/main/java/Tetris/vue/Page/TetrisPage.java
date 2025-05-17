@@ -89,13 +89,16 @@ public class TetrisPage extends JPanel implements Observer {
         }
         Piece piece = game.getPieceManager().getCurrentPiece();
         int[][] coords = piece.getCoordinates(piece.getX(), piece.getY());
+        int maxY = piece.maxYCoord();
         Color color = getColorCell(piece.getColor());
         int RDropMove = game.getMaxHeightEmpty(piece);
         int[][] RDropCoords = piece.getCoordinates(piece.getX(), RDropMove);
 
         for (int i = 0; i < 4; i++) {
             int x = coords[i][0];
-            cases[RDropCoords[i][1]][x].setBackground(Color.GRAY);
+            if (RDropCoords[i][1] > maxY) {
+                cases[RDropCoords[i][1]][x].setBackground(Color.GRAY);
+            }
             cases[coords[i][1]][x].setBackground(color);
         }
 

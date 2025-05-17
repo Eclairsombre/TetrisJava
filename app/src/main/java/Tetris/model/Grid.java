@@ -18,7 +18,7 @@ public class Grid extends Observable {
     );
     private boolean isPaused = false;
 
-    public Grid(int width, int height) {
+    public Grid(int width, int height, boolean debugMode) {
         this.height = height;
         this.width = width;
         this.grid = new PieceColor[height][width];
@@ -27,7 +27,7 @@ public class Grid extends Observable {
                 grid[y][x] = PieceColor.NONE;
             }
         }
-        this.pieceManager = new PieceManager();
+        this.pieceManager = new PieceManager(debugMode);
     }
 
     public int getWidth() {
@@ -171,7 +171,6 @@ public class Grid extends Observable {
         for (int i = 0; i < move_to; i++) {
             movePiece(0, 1, false);
         }
-        movePiece(0, 1, true);
         updateScore(30);
     }
 
@@ -211,24 +210,36 @@ public class Grid extends Observable {
         signalChange("grid");
     }
 
-    public void rotatePiece(boolean isLeft) {
-        Piece currentPiece = this.pieceManager.getCurrentPiece();
-        int[][] originalRotatedShape = currentPiece.getRotatedPosition(isLeft);
-        int[][] rotatedShape = new int[originalRotatedShape.length][originalRotatedShape[0].length];
-        for (int i = 0; i < originalRotatedShape.length; i++) {
-            System.arraycopy(originalRotatedShape[i], 0, rotatedShape[i], 0, originalRotatedShape[i].length);
-        }
+public void rotatePiece(boolean isLeft) {
+    Piece currentPiece = this.pieceManager.getCurrentPiece();
+    int[][] originalRotatedShape = currentPiece.getRotatedPosition(isLeft);
+    int[][] rotatedShape = new int[originalRotatedShape.length][originalRotatedShape[0].length];
+    for (int i = 0; i < originalRotatedShape.length; i++) {
+        System.arraycopy(originalRotatedShape[i], 0, rotatedShape[i], 0, originalRotatedShape[i].length);
+    }
 
-        for (int[] c : rotatedShape) {
-            c[0] += currentPiece.getX();
-            c[1] += currentPiece.getY();
-        }
+    for (int[] c : rotatedShape) {
+        c[0] += currentPiece.getX();
+        c[1] += currentPiece.getY();
+    }
 
-        if (isValidPosition(rotatedShape)) {
+    // kick for "wall kick" rotation, useful for T-Spin and other advanced techniques
+    // Don't change the order !!!!
+    int[][] kicks = { {0, 0}, {0, 1}, {-1, 2}, {1, 2}, {1, 1}, {-1, 1}, {1, 0}, {-1, 0} };
+    for (int[] kick : kicks) {
+        int[][] kickedShape = new int[rotatedShape.length][2];
+        for (int i = 0; i < rotatedShape.length; i++) {
+            kickedShape[i][0] = rotatedShape[i][0] + kick[0];
+            kickedShape[i][1] = rotatedShape[i][1] + kick[1];
+        }
+        if (isValidPosition(kickedShape)) {
             currentPiece.setShape(originalRotatedShape);
+            currentPiece.setPos(currentPiece.getX() + kick[0], currentPiece.getY() + kick[1]);
             signalChange("grid");
+            return;
         }
     }
+}
 
     public boolean isPaused() {
         return isPaused;
@@ -241,12 +252,28 @@ public class Grid extends Observable {
         }
     }
 
-    public void reset() {
+    public void reset(boolean debugMode) {
         this.isPaused = false;
         statsValues.reset();
-        this.pieceManager.reset();
+        this.pieceManager.reset(debugMode);
         for (PieceColor[] row : grid) {
             java.util.Arrays.fill(row, PieceColor.NONE);
+        }
+        if (debugMode) {
+            for (int i = 20; i < 25; i++) {
+                for (int j = 0; j < 10; j++) {
+                    grid[i][j] = PieceColor.RED;
+                }
+            }
+            grid[20][2] = PieceColor.NONE;
+            grid[20][3] = PieceColor.NONE;
+            grid[21][1] = PieceColor.NONE;
+            grid[21][2] = PieceColor.NONE;
+            grid[21][3] = PieceColor.NONE;
+            grid[22][1] = PieceColor.NONE;
+            grid[23][1] = PieceColor.NONE;
+            grid[23][2] = PieceColor.NONE;
+            grid[24][1] = PieceColor.NONE;
         }
         signalChange("grid");
         signalChange("nextPiece");
