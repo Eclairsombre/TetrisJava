@@ -66,11 +66,11 @@ public class Piece {
             int rotatedX, rotatedY;
 
             if (isLeft) {
-                rotatedX = -y;
-                rotatedY = x;
-            } else {
                 rotatedX = y;
                 rotatedY = -x;
+            } else {
+                rotatedX = -y;
+                rotatedY = x;
             }
 
             rotatedShape[i][0] = rotatedX + pivotX;

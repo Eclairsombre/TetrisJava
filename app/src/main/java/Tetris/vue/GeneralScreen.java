@@ -26,10 +26,10 @@ public class GeneralScreen extends JFrame {
     MusicPlayer musicPlayer;
     boolean debugMode;
 
-    public GeneralScreen(boolean debugMode) {
+    public GeneralScreen(boolean debugMode, int debugPos) {
         setFocusable(true);
         this.debugMode = debugMode;
-        game = new Game(debugMode);
+        game = new Game(debugMode, debugPos);
         musicPlayer = new MusicPlayer(musicPath);
 
         musicChoosePage = new MusicChoosePage(() -> {

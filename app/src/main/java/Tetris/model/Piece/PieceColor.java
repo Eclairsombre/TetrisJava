@@ -8,5 +8,6 @@ public enum PieceColor {
     GREEN,
     CYAN,
     PINK,
+    WHITE,
     NONE
 }

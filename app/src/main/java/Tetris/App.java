@@ -10,16 +10,19 @@ public class App {
         if (args.length > 0) {
             if (args[0].equals("-debug")) {
                 System.out.println("Debug mode activated");
-                new GeneralScreen(true);
-            } else if (args[0].equals("-help")) {
-                System.out.println("Usage: java -jar Tetris.jar [-debug]");
-                System.exit(0);
+                if (args.length > 1) {
+                    System.out.println("Debug mode activated with argument: " + args[1]);
+                    new GeneralScreen(true, Integer.parseInt(args[1]));
+                } else {
+                    new GeneralScreen(true, 0);
+                }
             } else {
-                System.out.println("Invalid argument. Use -help for usage information.");
+                System.out.println("Invalid argument: " + args[0]);
+                System.out.println("Usage: java -jar Tetris.jar [-debug [port]]");
                 System.exit(1);
             }
         } else {
-            new GeneralScreen(false);
+            new GeneralScreen(false, 0);
         }
     }
 }

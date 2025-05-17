@@ -4,6 +4,7 @@ public class Scheduler extends Thread {
     private final Runnable r;
     private long pause;
     private boolean isRunning = false;
+    private boolean wait = false;
 
     public Scheduler(long pause, Runnable runnable) {
         this.r = runnable;
@@ -15,7 +16,9 @@ public class Scheduler extends Thread {
         isRunning = true;
         while (isRunning) {
             try {
-                r.run();
+                if (!wait) {
+                    r.run();
+                }
                 Thread.sleep(pause);
             } catch (InterruptedException e) {
                 break;
@@ -29,5 +32,9 @@ public class Scheduler extends Thread {
 
     public void setPause(long pause) {
         this.pause = pause;
+    }
+
+    public void setWait() {
+        this.wait = !this.wait;
     }
 }

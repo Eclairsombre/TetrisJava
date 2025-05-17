@@ -17,9 +17,9 @@ public class Game extends Observable {
     private final Runnable runnable = () -> movePieceDown(false);
     private Scheduler scheduler, timer;
 
-    public Game(boolean debugMode) {
+    public Game(boolean debugMode, int debugPos) {
         this.debugMode = debugMode;
-        this.grid = new Grid(10, 25, debugMode);
+        this.grid = new Grid(10, 25, debugMode, debugPos);
         reset();
     }
 
@@ -61,18 +61,18 @@ public class Game extends Observable {
     }
 
     public void movePieceDown(boolean increment_score) {
-        grid.movePiece(0, 1, !debugMode);
+        grid.movePiece(0, 1, !debugMode, increment_score);
         if (increment_score) {
-            grid.updateScore(1);
+            grid.addToScore(1);
         }
     }
 
     public void movePieceLeft() {
-        grid.movePiece(-1, 0, false);
+        grid.movePiece(-1, 0, false, false);
     }
 
     public void movePieceRight() {
-        grid.movePiece(1, 0, false);
+        grid.movePiece(1, 0, false, false);
     }
 
     public void rotatePieceLeft() {
@@ -126,5 +126,9 @@ public class Game extends Observable {
 
     public void addGridObserver(Observer obj) {
         this.grid.addObserver(obj);
+    }
+
+    public void fixPiece() {
+        scheduler.setWait();
     }
 }

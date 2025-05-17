@@ -10,6 +10,8 @@ import Tetris.vue.Page.TetrisComponent.PieceDisplayManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -68,6 +70,7 @@ public class TetrisPage extends JPanel implements Observer {
             case PieceColor.PINK -> new Color(0x800080);
             case PieceColor.ORANGE -> new Color(0xFF7F00);
             case PieceColor.CYAN -> new Color(0x00FFFF);
+            case PieceColor.WHITE -> Color.WHITE;
             default -> Color.BLACK;
         };
     }
@@ -82,9 +85,13 @@ public class TetrisPage extends JPanel implements Observer {
     }
 
     public void updateBoard() {
+        List<Integer> whiteLines = new ArrayList<>();
         for (int i = 0; i < widthGrid; i++) {
             for (int j = 0; j < heightGrid; j++) {
                 cases[j][i].setBackground(getColorCell(i, j));
+                if (cases[j][i].getBackground() == Color.WHITE && !whiteLines.contains(j)) {
+                    whiteLines.add(j);
+                }
             }
         }
         Piece piece = game.getPieceManager().getCurrentPiece();
@@ -99,7 +106,11 @@ public class TetrisPage extends JPanel implements Observer {
             if (RDropCoords[i][1] > maxY) {
                 cases[RDropCoords[i][1]][x].setBackground(Color.GRAY);
             }
-            cases[coords[i][1]][x].setBackground(color);
+            if (whiteLines.contains(coords[i][1])) {
+                cases[coords[i][1]][x].setBackground(Color.WHITE);
+            } else {
+                cases[coords[i][1]][x].setBackground(color);
+            }
         }
 
         this.repaint();
@@ -158,12 +169,13 @@ public class TetrisPage extends JPanel implements Observer {
                 case "timer" -> dashBoardVue.updateTimerLabel(this.game.getStatsValues().getTime());
                 case "stats" -> dashBoardVue.updateStats(this.game.getStatsValues());
                 case "grid" -> SwingUtilities.invokeLater(this::updateBoard);
-                case "level" -> this.game.updateLevel();
                 case "gameOver" -> {
                     piecePanel.updateBestScores();
                     changeToGameOver.run();
                 }
                 case "nextPiece" -> SwingUtilities.invokeLater(this::updateNextPiece);
+                case "level" -> this.game.updateLevel(); // TODO : to move to the controller
+                case "fixPiece" -> this.game.fixPiece(); // TODO : to move to the controller
                 default -> System.err.println("Error: arg is not a valid String");
             }
         } catch (Exception e) {
