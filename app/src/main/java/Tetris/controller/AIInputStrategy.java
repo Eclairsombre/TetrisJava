@@ -46,7 +46,7 @@ public class AIInputStrategy implements InputStrategy {
                 while (enabled) {
                     processInput(InputController.getCurrentGame());
                     try {
-                        Thread.sleep(30);
+                        Thread.sleep(200);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         break;
@@ -66,6 +66,4 @@ public class AIInputStrategy implements InputStrategy {
             }
         }
     }
-
-
 }

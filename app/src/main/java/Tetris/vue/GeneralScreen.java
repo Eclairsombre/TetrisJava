@@ -100,6 +100,10 @@ public class GeneralScreen extends JFrame {
                 }
                 add(tetrisPage);
                 musicPlayer.play();
+                if (tetrisPage.getInputController().isAIControlled()) {
+                    tetrisPage.getInputController().setAIControlled(); // to restart the AI
+                }
+
                 tetrisPage.updateBoard();
                 tetrisPage.updateNextPiece();
             }

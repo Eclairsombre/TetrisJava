@@ -28,8 +28,7 @@ public class TetrisPage extends JPanel implements Observer {
     private final int heightGrid;
     Runnable changeToGameOver;
     Runnable changeToPause;
-    private InputController inputController;
-
+    private final InputController inputController;
 
     public TetrisPage(Game g, Runnable changeToGameOver, Runnable changeToPause) {
         Color backgroundColor = Color.LIGHT_GRAY;
@@ -75,6 +74,10 @@ public class TetrisPage extends JPanel implements Observer {
             updateNextPiece();
             updateBoard();
         });
+    }
+
+    public InputController getInputController() {
+        return inputController;
     }
 
     public void switchToHumanMode() {
@@ -195,6 +198,7 @@ public class TetrisPage extends JPanel implements Observer {
                 case "grid" -> SwingUtilities.invokeLater(this::updateBoard);
                 case "gameOver" -> {
                     piecePanel.updateBestScores();
+                    inputController.disable();
                     changeToGameOver.run();
                 }
                 case "nextPiece" -> SwingUtilities.invokeLater(this::updateNextPiece);
