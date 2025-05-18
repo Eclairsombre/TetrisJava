@@ -1,5 +1,6 @@
 package Tetris.controller;
 
+import Tetris.model.AIInputStrategy;
 import Tetris.model.FileWriterAndReader;
 import Tetris.model.Grid;
 import Tetris.model.Piece.Piece;
@@ -17,10 +18,11 @@ public class Game extends Observable {
     private final Runnable runnable = () -> movePieceDown(false);
     private Scheduler scheduler, timer;
     private boolean aiMode = false;
+    private final AIInputStrategy aiInputStrategy = new AIInputStrategy();
 
     public Game(boolean debugMode, int debugPos) {
         this.debugMode = debugMode;
-        this.grid = new Grid(10, 25, debugMode, debugPos);
+        this.grid = new Grid(10, 25, this.debugMode, debugPos);
         reset();
     }
 
@@ -63,9 +65,6 @@ public class Game extends Observable {
 
     public void movePieceDown(boolean increment_score) {
         grid.movePiece(0, 1, !debugMode, increment_score);
-        if (increment_score) {
-            grid.addToScore(1);
-        }
     }
 
     public void movePieceLeft() {
@@ -85,7 +84,7 @@ public class Game extends Observable {
     }
 
     public void doRdrop() {
-        grid.doRdrop();
+        grid.doRdrop(true);
     }
 
     public void updateLevel() {
@@ -129,11 +128,20 @@ public class Game extends Observable {
         this.grid.addObserver(obj);
     }
 
-    public int[] getBestMove() {
-        return grid.getBestMove();
-    }
-
     public void fixPiece() {
         scheduler.setWait();
+    }
+
+    public boolean isAiMode() {
+        return aiMode;
+    }
+
+    public void setAiMode(boolean isAIMod) {
+        this.aiMode = isAIMod;
+        if (isAIMod) {
+            aiInputStrategy.enable(grid);
+        } else {
+            aiInputStrategy.disable();
+        }
     }
 }

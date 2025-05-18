@@ -1,19 +1,18 @@
-package Tetris.controller;
+package Tetris.model;
 
-public class AIInputStrategy implements InputStrategy {
+public class AIInputStrategy {
     private boolean enabled = false;
     private Thread aiThread;
     private int[] plannedMoves = null;
     private int currentMoveIndex = 0;
 
-    @Override
-    public void processInput(Game game) {
-        if (!enabled || game.isPaused()) {
+    public void processInput(Grid grid) {
+        if (!enabled || grid.isPaused()) {
             return;
         }
 
         if (plannedMoves == null || currentMoveIndex >= plannedMoves.length) {
-            plannedMoves = game.getBestMove();
+            plannedMoves = grid.getBestMove();
             currentMoveIndex = 0;
 
             if (plannedMoves == null || plannedMoves.length == 0) {
@@ -24,19 +23,18 @@ public class AIInputStrategy implements InputStrategy {
         int moveType = plannedMoves[currentMoveIndex++];
 
         switch (moveType) {
-            case 0 -> game.rotatePieceLeft();
-            case 1 -> game.rotatePieceRight();
-            case 2 -> game.movePieceLeft();
-            case 3 -> game.movePieceRight();
-            case 4 -> game.movePieceDown(true);
-            case 5 -> game.doRdrop();
+            case 0 -> grid.rotatePiece(true);
+            case 1 -> grid.rotatePiece(false);
+            case 2 -> grid.movePiece(-1, 0, false, false);
+            case 3 -> grid.movePiece(1, 0, false, false);
+            case 4 ->  grid.movePiece(0, 1, true, false);
+            case 5 -> grid.doRdrop(false);
             default -> {
             }
         }
     }
 
-    @Override
-    public void enable() {
+    public void enable(Grid grid) {
         if (!enabled) {
             enabled = true;
             plannedMoves = null;
@@ -44,7 +42,7 @@ public class AIInputStrategy implements InputStrategy {
 
             aiThread = new Thread(() -> {
                 while (enabled) {
-                    processInput(InputController.getCurrentGame());
+                    processInput(grid);
                     try {
                         Thread.sleep(200);
                     } catch (InterruptedException e) {
@@ -57,7 +55,6 @@ public class AIInputStrategy implements InputStrategy {
         }
     }
 
-    @Override
     public void disable() {
         if (enabled) {
             enabled = false;

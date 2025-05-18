@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import static Tetris.controller.Action.*;
 
 public class GeneralScreen extends JFrame {
     HomePage homePage;
@@ -100,9 +101,6 @@ public class GeneralScreen extends JFrame {
                 }
                 add(tetrisPage);
                 musicPlayer.play();
-                if (tetrisPage.getInputController().isAIControlled()) {
-                    tetrisPage.getInputController().setAIControlled(); // to restart the AI
-                }
 
                 tetrisPage.updateBoard();
                 tetrisPage.updateNextPiece();
@@ -162,22 +160,27 @@ public class GeneralScreen extends JFrame {
                         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                             game.pauseGame();
                         }
+                        if (e.getKeyCode() == KeyEvent.VK_P) {
+                            game.setAiMode(!game.isAiMode());
+                            tetrisPage.updateAILabel();
+                        }
                     }
                     default -> {
                         return;
                     }
                 }
-                if (game.isPaused()) {
+                if (game.isPaused() || game.isAiMode()) {
                     return;
                 }
+
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_DOWN -> game.movePieceDown(true);
-                    case KeyEvent.VK_LEFT -> game.movePieceLeft();
-                    case KeyEvent.VK_RIGHT -> game.movePieceRight();
-                    case KeyEvent.VK_UP -> game.doRdrop();
-                    case KeyEvent.VK_Q -> game.rotatePieceLeft();
-                    case KeyEvent.VK_D -> game.rotatePieceRight();
-                    case KeyEvent.VK_SPACE -> game.exchangeHoldAndCurrent();
+                    case KeyEvent.VK_DOWN -> MOVE_DOWN.execute(game);
+                    case KeyEvent.VK_LEFT -> MOVE_LEFT.execute(game);
+                    case KeyEvent.VK_RIGHT -> MOVE_RIGHT.execute(game);
+                    case KeyEvent.VK_UP -> RDROP.execute(game);
+                    case KeyEvent.VK_Q -> ROTATE_LEFT.execute(game);
+                    case KeyEvent.VK_D -> ROTATE_RIGHT.execute(game);
+                    case KeyEvent.VK_SPACE -> HOLD.execute(game);
                     default -> {
                         // Do nothing
                     }

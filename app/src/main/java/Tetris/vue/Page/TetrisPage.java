@@ -1,7 +1,6 @@
 package Tetris.vue.Page;
 
 import Tetris.controller.Game;
-import Tetris.controller.InputController;
 import Tetris.model.Piece.Piece;
 import Tetris.model.Piece.PieceColor;
 import Tetris.vue.Page.TetrisComponent.CustomJPanel;
@@ -28,7 +27,6 @@ public class TetrisPage extends JPanel implements Observer {
     private final int heightGrid;
     Runnable changeToGameOver;
     Runnable changeToPause;
-    private final InputController inputController;
 
     public TetrisPage(Game g, Runnable changeToGameOver, Runnable changeToPause) {
         Color backgroundColor = Color.LIGHT_GRAY;
@@ -45,6 +43,7 @@ public class TetrisPage extends JPanel implements Observer {
         GameBoardView boardView = new GameBoardView(widthGrid, heightGrid, cases, backgroundColor);
 
         dashBoardVue = new DashBoardView(backgroundColor);
+        dashBoardVue.setPreferredSize(new Dimension(200, 200));
 
         JPanel templatePanel = new JPanel();
         piecePanel = new PieceDisplayManager(nextPieceCells, holdPieceCells, 20, 20, backgroundColor, game.getFileWriterAndReader());
@@ -53,22 +52,9 @@ public class TetrisPage extends JPanel implements Observer {
 
         setLayout(new BorderLayout());
         add(boardView, BorderLayout.CENTER);
-        add(dashBoardVue, BorderLayout.NORTH);
+        add(dashBoardVue, BorderLayout.WEST);
         add(templatePanel, BorderLayout.EAST);
-        inputController = new InputController(game, this);
         setVisible(true);
-
-        JToggleButton aiToggle = new JToggleButton("Mode IA Off");
-        aiToggle.addActionListener(e -> {
-            if (aiToggle.isSelected()) {
-                aiToggle.setText("Mode IA On");
-                switchToAIMode();
-            } else {
-                aiToggle.setText("Mode IA Off");
-                switchToHumanMode();
-            }
-        });
-        dashBoardVue.add(aiToggle);
 
         SwingUtilities.invokeLater(() -> { // to fix or remove to solve the problem if no clue found
             updateNextPiece();
@@ -76,16 +62,12 @@ public class TetrisPage extends JPanel implements Observer {
         });
     }
 
-    public InputController getInputController() {
-        return inputController;
-    }
-
-    public void switchToHumanMode() {
-        inputController.setHumanControlled();
-    }
-
-    public void switchToAIMode() {
-        inputController.setAIControlled();
+    public void updateAILabel() {
+        if (game.isAiMode()) {
+            dashBoardVue.updateAILabel("AI Mode : ON");
+        } else {
+            dashBoardVue.updateAILabel("AI Mode : OFF");
+        }
     }
 
     private Color getColorCell(PieceColor color) {
@@ -198,12 +180,13 @@ public class TetrisPage extends JPanel implements Observer {
                 case "grid" -> SwingUtilities.invokeLater(this::updateBoard);
                 case "gameOver" -> {
                     piecePanel.updateBestScores();
-                    inputController.disable();
+                    game.setAiMode(false);
+                    dashBoardVue.updateAILabel("AI Mode : OFF");
                     changeToGameOver.run();
                 }
                 case "nextPiece" -> SwingUtilities.invokeLater(this::updateNextPiece);
-                case "level" -> this.game.updateLevel(); // TODO : to move to the controller
-                case "fixPiece" -> this.game.fixPiece(); // TODO : to move to the controller
+                case "level" -> this.game.updateLevel();
+                case "fixPiece" -> this.game.fixPiece();
                 default -> System.err.println("Error: arg is not a valid String");
             }
         } catch (Exception e) {

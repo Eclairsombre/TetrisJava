@@ -23,9 +23,9 @@ public class Grid extends Observable {
     private boolean isPaused = false;
     private final int debugPos;
     private boolean TSpin = false;
-    private boolean difficultMove = false; // TODO : use for scorage
-    private int BtBCounter = 0; // TODO : use for scorage
+    private int BtBCounter = 0;
     private boolean isFixing = false;
+    private Thread resetScoreSkillLabel;
 
     public Grid(int width, int height, boolean debugMode, int debugPos) {
         this.height = height;
@@ -38,6 +38,15 @@ public class Grid extends Observable {
         }
         this.pieceManager = new PieceManager(debugMode);
         this.debugPos = debugPos;
+        resetScoreSkillLabel = new Thread(() -> { // used for delete line clear displaying
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                // we don't care
+            }
+            statsValues.lineClearDisplay = "";
+            signalChange("stats");
+        });
     }
 
     public int getWidth() {
@@ -151,22 +160,103 @@ public class Grid extends Observable {
                 deleteLine(y);
             }
 
-            if (TSpin) {
-                switch (nbLinesCleared) {
-                    case 1 -> addToScore(400); // T-Spin single
-                    case 2 -> addToScore(1200); // T-Spin double
-                    case 3 -> addToScore(1600); // T-Spin triple
+            calculateScore(nbLinesCleared);
+        }
+    }
+
+    private void calculateScore(int nbLinesCleared) {int score = 0;
+        String label = "";
+        switch (nbLinesCleared) {
+            case 1 -> {
+                label = "Single";
+                score = 100;
+                if (TSpin) {
+                    label += " T-Spin";
+                    score = 400;
+                    BtBCounter += 1;
+                } else {
+                    BtBCounter = 0;
+                }
+                if (allClear()) {
+                    label += " All clear";
+                    score = 800;
                 }
             }
-            switch (nbLinesCleared) {
-                case 1 -> addToScore(100); // simple
-                case 2 -> addToScore(300); // double
-                case 3 -> addToScore(500); // triple
-                case 4 -> addToScore(800); // tetris
-                default -> addToScore(-1000000); // impossibly
+            case 2 -> {
+                label = "Double";
+                score = 300;
+                if (TSpin) {
+                    label += " T-Spin";
+                    score = 1200;
+                    BtBCounter += 1;
+                } else {
+                    BtBCounter = 0;
+                }
+                if (allClear()) {
+                    label += " All clear";
+                    score = 1200;
+                }
             }
-            signalChange("stats");
+            case 3 -> {
+                label = "Triple";
+                score = 500;
+                if (TSpin) {
+                    label += " T-Spin triple";
+                    score = 1600;
+                    BtBCounter += 1;
+                } else {
+                    BtBCounter = 0;
+                }
+                if (allClear()) {
+                    label += " All clear";
+                    score = 1800;
+                }
+            }
+            case 4 -> {
+                label = "Tetris";
+                if (allClear()) {
+                    label += " All clear";
+                    score = 2000;
+                } else {
+                    score = 800;
+                }
+                BtBCounter += 1;
+            }
         }
+
+        if (BtBCounter >= 2) {
+            score = (int) (score * 1.5);
+            label += " BtB !";
+        }
+
+        statsValues.lineClearDisplay = label;
+
+        addToScore(score);
+        signalChange("stats");
+        if (resetScoreSkillLabel.isAlive()) {
+            resetScoreSkillLabel.interrupt();
+        }
+        resetScoreSkillLabel = new Thread(() -> {
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                // we don't care
+            }
+            statsValues.lineClearDisplay = "";
+            signalChange("stats");
+        });
+        resetScoreSkillLabel.start();
+    }
+
+    private boolean allClear() {
+        for (PieceColor[] c : grid) {
+            for (PieceColor i : c) {
+                if (i != PieceColor.NONE) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void colorWhiteLine(int y) {
@@ -211,10 +301,10 @@ public class Grid extends Observable {
         return maxHeight;
     }
 
-    public void doRdrop() {
+    public void doRdrop(boolean incrementScore) {
         int move_to = getMaxHeightEmpty(pieceManager.getCurrentPiece());
         for (int i = 0; i < move_to; i++) {
-            movePiece(0, 1, false, true);
+            movePiece(0, 1, false, incrementScore);
         }
         movePiece(0, 1, true, false);
     }
@@ -296,7 +386,7 @@ public class Grid extends Observable {
             };
             int count = 0;
             for (int[] c : coords) {
-                if (isValidPosition(new int[][]{c})) {
+                if (!isValidPosition(new int[][]{c})) {
                     count++;
                 }
             }
@@ -330,7 +420,6 @@ public class Grid extends Observable {
 
         int[] upperCorner;
         String direction = ((PieceT) currentPiece).getDirection();
-        System.out.println(direction);
         switch (direction) {
             case "up" ->
                     upperCorner = isLeft ? new int[]{currentPiece.getX() + 2, currentPiece.getY()} : new int[]{currentPiece.getX(), currentPiece.getY()};
@@ -345,8 +434,6 @@ public class Grid extends Observable {
                 return;
             }
         }
-        System.out.println("corner :" + upperCorner[0] + " " + upperCorner[1]);
-        System.out.println("left :" + isLeft);
 
         // special case for T-Spin
         kicks = new int[][]{{1, 1}, {-1, 1}, {0, 2}, {-1, 2}, {1, 2}};
@@ -356,13 +443,8 @@ public class Grid extends Observable {
     }
 
     private boolean tryRotate(int[][] coords, int[][] kicks, Piece currentPiece, int[][] originalRotatedShape) {
-        int[][] kickedShape = new int[coords.length][2];
         for (int[] kick : kicks) {
-            for (int i = 0; i < coords.length; i++) {
-                kickedShape[i][0] = coords[i][0] + kick[0];
-                kickedShape[i][1] = coords[i][1] + kick[1];
-            }
-            if (isValidPosition(kickedShape)) {
+            if (isValidPositionForShape(coords, kick[0], kick[1])) {
                 currentPiece.setShape(originalRotatedShape);
                 currentPiece.setPos(currentPiece.getX() + kick[0], currentPiece.getY() + kick[1]);
                 signalChange("grid");
@@ -496,19 +578,15 @@ public class Grid extends Observable {
 
                 for (int r = 0; r < rotation; r++) {
                     rotatedShape = applyRotation(rotatedShape, false); // false pour rotation à droite
-                }
+                } // TODO : why right rotation not used anywhere ?
             }
 
 
             for (int x = -1; x < width; x++) {
 
                 if (isValidPositionForShape(rotatedShape, x, currentPiece.getY())) {
-
                     int maxY = findMaxY(rotatedShape, x);
-
-
                     int score = evaluatePosition(currentPiece, x, maxY, rotatedShape);
-
                     if (score > bestScore) {
                         bestScore = score;
                         bestX = x;
@@ -519,25 +597,18 @@ public class Grid extends Observable {
             }
         }
 
-
         currentPiece.setShape(originalShape);
-
-
         return calculateMoves(currentPiece.getX(), currentPiece.getY(), bestX, bestY, bestRotation);
     }
 
 
     private boolean isValidPositionForShape(int[][] shape, int x, int y) {
-        for (int[] point : shape) {
-            int testX = point[0] + x;
-            int testY = point[1] + y;
-            if (testX < 0 || testX >= width || testY < 0 || testY >= height ||
-                    (testY >= 0 && testX >= 0 && testX < width && testY < height &&
-                            grid[testY][testX] != PieceColor.NONE)) {
-                return false;
-            }
+        int[][] newPosition = new int[shape.length][2];
+        for (int i = 0; i < shape.length; i++) {
+            newPosition[i][0] = shape[i][0] + x;
+            newPosition[i][1] = shape[i][1] + y;
         }
-        return true;
+        return isValidPosition(newPosition);
     }
 
 
@@ -551,7 +622,6 @@ public class Grid extends Observable {
         }
         return y;
     }
-
 
     private int[][] applyRotation(int[][] shape, boolean isLeft) {
 
@@ -605,15 +675,13 @@ public class Grid extends Observable {
     }
 
 
-    private int evaluatePosition(Piece piece, int x, int y, int[][] shape) {
+    private int evaluatePosition(Piece piece, int x, int y, int[][] shape) { // TODO WHY NOT USING PIECE ?
         int score = 0;
-
 
         int maxHeight = getMaxHeightAfterPlacement(x, y, shape);
         int completeLines = getCompleteLinesAfterPlacement(x, y, shape);
         int holes = getHoleAfterPlacement(x, y, shape);
         int bumpiness = getBumpinessAfterPlacement(x, y, shape);
-
 
         score -= maxHeight * 500;
         System.out.println(maxHeight);
