@@ -17,18 +17,17 @@ public class Grid extends Observable {
     private final int height;
     private final PieceColor[][] grid;
     private final PieceManager pieceManager;
-    private final StatsValues statsValues = new StatsValues();
+    private final StatsValues statsValues;
     private final int debugPos;
     public FileWriterAndReader fileWriterAndReader = new FileWriterAndReader(
             "app/src/main/resources/score.txt"
     );
     private boolean isPaused = false;
     private boolean TSpin = false;
-    private int BtBCounter = 0;
     private boolean isFixing = false;
-    private Thread resetScoreSkillLabel;
 
     public Grid(int width, int height, boolean debugMode, int debugPos) {
+        this.statsValues =  new StatsValues(() -> signalChange("stats"));
         this.height = height;
         this.width = width;
         this.grid = new PieceColor[height][width];
@@ -39,15 +38,7 @@ public class Grid extends Observable {
         }
         this.pieceManager = new PieceManager(debugMode);
         this.debugPos = debugPos;
-        resetScoreSkillLabel = new Thread(() -> { // used for delete line clear displaying
-            try {
-                sleep(1000);
-            } catch (InterruptedException e) {
-                // we don't care
-            }
-            statsValues.lineClearDisplay = "";
-            signalChange("stats");
-        });
+
     }
 
     public int getWidth() {
@@ -161,96 +152,13 @@ public class Grid extends Observable {
                 deleteLine(y);
             }
 
-            calculateScore(nbLinesCleared);
-        }
-    }
-
-    private void calculateScore(int nbLinesCleared) {
-        int score = 0;
-        String label = "";
-        switch (nbLinesCleared) {
-            case 1 -> {
-                label = "Single";
-                score = 100;
-                if (TSpin) {
-                    label += " T-Spin";
-                    score = 400;
-                    BtBCounter += 1;
-                } else {
-                    BtBCounter = 0;
-                }
-                if (allClear()) {
-                    label += " All clear";
-                    score = 800;
-                }
-            }
-            case 2 -> {
-                label = "Double";
-                score = 300;
-                if (TSpin) {
-                    label += " T-Spin";
-                    score = 1200;
-                    BtBCounter += 1;
-                } else {
-                    BtBCounter = 0;
-                }
-                if (allClear()) {
-                    label += " All clear";
-                    score = 1200;
-                }
-            }
-            case 3 -> {
-                label = "Triple";
-                score = 500;
-                if (TSpin) {
-                    label += " T-Spin triple";
-                    score = 1600;
-                    BtBCounter += 1;
-                } else {
-                    BtBCounter = 0;
-                }
-                if (allClear()) {
-                    label += " All clear";
-                    score = 1800;
-                }
-            }
-            case 4 -> {
-                label = "Tetris";
-                if (allClear()) {
-                    label += " All clear";
-                    score = 2000;
-                } else {
-                    score = 800;
-                }
-                BtBCounter += 1;
-            }
-        }
-
-        if (BtBCounter >= 2) {
-            score = (int) (score * 1.5);
-            label += " BtB !";
-        }
-
-        statsValues.lineClearDisplay = label;
-
-        addToScore(score);
-        signalChange("stats");
-        if (resetScoreSkillLabel.isAlive()) {
-            resetScoreSkillLabel.interrupt();
-        }
-        resetScoreSkillLabel = new Thread(() -> {
-            try {
-                sleep(1000);
-            } catch (InterruptedException e) {
-                // we don't care
-            }
-            statsValues.lineClearDisplay = "";
+            statsValues.calculateScore(nbLinesCleared, TSpin, isAllClear());
             signalChange("stats");
-        });
-        resetScoreSkillLabel.start();
+            statsValues.execResetScoreSkillLabel();
+        }
     }
 
-    private boolean allClear() {
+    private boolean isAllClear() {
         for (PieceColor[] c : grid) {
             for (PieceColor i : c) {
                 if (i != PieceColor.NONE) {
@@ -578,8 +486,8 @@ public class Grid extends Observable {
             if (rotation > 0) {
 
                 for (int r = 0; r < rotation; r++) {
-                    rotatedShape = applyRotation(rotatedShape, false); // false pour rotation à droite
-                } // TODO : why right rotation not used anywhere ?
+                    rotatedShape = applyRotation(rotatedShape, false); // false for right rotation
+                }
             }
 
             for (int x = -1; x < width; x++) {

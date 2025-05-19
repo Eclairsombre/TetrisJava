@@ -3,6 +3,7 @@ package Tetris.vue.Page;
 import Tetris.controller.Game;
 import Tetris.model.Piece.Piece;
 import Tetris.model.Piece.PieceColor;
+import Tetris.model.Piece.PieceTemplate.PieceI;
 import Tetris.vue.Page.TetrisComponent.CustomJPanel;
 import Tetris.vue.Page.TetrisComponent.DashBoardView;
 import Tetris.vue.Page.TetrisComponent.GameBoardView;
@@ -156,8 +157,12 @@ public class TetrisPage extends JPanel implements Observer {
             if (!(coords[3][0] == 1 && coords[3][1] == 3)) {
                 coords = holdPiece.getCoordinates(1, 1);
             }
+            int offset = 0;
+            if (holdPiece instanceof PieceI && holdPiece.getShape()[0][0] == 0) {// we are horizontaly oriented
+                offset = 1;
+            }
             for (int[] coord : coords) {
-                int x = coord[0];
+                int x = coord[0] - offset;
                 int y = coord[1];
                 holdPieceCells[x][y].setBackground(color);
             }
