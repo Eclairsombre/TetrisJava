@@ -705,7 +705,14 @@ public class Grid extends Observable {
         PieceColor[][] tempGrid = getTempGrid(x, y, shape);
 
         for (int row = 0; row < height; row++) {
-            if (isLineComplete(row, tempGrid)) {
+            boolean isComplete = true;
+            for (int col = 0; col < width; col++) {
+                if (tempGrid[row][col] == PieceColor.NONE) {
+                    isComplete = false;
+                    break;
+                }
+            }
+            if (isComplete) {
                 completeLines++;
             }
         }
