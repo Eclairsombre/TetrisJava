@@ -42,7 +42,7 @@ public class DashBoardView extends JPanel {
         scoreDisplayLabel = new JLabel("", SwingConstants.CENTER);
         scoreDisplayLabel.setForeground(Color.RED);
         TextView scoreDisplayPanel = new TextView(fontSize * 2, backgroundColor, scoreDisplayLabel);
-        scoreDisplayPanel.setBounds(20, 300, 200, 50);
+        scoreDisplayPanel.setBounds(20, 300, 260, 50);
         add(scoreDisplayPanel);
     }
 

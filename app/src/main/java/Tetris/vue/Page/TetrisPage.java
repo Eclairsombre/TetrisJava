@@ -43,7 +43,7 @@ public class TetrisPage extends JPanel implements Observer {
         GameBoardView boardView = new GameBoardView(widthGrid, heightGrid, cases, backgroundColor);
 
         dashBoardVue = new DashBoardView(backgroundColor);
-        dashBoardVue.setPreferredSize(new Dimension(200, 200));
+        dashBoardVue.setPreferredSize(new Dimension(260, 200));
 
         JPanel templatePanel = new JPanel();
         piecePanel = new PieceDisplayManager(nextPieceCells, holdPieceCells, 20, 20, backgroundColor, game.getFileWriterAndReader());

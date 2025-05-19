@@ -140,7 +140,7 @@ public class Grid extends Observable {
         int nbLinesCleared = 0;
         List<Integer> linesToDelete = new ArrayList<>();
         for (int y = 0; y < height; y++) {
-            if (isLineComplete(y)) {
+            if (isLineComplete(y, grid)) { // piece already added
                 linesToDelete.add(y);
             }
         }
@@ -281,9 +281,9 @@ public class Grid extends Observable {
         // signalChange("grid"); after this function because we call it in the movePiece method
     }
 
-    private boolean isLineComplete(int y) {
+    private boolean isLineComplete(int y, PieceColor[][] usePiece) {
         for (int x = 0; x < width; x++) {
-            if (grid[y][x] == PieceColor.NONE) {
+            if (usePiece[y][x] == PieceColor.NONE) {
                 return false;
             }
         }
@@ -566,7 +566,6 @@ public class Grid extends Observable {
         Piece currentPiece = pieceManager.getCurrentPiece();
         int bestScore = Integer.MIN_VALUE;
         int bestX = currentPiece.getX();
-        int bestY = currentPiece.getY();
         int bestRotation = 0;
 
         int[][] originalShape = currentPiece.getShape();
@@ -581,16 +580,13 @@ public class Grid extends Observable {
                 } // TODO : why right rotation not used anywhere ?
             }
 
-
             for (int x = -1; x < width; x++) {
-
                 if (isValidPositionForShape(rotatedShape, x, currentPiece.getY())) {
                     int maxY = findMaxY(rotatedShape, x);
-                    int score = evaluatePosition(currentPiece, x, maxY, rotatedShape);
+                    int score = evaluatePosition(x, maxY, rotatedShape);
                     if (score > bestScore) {
                         bestScore = score;
                         bestX = x;
-                        bestY = maxY;
                         bestRotation = rotation;
                     }
                 }
@@ -598,7 +594,7 @@ public class Grid extends Observable {
         }
 
         currentPiece.setShape(originalShape);
-        return calculateMoves(currentPiece.getX(), currentPiece.getY(), bestX, bestY, bestRotation);
+        return calculateMoves(currentPiece.getX(), bestX, bestRotation);
     }
 
 
@@ -641,15 +637,13 @@ public class Grid extends Observable {
     }
 
 
-    private int[] calculateMoves(int startX, int startY, int targetX, int targetY, int rotations) {
+    private int[] calculateMoves(int startX, int targetX, int rotations) {
 
         java.util.List<Integer> moves = new java.util.ArrayList<>();
-
 
         for (int i = 0; i < rotations; i++) {
             moves.add(1);
         }
-
 
         int dx = targetX - startX;
         while (dx != 0) {
@@ -662,9 +656,7 @@ public class Grid extends Observable {
             }
         }
 
-
         moves.add(5);
-
 
         int[] result = new int[moves.size()];
         for (int i = 0; i < moves.size(); i++) {
@@ -675,7 +667,7 @@ public class Grid extends Observable {
     }
 
 
-    private int evaluatePosition(Piece piece, int x, int y, int[][] shape) { // TODO WHY NOT USING PIECE ?
+    private int evaluatePosition(int x, int y, int[][] shape) {
         int score = 0;
 
         int maxHeight = getMaxHeightAfterPlacement(x, y, shape);
@@ -701,24 +693,11 @@ public class Grid extends Observable {
             maxHeight = Math.max(maxHeight, height - testY);
         }
 
-        boolean[][] tempGrid = new boolean[height][width];
-        for (int r = 0; r < height; r++) {
-            for (int c = 0; c < width; c++) {
-                tempGrid[r][c] = grid[r][c] != PieceColor.NONE;
-            }
-        }
-
-        for (int[] point : shape) {
-            int testX = point[0] + x;
-            int testY = point[1] + y;
-            if (testX >= 0 && testX < width && testY >= 0 && testY < height) {
-                tempGrid[testY][testX] = true;
-            }
-        }
+        PieceColor[][] tempGrid = getTempGrid(x, y, shape);
 
         for (int col = 0; col < width; col++) {
             for (int row = 0; row < height; row++) {
-                if (tempGrid[row][col]) {
+                if (tempGrid[row][col] != PieceColor.NONE) {
                     int colHeight = height - row;
                     maxHeight = Math.max(maxHeight, colHeight);
                     break;
@@ -732,29 +711,10 @@ public class Grid extends Observable {
     public int getCompleteLinesAfterPlacement(int x, int y, int[][] shape) {
         int completeLines = 0;
 
-
-        PieceColor[][] tempGrid = new PieceColor[height][width];
-        for (int r = 0; r < height; r++) {
-            System.arraycopy(grid[r], 0, tempGrid[r], 0, width);
-        }
-
-        for (int[] point : shape) {
-            int testX = point[0] + x;
-            int testY = point[1] + y;
-            if (testX >= 0 && testX < width && testY >= 0 && testY < height) {
-                tempGrid[testY][testX] = pieceManager.getCurrentPiece().getColor();
-            }
-        }
+        PieceColor[][] tempGrid = getTempGrid(x, y, shape);
 
         for (int row = 0; row < height; row++) {
-            boolean isComplete = true;
-            for (int col = 0; col < width; col++) {
-                if (tempGrid[row][col] == PieceColor.NONE) {
-                    isComplete = false;
-                    break;
-                }
-            }
-            if (isComplete) {
+            if (isLineComplete(row, tempGrid)) {
                 completeLines++;
             }
         }
@@ -765,20 +725,7 @@ public class Grid extends Observable {
     public int getHoleAfterPlacement(int x, int y, int[][] shape) {
         int holeCount = 0;
 
-        PieceColor[][] tempGrid = new PieceColor[height][width];
-        for (int r = 0; r < height; r++) {
-            System.arraycopy(grid[r], 0, tempGrid[r], 0, width);
-        }
-
-
-        for (int[] point : shape) {
-            int testX = point[0] + x;
-            int testY = point[1] + y;
-            if (testX >= 0 && testX < width && testY >= 0 && testY < height) {
-                tempGrid[testY][testX] = pieceManager.getCurrentPiece().getColor();
-            }
-        }
-
+        PieceColor[][] tempGrid = getTempGrid(x, y, shape);
 
         for (int col = 0; col < width; col++) {
             boolean blockFound = false;
@@ -794,15 +741,11 @@ public class Grid extends Observable {
         return holeCount;
     }
 
-    public int getBumpinessAfterPlacement(int x, int y, int[][] shape) {
-        int bumpiness = 0;
-
-
+    private PieceColor[][] getTempGrid(int x, int y, int[][] shape) {
         PieceColor[][] tempGrid = new PieceColor[height][width];
         for (int r = 0; r < height; r++) {
             System.arraycopy(grid[r], 0, tempGrid[r], 0, width);
         }
-
 
         for (int[] point : shape) {
             int testX = point[0] + x;
@@ -811,7 +754,13 @@ public class Grid extends Observable {
                 tempGrid[testY][testX] = pieceManager.getCurrentPiece().getColor();
             }
         }
+        return tempGrid;
+    }
 
+    public int getBumpinessAfterPlacement(int x, int y, int[][] shape) {
+        int bumpiness = 0;
+
+        PieceColor[][] tempGrid = getTempGrid(x, y, shape);
 
         int[] heights = new int[width];
         for (int col = 0; col < width; col++) {
@@ -823,13 +772,11 @@ public class Grid extends Observable {
             }
         }
 
-
         for (int i = 1; i < heights.length; i++) {
             bumpiness += Math.abs(heights[i] - heights[i - 1]);
         }
 
         return bumpiness;
     }
-
 }
 
