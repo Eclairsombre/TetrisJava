@@ -34,8 +34,6 @@ public class HomePage extends JPanel implements Observer {
         });
 
         setVisible(true);
-        welcomeLabel.setBounds(0, getHeight() / 4, 800, 100);
-        buttonPanel.setBounds(0, getHeight() - buttonPanel.getHeight(), 800, 150);
     }
 
     @Override

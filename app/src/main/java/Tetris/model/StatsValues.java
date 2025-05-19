@@ -1,5 +1,8 @@
 package Tetris.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static java.lang.Thread.sleep;
 
 public class StatsValues {
@@ -11,6 +14,9 @@ public class StatsValues {
     private final Runnable callView;
     private Thread resetScoreSkillLabel;
     private int BtBCounter = 0;
+    public FileWriterAndReader fileWriterAndReader = new FileWriterAndReader(
+            "app/src/main/resources/score.txt"
+    );
 
     StatsValues(Runnable callView) {
         this.callView = callView;
@@ -117,5 +123,38 @@ public class StatsValues {
 
         lineClearDisplay = label;
         this.score += score;
+    }
+
+
+    public void saveScore() {
+        String[] lines = fileWriterAndReader.readFromFile();
+        String nouvelleLigne = "Level :" + (level.getLevel() + 1) + " , " + score + " , " + getTime();
+        List<String> allScores = new ArrayList<>();
+
+        for (String line : lines) {
+            if (line != null && !line.trim().isEmpty() && line.split(" , ").length >= 2) {
+                allScores.add(line);
+            }
+        }
+
+        allScores.add(nouvelleLigne);
+        allScores.sort((a, b) -> {
+            try {
+                String[] partsA = a.split(" , ");
+                String[] partsB = b.split(" , ");
+
+                if (partsA.length < 2 || partsB.length < 2) {
+                    return 0;
+                }
+
+                int scoreA = Integer.parseInt(partsA[1].trim());
+                int scoreB = Integer.parseInt(partsB[1].trim());
+                return Integer.compare(scoreB, scoreA);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        });
+
+        fileWriterAndReader.writeToFile(allScores);
     }
 }

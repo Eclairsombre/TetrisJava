@@ -11,16 +11,21 @@ public class AIInputStrategy {
             return;
         }
 
-        if (plannedMoves == null || currentMoveIndex >= plannedMoves.length) {
-            plannedMoves = grid.getBestMove();
-            currentMoveIndex = 0;
+        int[] currentPlannedMoves = this.plannedMoves;
+        int index = this.currentMoveIndex;
 
-            if (plannedMoves == null || plannedMoves.length == 0) {
+        if (currentPlannedMoves == null || index >= currentPlannedMoves.length) {
+            currentPlannedMoves = grid.getBestMove();
+            index = 0;
+            this.plannedMoves = currentPlannedMoves;
+            this.currentMoveIndex = index;
+
+            if (currentPlannedMoves == null || currentPlannedMoves.length == 0) {
                 return;
             }
         }
-
-        int moveType = plannedMoves[currentMoveIndex++];
+        int moveType = currentPlannedMoves[index];
+        this.currentMoveIndex = index + 1;
 
         switch (moveType) {
             case 0 -> grid.rotatePiece(true);
@@ -29,8 +34,8 @@ public class AIInputStrategy {
             case 3 -> grid.movePiece(1, 0, false, false);
             case 4 -> grid.movePiece(0, 1, true, false);
             case 5 -> grid.doRdrop(false);
-            default -> {
-            }
+            case 6 -> grid.exchangeHoldAndCurrent();
+            default -> System.err.println("Error: Invalid move type " + moveType);
         }
     }
 
@@ -44,7 +49,7 @@ public class AIInputStrategy {
                 while (enabled) {
                     processInput(grid);
                     try {
-                        Thread.sleep(20);
+                        Thread.sleep(5);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         break;

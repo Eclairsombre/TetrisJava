@@ -158,7 +158,7 @@ public class TetrisPage extends JPanel implements Observer {
                 coords = holdPiece.getCoordinates(1, 1);
             }
             int offset = 0;
-            if (holdPiece instanceof PieceI && holdPiece.getShape()[0][0] == 0) {// we are horizontaly oriented
+            if (holdPiece instanceof PieceI && holdPiece.getShape()[0][0] == 0) { // we are horizontally oriented
                 offset = 1;
             }
             for (int[] coord : coords) {

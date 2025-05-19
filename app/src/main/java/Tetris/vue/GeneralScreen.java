@@ -88,6 +88,7 @@ public class GeneralScreen extends JFrame {
         switch (page) {
             case "homePage" -> {
                 musicPlayer.stop();
+                homePage.setPreferredSize(getSize()); // to force resizing
                 add(homePage);
             }
             case "tetrisView" -> {

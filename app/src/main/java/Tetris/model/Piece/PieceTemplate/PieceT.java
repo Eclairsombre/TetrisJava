@@ -32,7 +32,6 @@ public class PieceT extends Piece {
         }
         if (coinToCheck.size() == 1) {
             int[] lastPoint = coinToCheck.getFirst();
-            System.out.println(lastPoint[0] + " " + lastPoint[1]);
             if (lastPoint[0] == 0 && lastPoint[1] == 1) {
                 return "right";
             } else if (lastPoint[0] == 1 && lastPoint[1] == 2) {
