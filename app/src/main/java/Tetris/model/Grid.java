@@ -668,7 +668,7 @@ public class Grid extends Observable {
 
         score -= maxHeight * 730;
         score += completeLines * 608;
-        score -= holes * 214;
+        score -= holes * 814;
         score -= bumpiness * 224;
 
 

@@ -28,12 +28,14 @@ public class HomePage extends JPanel implements Observer {
             @Override
             public void componentResized(java.awt.event.ComponentEvent e) {
                 Dimension size = getSize();
-                welcomeLabel.setBounds(0, getHeight()/4, size.width, 100);
+                welcomeLabel.setBounds(0, getHeight() / 4, size.width, 100);
                 buttonPanel.setBounds(0, getHeight() - buttonPanel.getHeight(), size.width, 150);
             }
         });
 
         setVisible(true);
+        welcomeLabel.setBounds(0, getHeight() / 4, 800, 100);
+        buttonPanel.setBounds(0, getHeight() - buttonPanel.getHeight(), 800, 150);
     }
 
     @Override
