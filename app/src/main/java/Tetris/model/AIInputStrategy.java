@@ -27,7 +27,7 @@ public class AIInputStrategy {
             case 1 -> grid.rotatePiece(false);
             case 2 -> grid.movePiece(-1, 0, false, false);
             case 3 -> grid.movePiece(1, 0, false, false);
-            case 4 ->  grid.movePiece(0, 1, true, false);
+            case 4 -> grid.movePiece(0, 1, true, false);
             case 5 -> grid.doRdrop(false);
             default -> {
             }
@@ -44,7 +44,7 @@ public class AIInputStrategy {
                 while (enabled) {
                     processInput(grid);
                     try {
-                        Thread.sleep(200);
+                        Thread.sleep(20);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         break;

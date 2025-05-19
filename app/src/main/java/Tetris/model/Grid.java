@@ -18,11 +18,11 @@ public class Grid extends Observable {
     private final PieceColor[][] grid;
     private final PieceManager pieceManager;
     private final StatsValues statsValues = new StatsValues();
+    private final int debugPos;
     public FileWriterAndReader fileWriterAndReader = new FileWriterAndReader(
             "app/src/main/resources/score.txt"
     );
     private boolean isPaused = false;
-    private final int debugPos;
     private boolean TSpin = false;
     private int BtBCounter = 0;
     private boolean isFixing = false;
@@ -668,10 +668,9 @@ public class Grid extends Observable {
 
         score -= maxHeight * 500;
         System.out.println(maxHeight);
-        score += completeLines * 1000;
+        score += completeLines * 700;
 
-        score -= holes * 500;
-        score -= bumpiness * 300;
+
         return score;
     }
 
@@ -679,19 +678,12 @@ public class Grid extends Observable {
     private int getMaxHeightAfterPlacement(int x, int y, int[][] shape) {
         int maxHeight = 0;
 
-        for (int[] point : shape) {
-            int testY = point[1] + y;
-            maxHeight = Math.max(maxHeight, height - testY);
-        }
-
         PieceColor[][] tempGrid = getTempGrid(x, y, shape);
 
         for (int col = 0; col < width; col++) {
             for (int row = 0; row < height; row++) {
                 if (tempGrid[row][col] != PieceColor.NONE) {
-                    int colHeight = height - row;
-                    maxHeight = Math.max(maxHeight, colHeight);
-                    break;
+                    maxHeight++;
                 }
             }
         }
@@ -755,7 +747,7 @@ public class Grid extends Observable {
 
         int[] heights = new int[width];
         for (int col = 0; col < width; col++) {
-            for (int row = height - 1; row >= 0; row--) {
+            for (int row = 0; row < height; row++) {
                 if (tempGrid[row][col] != PieceColor.NONE) {
                     heights[col] = height - row;
                     break;
