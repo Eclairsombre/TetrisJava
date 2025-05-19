@@ -120,8 +120,8 @@ public class Game extends Observable {
         return grid.getPieceManager();
     }
 
-    public int getMaxHeightEmpty(Piece piece) {
-        return grid.getMaxHeightEmpty(piece);
+    public int findMaxY(Piece piece) {
+        return grid.findMaxY(piece.getShape(), piece.getX());
     }
 
     public void addGridObserver(Observer obj) {

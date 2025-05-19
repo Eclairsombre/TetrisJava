@@ -8,6 +8,7 @@ import Tetris.model.Piece.PieceTemplate.PieceT;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
+
 import static java.lang.Thread.sleep;
 
 @SuppressWarnings("deprecation")
@@ -164,7 +165,8 @@ public class Grid extends Observable {
         }
     }
 
-    private void calculateScore(int nbLinesCleared) {int score = 0;
+    private void calculateScore(int nbLinesCleared) {
+        int score = 0;
         String label = "";
         switch (nbLinesCleared) {
             case 1 -> {
@@ -290,19 +292,19 @@ public class Grid extends Observable {
         return true;
     }
 
-    public int getMaxHeightEmpty(Piece piece) {
-        int maxHeight = height - 1;
-        for (int i = 0; i < height; i++) {
-            if (!isValidPosition(piece.getCoordinates(piece.getX(), i))) {
-                maxHeight = i - 1;
+    public int findMaxY(int[][] shape, int x) {
+        int y = 0;
+        while (y < height) {
+            if (!isValidPositionForShape(shape, x, y + 1)) {
                 break;
             }
+            y++;
         }
-        return maxHeight;
+        return y;
     }
 
     public void doRdrop(boolean incrementScore) {
-        int move_to = getMaxHeightEmpty(pieceManager.getCurrentPiece());
+        int move_to = findMaxY(pieceManager.getCurrentPiece().getShape(), pieceManager.getCurrentPiece().getX());
         for (int i = 0; i < move_to; i++) {
             movePiece(0, 1, false, incrementScore);
         }
@@ -607,17 +609,6 @@ public class Grid extends Observable {
         return isValidPosition(newPosition);
     }
 
-
-    private int findMaxY(int[][] shape, int x) {
-        int y = 0;
-        while (y < height) {
-            if (!isValidPositionForShape(shape, x, y + 1)) {
-                break;
-            }
-            y++;
-        }
-        return y;
-    }
 
     private int[][] applyRotation(int[][] shape, boolean isLeft) {
 
