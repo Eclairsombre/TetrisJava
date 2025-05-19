@@ -684,24 +684,11 @@ public class Grid extends Observable {
             maxHeight = Math.max(maxHeight, height - testY);
         }
 
-        boolean[][] tempGrid = new boolean[height][width];
-        for (int r = 0; r < height; r++) {
-            for (int c = 0; c < width; c++) {
-                tempGrid[r][c] = grid[r][c] != PieceColor.NONE;
-            }
-        }
-
-        for (int[] point : shape) {
-            int testX = point[0] + x;
-            int testY = point[1] + y;
-            if (testX >= 0 && testX < width && testY >= 0 && testY < height) {
-                tempGrid[testY][testX] = true;
-            }
-        }
+        PieceColor[][] tempGrid = getTempGrid(x, y, shape);
 
         for (int col = 0; col < width; col++) {
             for (int row = 0; row < height; row++) {
-                if (tempGrid[row][col]) {
+                if (tempGrid[row][col] != PieceColor.NONE) {
                     int colHeight = height - row;
                     maxHeight = Math.max(maxHeight, colHeight);
                     break;
@@ -715,29 +702,10 @@ public class Grid extends Observable {
     public int getCompleteLinesAfterPlacement(int x, int y, int[][] shape) {
         int completeLines = 0;
 
-
-        PieceColor[][] tempGrid = new PieceColor[height][width];
-        for (int r = 0; r < height; r++) {
-            System.arraycopy(grid[r], 0, tempGrid[r], 0, width);
-        }
-
-        for (int[] point : shape) {
-            int testX = point[0] + x;
-            int testY = point[1] + y;
-            if (testX >= 0 && testX < width && testY >= 0 && testY < height) {
-                tempGrid[testY][testX] = pieceManager.getCurrentPiece().getColor();
-            }
-        }
+        PieceColor[][] tempGrid = getTempGrid(x, y, shape);
 
         for (int row = 0; row < height; row++) {
-            boolean isComplete = true;
-            for (int col = 0; col < width; col++) {
-                if (tempGrid[row][col] == PieceColor.NONE) {
-                    isComplete = false;
-                    break;
-                }
-            }
-            if (isComplete) {
+            if (isLineComplete(row, tempGrid)) {
                 completeLines++;
             }
         }
@@ -748,20 +716,7 @@ public class Grid extends Observable {
     public int getHoleAfterPlacement(int x, int y, int[][] shape) {
         int holeCount = 0;
 
-        PieceColor[][] tempGrid = new PieceColor[height][width];
-        for (int r = 0; r < height; r++) {
-            System.arraycopy(grid[r], 0, tempGrid[r], 0, width);
-        }
-
-
-        for (int[] point : shape) {
-            int testX = point[0] + x;
-            int testY = point[1] + y;
-            if (testX >= 0 && testX < width && testY >= 0 && testY < height) {
-                tempGrid[testY][testX] = pieceManager.getCurrentPiece().getColor();
-            }
-        }
-
+        PieceColor[][] tempGrid = getTempGrid(x, y, shape);
 
         for (int col = 0; col < width; col++) {
             boolean blockFound = false;
@@ -777,15 +732,11 @@ public class Grid extends Observable {
         return holeCount;
     }
 
-    public int getBumpinessAfterPlacement(int x, int y, int[][] shape) {
-        int bumpiness = 0;
-
-
+    private PieceColor[][] getTempGrid(int x, int y, int[][] shape) {
         PieceColor[][] tempGrid = new PieceColor[height][width];
         for (int r = 0; r < height; r++) {
             System.arraycopy(grid[r], 0, tempGrid[r], 0, width);
         }
-
 
         for (int[] point : shape) {
             int testX = point[0] + x;
@@ -794,18 +745,23 @@ public class Grid extends Observable {
                 tempGrid[testY][testX] = pieceManager.getCurrentPiece().getColor();
             }
         }
+        return tempGrid;
+    }
 
+    public int getBumpinessAfterPlacement(int x, int y, int[][] shape) {
+        int bumpiness = 0;
+
+        PieceColor[][] tempGrid = getTempGrid(x, y, shape);
 
         int[] heights = new int[width];
         for (int col = 0; col < width; col++) {
-            for (int row = height - 1; row >= 0; row--) {
+            for (int row = 0; row < height; row++) {
                 if (tempGrid[row][col] != PieceColor.NONE) {
                     heights[col] = height - row;
                     break;
                 }
             }
         }
-
 
         for (int i = 1; i < heights.length; i++) {
             bumpiness += Math.abs(heights[i] - heights[i - 1]);
@@ -814,4 +770,3 @@ public class Grid extends Observable {
         return bumpiness;
     }
 }
-

@@ -75,7 +75,7 @@ public class GeneralScreen extends JFrame {
 
         setPage("homePage");
         setTitle("Tetris");
-        setSize(1000, 1000);
+        setSize(800, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // Center the window
         setVisible(true);
