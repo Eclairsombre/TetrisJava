@@ -8,11 +8,11 @@ import java.awt.*;
 import java.io.File;
 import java.util.prefs.Preferences;
 
-public class MusicChoosePage extends JPanel {
+public class MusicChoosePopup extends JPanel {
     private MusicPlayer previewPlayer;
     private String paths = "data/music/TetrisOST.wav";
 
-    public MusicChoosePage(Runnable returnToMenu) {
+    public MusicChoosePopup(Runnable returnToMenu) {
         setSize(400, 250);
         File musicDir = new File("app/src/main/resources/data/music/");
         if (!musicDir.exists() || !musicDir.isDirectory()) {
@@ -72,7 +72,7 @@ public class MusicChoosePage extends JPanel {
     }
 
     private void saveMusicPath(String path) {
-        Preferences prefs = Preferences.userNodeForPackage(MusicChoosePage.class);
+        Preferences prefs = Preferences.userNodeForPackage(MusicChoosePopup.class);
         prefs.put("selectedMusicPath", path);
     }
 

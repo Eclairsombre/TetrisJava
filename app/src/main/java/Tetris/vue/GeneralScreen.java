@@ -4,7 +4,7 @@ import Tetris.controller.Game;
 import Tetris.vue.BasicComponent.Button;
 import Tetris.vue.BasicComponent.MusicPlayer;
 import Tetris.vue.Page.HomePage;
-import Tetris.vue.Page.MusicChoosePage;
+import Tetris.vue.Page.MusicChoosePopup;
 import Tetris.vue.Page.PopupPage;
 import Tetris.vue.Page.TetrisPage;
 
@@ -16,37 +16,47 @@ import java.awt.event.KeyEvent;
 
 import static Tetris.controller.Action.*;
 
-public class GeneralScreen extends JFrame {
-    HomePage homePage;
-    TetrisPage[] tetrisPage = new TetrisPage[2];
-    PopupPage[] gameOverPopup = new PopupPage[2];
-    PopupPage pausePopup;
-    String selectedPage = "homePage";
-    Game[] games = new Game[2];
-    String musicPath = "data/music/TetrisOST.wav";
-    MusicChoosePage musicChoosePage;
-    MusicPlayer musicPlayer;
-    boolean debugMode;
-    JPanel[] playersPages = new JPanel[2];
-    boolean[] isGameOver = new boolean[2];
-    boolean[] isPreviousGameOver = new boolean[2];
-    boolean is2PlayerMode;
 
+/**
+ * GeneralScreen is the main class that creates the GUI for the Tetris game.
+ * It initializes the game pages, handles user input, and manages the game state.
+ * This class allows JPanel change interface without creating a new JFrame.
+ */
+public class GeneralScreen extends JFrame {
+    private String selectedPage = "homePage";
+    private HomePage homePage; /// Main menu of the app
+    private final PopupPage[] gameOverPopup = new PopupPage[2]; /// Game over popup for each player
+    private final TetrisPage[] tetrisPage = new TetrisPage[2]; /// Game page for each player
+    private final Game[] games = new Game[2]; /// Game instance for each player
+    private final PopupPage pausePopup; /// Pause page in the game screen
+    private MusicChoosePopup musicChoosePopup; /// Music selection page in the main menu
+    private MusicPlayer musicPlayer; /// Music player for the background music
+    private final JPanel[] playersPages = new JPanel[2];
+    private final boolean[] isGameOver = new boolean[2];
+    private final boolean[] isPreviousGameOver = new boolean[2];
+    private boolean is2PlayerMode;
+
+
+    /**
+     * Constructor for the GeneralScreen class.
+     *
+     * @param debugMode  boolean indicating if the game is in debug mode
+     * @param debugPos   integer indicating the index of the debug position
+     */
     public GeneralScreen(boolean debugMode, int debugPos) {
         setFocusable(true);
-        this.debugMode = debugMode;
         for (int i = 0; i < this.games.length; i++) {
             this.games[i] = new Game(debugMode, debugPos);
         }
-        this.musicPlayer = new MusicPlayer(this.musicPath);
+        this.musicPlayer = new MusicPlayer("data/music/TetrisOST.wav");
 
         this.isGameOver[0] = false;
         this.isGameOver[1] = false;
         this.isPreviousGameOver[0] = false;
         this.isPreviousGameOver[1] = false;
 
-        this.musicChoosePage = new MusicChoosePage(() -> {
-            this.musicPlayer = new MusicPlayer(this.musicChoosePage.getPath());
+        this.musicChoosePopup = new MusicChoosePopup(() -> {
+            this.musicPlayer = new MusicPlayer(this.musicChoosePopup.getPath());
             this.homePage.setButtonsVisibility(true);
             setPage("homePage");
         });
@@ -214,7 +224,7 @@ public class GeneralScreen extends JFrame {
                     add(component);
                 }
             }
-            case "musicChoosePage" -> add(getJLayeredPane(this.homePage, this.musicChoosePage, 1));
+            case "musicChoosePage" -> add(getJLayeredPane(this.homePage, this.musicChoosePopup, 1));
             case "pause" -> {
                 this.musicPlayer.stop();
                 if (is2PlayerMode) {
