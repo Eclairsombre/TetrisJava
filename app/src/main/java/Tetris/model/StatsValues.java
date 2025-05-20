@@ -151,7 +151,7 @@ public class StatsValues {
      */
     public void saveScore() {
         String[] lines = fileWriterAndReader.readFromFile();
-        String nouvelleLigne = "Level :" + (level.getLevel()) + " , " + score + " , " + getTime();
+        String nouvelleLigne = "Level :" + (level.level()) + " , " + score + " , " + getTime();
         List<String> allScores = new ArrayList<>();
 
         for (String line : lines) {

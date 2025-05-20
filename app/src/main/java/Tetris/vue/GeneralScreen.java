@@ -3,19 +3,16 @@ package Tetris.vue;
 import Tetris.controller.Game;
 import Tetris.vue.BasicComponent.Button;
 import Tetris.vue.BasicComponent.MusicPlayer;
-import Tetris.vue.Page.HomePage;
-import Tetris.vue.Page.MusicChoosePopup;
-import Tetris.vue.Page.PopupPage;
-import Tetris.vue.Page.TetrisPage;
+import Tetris.vue.Page.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 import static Tetris.controller.Action.*;
-
 
 /**
  * GeneralScreen is the main class that creates the GUI for the Tetris game.
@@ -24,118 +21,112 @@ import static Tetris.controller.Action.*;
  */
 public class GeneralScreen extends JFrame {
     private String selectedPage = "homePage";
-    private HomePage homePage; /// Main menu of the app
-    private final PopupPage[] gameOverPopup = new PopupPage[2]; /// Game over popup for each player
-    private final TetrisPage[] tetrisPage = new TetrisPage[2]; /// Game page for each player
-    private final Game[] games = new Game[2]; /// Game instance for each player
-    private final PopupPage pausePopup; /// Pause page in the game screen
-    private MusicChoosePopup musicChoosePopup; /// Music selection page in the main menu
-    private MusicPlayer musicPlayer; /// Music player for the background music
+    private final HomePage homePage;
+    /// Main menu of the app
+
+    private final PopupPage[] gameOverPopup = new PopupPage[2];
+    /// Game over popup for each player
+
+    private final TetrisPage[] tetrisPage = new TetrisPage[2];
+    /// Game page for each player
+
+    private final Game[] games = new Game[2];
+    /// Game instance for each player
+
+    private final PopupPage pausePopup;
+    /// Pause page in the game screen
+
+    private final MusicChoosePopup musicChoosePopup;
+    /// Music selection page in the main menu
+
+    private MusicPlayer musicPlayer;
+    /// Music player for the background music
+
     private final JPanel[] playersPages = new JPanel[2];
+    /// Game page template for each player
+
     private final boolean[] isGameOver = new boolean[2];
     private final boolean[] isPreviousGameOver = new boolean[2];
     private boolean is2PlayerMode;
+    /// Basic booleans to manage the game state
 
 
     /**
-     * Constructor for the GeneralScreen class.
+     * Constructor for the GeneralScreen class. Initialize the app and all the pages.
      *
      * @param debugMode  boolean indicating if the game is in debug mode
      * @param debugPos   integer indicating the index of the debug position
      */
     public GeneralScreen(boolean debugMode, int debugPos) {
-        setFocusable(true);
+        // Initialize all the pages and the game instances
         for (int i = 0; i < this.games.length; i++) {
             this.games[i] = new Game(debugMode, debugPos);
         }
         this.musicPlayer = new MusicPlayer("data/music/TetrisOST.wav");
+        this.musicChoosePopup = new MusicChoosePopup(() -> setPage("homePage"));
 
-        this.isGameOver[0] = false;
-        this.isGameOver[1] = false;
-        this.isPreviousGameOver[0] = false;
-        this.isPreviousGameOver[1] = false;
-
-        this.musicChoosePopup = new MusicChoosePopup(() -> {
-            this.musicPlayer = new MusicPlayer(this.musicChoosePopup.getPath());
-            this.homePage.setButtonsVisibility(true);
-            setPage("homePage");
-        });
-
-        this.homePage = new HomePage(
-                new Button("Mode 1 Joueur", () -> {
-                    this.is2PlayerMode = false;
-                    setPage("tetrisView");
-                }),
-                new Button("Mode 2 Joueurs", () -> {
-                    this.is2PlayerMode = true;
-                    setPage("tetrisView");
-                }),
-                new Button("Choisir la musique", () -> {
-                    this.homePage.setButtonsVisibility(false);
-                    setPage("musicChoosePage");
-                })
-        );
+        this.homePage = new HomePage(new Button("Mode 1 Joueur", () -> {
+            this.is2PlayerMode = false;
+            setPage("tetrisView");
+        }), new Button("Mode 2 Joueurs", () -> {
+            this.is2PlayerMode = true;
+            setPage("tetrisView");
+        }), new Button("Choisir la musique", () -> setPage("musicChoosePage")));
 
         this.pausePopup = new PopupPage("PAUSE", Color.BLACK, this.games[0],
-                new Button("Revenir au jeu", () -> {
-                    setPage("tetrisView");
-                    this.games[0].resumeGame();
-                    this.games[1].resumeGame();
-                }),
+                new Button("Revenir au jeu", () -> setPage("tetrisView")),
                 new Button("Retour au menu", () -> setPage("homePage"))
         );
 
-        initPages(0);
-        initPages(1);
+        initPages();
 
-        playersPages[0] = tetrisPage[0];
-        playersPages[1] = tetrisPage[1];
+        for (int i = 0; i < this.games.length; i++) {
+            this.isGameOver[i] = false;
+            this.isPreviousGameOver[i] = false;
+            playersPages[i] = tetrisPage[i];
+        }
 
+        // Set global parameters and initialize the JFrame
         createEventListener();
-
         setPage("homePage");
         setTitle("Tetris");
         setSize(1600, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Center the window
+        setLocationRelativeTo(null); // to center the window
         setVisible(true);
+        setFocusable(true);
     }
 
-    public void initPages(int i) {
-        Runnable changeToGameOver = () -> {
-            this.gameOverPopup[i].updateStats(this.games[i].getStatsValues());
-            this.games[i].stopGame();
-            this.isGameOver[i] = true;
-            this.isPreviousGameOver[i] = true;
-            setPage("gameOver");
-        };
+    /**
+     * Initialize the game pages for each player.
+     */
+    public void initPages() {
+        for (int i = 0; i < this.games.length; i++) {
+            int finalI = i; // to use in the lambda expression
+            this.tetrisPage[i] = new TetrisPage(this.games[i],
+                    () -> {
+                        this.isGameOver[finalI] = true;
+                        setPage("gameOver");
+                    }
+            );
+            this.tetrisPage[i].start();
+            this.games[i].addGridObserver(this.tetrisPage[i]);
 
-        Runnable changeToPause = () -> {
-            this.pausePopup.updateStats(this.games[0].getStatsValues());
-            setPage("pause");
-        };
-
-        this.tetrisPage[i] = new TetrisPage(this.games[i], changeToGameOver, changeToPause);
-        this.tetrisPage[i].start();
-        this.games[i].addGridObserver(this.tetrisPage[i]);
-
-        this.gameOverPopup[i] = new PopupPage("GAME OVER", Color.RED, this.games[i],
-                new Tetris.vue.BasicComponent.Button("Rejouer", () -> {
-                    this.isGameOver[i] = false;
-                    this.games[i].reset();
-                    games[i].resumeGame();
-                    setPage("tetrisView");
-                }),
-                new Tetris.vue.BasicComponent.Button("Retour au menu", () -> {
-                    isGameOver[0] = false;
-                    isGameOver[1] = false;
-                    isPreviousGameOver[0] = false;
-                    isPreviousGameOver[1] = false;
-                    setPage("homePage");
-                })
-        );
+            this.gameOverPopup[i] = new PopupPage("GAME OVER", Color.RED, this.games[i],
+                    new Button("Rejouer", () -> {
+                        this.isGameOver[finalI] = false;
+                        setPage("tetrisView");
+                    }),
+                    new Button("Retour au menu", () -> setPage("homePage"))
+            );
+        }
     }
 
+    /**
+     * Set the current page of the JFrame and apply the necessary changes.
+     *
+     * @param page the name of the page to set
+     */
     public synchronized void setPage(String page) {
         String previousPage = this.selectedPage;
         getContentPane().removeAll();
@@ -143,107 +134,130 @@ public class GeneralScreen extends JFrame {
         switch (page) {
             case "homePage" -> {
                 this.musicPlayer.stop();
+                this.musicPlayer.reset();
+                this.musicPlayer = new MusicPlayer(this.musicChoosePopup.getPath());
+                this.homePage.setButtonsVisibility(true);
+                for (int i = 0; i < this.games.length; i++) { // reset the game instances
+                    this.isGameOver[i] = false;
+                    this.isPreviousGameOver[i] = false;
+                    this.games[i].setAiMode(false);
+                    this.games[i].stopGame();
+                }
                 this.homePage.setPreferredSize(getSize()); // to force resizing
                 add(this.homePage);
-                games[0].stopGame();
-                games[1].stopGame();
             }
             case "tetrisView" -> {
-                if (previousPage.equals("homePage")) {
-                    this.musicPlayer.stop();
-                    this.musicPlayer.reset();
+                if (!this.musicPlayer.isPlaying()) {
                     this.musicPlayer.play();
                 }
-                if (!is2PlayerMode) {
-                    if (previousPage.equals("homePage") || previousPage.equals("gameOver")) {
-                        this.games[0].reset();
+
+                for (int i = 0; i < this.games.length; i++) {
+                    if ((this.isPreviousGameOver[i] && !previousPage.equals("pause")) || previousPage.equals("homePage")) {
+                        this.games[i].reset();
+                        this.playersPages[i] = this.tetrisPage[i];
+                        this.isPreviousGameOver[i] = false;
                     }
-                    playersPages[0] = tetrisPage[0];
-                    playersPages[0].setPreferredSize(getSize());
-                    add(this.playersPages[0]);
-                } else {
-                    if (previousPage.equals("homePage")) {
-                        this.games[0].reset();
-                        playersPages[0] = tetrisPage[0];
+                }
 
-                        this.games[1].reset();
-                        playersPages[1] = tetrisPage[1];
+                this.games[0].resumeGame();
+                if (this.is2PlayerMode) {
+                    this.games[1].resumeGame();
+                }
 
-                        this.playersPages[0].setPreferredSize(new Dimension( getSize().width / 2, getSize().height));
-                        this.playersPages[1].setPreferredSize(new Dimension( getSize().width / 2, getSize().height));
-                    }
-
-                    if (this.isPreviousGameOver[0]) {
-                        playersPages[0] = tetrisPage[0];
-                        this.isPreviousGameOver[0] = false;
+                if (previousPage.equals("homePage")) {
+                    if (is2PlayerMode) {
+                        this.playersPages[0].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
+                        this.playersPages[1].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
                     } else {
-                        playersPages[1] = tetrisPage[1];
-                        this.isPreviousGameOver[1] = false;
+                        this.playersPages[0].setPreferredSize(getSize());
                     }
+                }
 
-                    JPanel component = new JPanel();
-                    component.setLayout(new BorderLayout());
-
-                    tetrisPage[0].updateBoard();
-                    tetrisPage[0].updateNextPiece();
-                    component.add(this.playersPages[0], BorderLayout.WEST);
-
-                    tetrisPage[1].updateBoard();
-                    tetrisPage[1].updateNextPiece();
-                    component.add(this.playersPages[1], BorderLayout.EAST);
-
-                    component.setPreferredSize(getSize());
-                    component.setFocusable(false);
-                    add(component);
+                if (this.is2PlayerMode) {
+                    addTwinPanel(this.playersPages[0], this.playersPages[1]);
+                } else {
+                    add(this.playersPages[0]);
                 }
             }
             case "gameOver" -> {
-                if (!is2PlayerMode) {
-                    playersPages[0] = new JPanel();
-                    playersPages[0].add(getJLayeredPane(this.tetrisPage[0], this.gameOverPopup[0], 1));
-                    add(playersPages[0]);
-                } else {
-                    if (this.isGameOver[0]) {
-                        this.gameOverPopup[0].updateStats(this.games[0].getStatsValues());
-                        playersPages[0] = new JPanel();
-                        playersPages[0].add(getJLayeredPane(this.tetrisPage[0], this.gameOverPopup[0], 2));
+                if (this.is2PlayerMode) {
+                    for (int i = 0; i < this.games.length; i++) {
+                        if (!this.isGameOver[i]) {
+                            continue;
+                        }
+                        this.gameOverPopup[i].updateStats(this.games[i].getStatsValues());
+                        this.games[i].stopGame();
+                        this.isPreviousGameOver[i] = true;
+                        this.playersPages[i] = new JPanel();
+                        int divideWidth = 2;
+                        JLayeredPane layeredPane = getJLayeredPane(this.tetrisPage[i], this.gameOverPopup[i], divideWidth);
+                        this.playersPages[i].add(layeredPane);
+                        // because of the container, we need to force the resizing
+                        this.playersPages[i].addComponentListener(new ComponentAdapter() {
+                            @Override
+                            public void componentResized(ComponentEvent e) {
+                                layeredPane.setPreferredSize(new Dimension(getSize().width / divideWidth, getSize().height));
+                            }
+                        });
                     }
-                    if (this.isGameOver[1]) {
-                        this.gameOverPopup[1].updateStats(this.games[1].getStatsValues());
-                        playersPages[1] = new JPanel();
-                        playersPages[1].add(getJLayeredPane(this.tetrisPage[1], this.gameOverPopup[1], 2));
-                    }
-                    JPanel component = new JPanel();
-                    component.setLayout(new BorderLayout());
-
-                    component.add(this.playersPages[0], BorderLayout.WEST);
-                    component.add(this.playersPages[1], BorderLayout.EAST);
-
-                    component.setPreferredSize(getSize());
-                    component.setFocusable(false);
-                    add(component);
+                    addTwinPanel(this.playersPages[0], this.playersPages[1]);
+                } else if (this.isGameOver[0]) { // if only one player is playing
+                    this.gameOverPopup[0].updateStats(this.games[0].getStatsValues());
+                    this.games[0].stopGame();
+                    this.isPreviousGameOver[0] = true;
+                    this.playersPages[0] = new JPanel();
+                    add(getJLayeredPane(this.tetrisPage[0], this.gameOverPopup[0], 1));
                 }
             }
-            case "musicChoosePage" -> add(getJLayeredPane(this.homePage, this.musicChoosePopup, 1));
+            case "musicChoosePage" -> {
+                this.homePage.setButtonsVisibility(false);
+                add(getJLayeredPane(this.homePage, this.musicChoosePopup, 1));
+            }
             case "pause" -> {
                 this.musicPlayer.stop();
-                if (is2PlayerMode) {
+                this.pausePopup.updateStats(this.games[0].getStatsValues());
+                if (this.is2PlayerMode) {
                     JPanel container = new JPanel();
                     container.setLayout(new BorderLayout());
                     container.add(this.tetrisPage[0], BorderLayout.WEST);
                     container.add(this.tetrisPage[1], BorderLayout.EAST);
                     add(getJLayeredPane(container, this.pausePopup, 1));
                 } else {
-                    add(getJLayeredPane(tetrisPage[0], this.pausePopup, 1));
+                    add(getJLayeredPane(this.tetrisPage[0], this.pausePopup, 1));
                 }
             }
         }
         this.selectedPage = page;
-
         repaint();
         revalidate();
     }
 
+    /**
+     * Add two panels side by side in a container. (Used for 2 players mode)
+     *
+     * @param panel1 the first panel to add
+     * @param panel2 the second panel to add
+     */
+    private void addTwinPanel(JPanel panel1, JPanel panel2) {
+        JPanel container = new JPanel();
+        container.setLayout(new BorderLayout());
+        container.add(panel1, BorderLayout.WEST);
+        container.add(panel2, BorderLayout.EAST);
+        container.setPreferredSize(getSize());
+        container.setFocusable(false);
+        add(container);
+    }
+
+
+    /**
+     * Create a JLayeredPane with two panels (background and foreground) and set their bounds.
+     * Usually used for the game over popup and the pause popup.
+     *
+     * @param background the background panel
+     * @param foreground the foreground panel
+     * @param divideWidth the width to divide the screen
+     * @return the JLayeredPane with the two panels
+     */
     private JLayeredPane getJLayeredPane(JPanel background, JPanel foreground, int divideWidth) {
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setPreferredSize(new Dimension(getSize().width / divideWidth, getSize().height));
@@ -251,18 +265,24 @@ public class GeneralScreen extends JFrame {
 
         layeredPane.addComponentListener(new ComponentAdapter() {
             @Override
-            public void componentResized(java.awt.event.ComponentEvent e) {
+            public void componentResized(ComponentEvent e) {
                 background.setPreferredSize(new Dimension(getSize().width / divideWidth, getSize().height));
                 prepareLayeredPane(background, foreground, divideWidth);
             }
         });
         prepareLayeredPane(background, foreground, divideWidth);
-
         layeredPane.add(background, Integer.valueOf(0));
         layeredPane.add(foreground, Integer.valueOf(1));
         return layeredPane;
     }
 
+    /**
+     * Prepare the layered pane by setting the bounds of the background and foreground panels.
+     *
+     * @param background the background panel
+     * @param foreground the foreground panel
+     * @param divideWidth the width to divide the screen
+     */
     private void prepareLayeredPane(JPanel background, JPanel foreground, int divideWidth) {
         background.setBounds(0, 0, getWidth() / divideWidth, getHeight());
         foreground.setBounds(
@@ -273,48 +293,43 @@ public class GeneralScreen extends JFrame {
         );
     }
 
+    /**
+     * Global event listener for the JFrame, to handle key events and component resizing.
+     */
     public void createEventListener() {
         addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e) {
-                switch (selectedPage) {
-                    case "pause" -> {
-                        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                            setPage("tetrisView");
-                            games[0].resumeGame();
-                            if (is2PlayerMode) {
-                                games[1].resumeGame();
-                            }
-                        }
-                    }
-                    case "tetrisView" -> {
-                        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    switch (selectedPage) {
+                        case "pause" -> setPage("tetrisView");
+                        case "tetrisView", "gameOver" -> {
                             games[0].pauseGame();
                             if (is2PlayerMode) {
                                 games[1].pauseGame();
                             }
+                            setPage("pause");
                         }
-                        if (e.getKeyCode() == KeyEvent.VK_O) {
-                            games[0].setAiMode(!games[0].isAiMode());
-                            tetrisPage[0].updateAILabel();
-                        }
-                        if (e.getKeyCode() == KeyEvent.VK_P && is2PlayerMode) {
-                            games[1].setAiMode(!games[1].isAiMode());
-                            tetrisPage[1].updateAILabel();
-                        }
+                        case "homePage" -> System.exit(0);
                     }
-                    case "gameOver" -> {
-                        // do nothing
+                } else if (selectedPage.equals("tetrisView")) {
+                    if (e.getKeyCode() == KeyEvent.VK_O) {
+                        games[0].setAiMode(!games[0].isAiMode());
+                        tetrisPage[0].updateAILabel();
                     }
-                    default -> {
-                        return;
+                    if (e.getKeyCode() == KeyEvent.VK_P && is2PlayerMode) {
+                        games[1].setAiMode(!games[1].isAiMode());
+                        tetrisPage[1].updateAILabel();
                     }
                 }
-                if (games[0].isPaused()) {
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (!selectedPage.equals("tetrisView")) {
                     return;
                 }
-
-                if (!(games[0].isAiMode()) && !isGameOver[0]) {
+                if (!(games[0].isAiMode()) && !isGameOver[0] && !games[0].isPaused()) {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_S -> MOVE_DOWN.execute(games[0]);
                         case KeyEvent.VK_Q -> MOVE_LEFT.execute(games[0]);
@@ -326,7 +341,7 @@ public class GeneralScreen extends JFrame {
                     }
                 }
 
-                if (is2PlayerMode && !(games[1].isAiMode()) && !isGameOver[1]) {
+                if (is2PlayerMode && !(games[1].isAiMode()) && !isGameOver[1] && !games[1].isPaused()) {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_NUMPAD5 -> MOVE_DOWN.execute(games[1]);
                         case KeyEvent.VK_NUMPAD4 -> MOVE_LEFT.execute(games[1]);
@@ -342,7 +357,7 @@ public class GeneralScreen extends JFrame {
 
         addComponentListener(new ComponentAdapter() {
             @Override
-            public void componentResized(java.awt.event.ComponentEvent e) {
+            public void componentResized(ComponentEvent e) {
                 for (JPanel page : playersPages) {
                     page.setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
                     page.revalidate();

@@ -51,7 +51,7 @@ public class AIInputStrategy {
     /**
      * Enables the AI input strategy.
      *
-     * @param grid The grid object representing the game state.
+     * @param game The game object representing the game state.
      */
     public void enable(Game game) {
         if (!enabled) {

@@ -31,7 +31,7 @@ public class PopupPage extends JPanel {
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 24));
         scoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        levelLabel = new JLabel("Niveau: " + (statsValues.level.getLevel()), SwingConstants.CENTER);
+        levelLabel = new JLabel("Niveau: " + (statsValues.level.level()), SwingConstants.CENTER);
         levelLabel.setFont(new Font("Arial", Font.BOLD, 24));
         levelLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -60,7 +60,7 @@ public class PopupPage extends JPanel {
 
     public void updateStats(StatsValues statsValues) {
         scoreLabel.setText("Score : " + statsValues.score);
-        levelLabel.setText("Niveau : " + (statsValues.level.getLevel()));
+        levelLabel.setText("Niveau : " + (statsValues.level.level()));
         timeLabel.setText("Temps de jeu: : " + statsValues.getTime());
     }
 }

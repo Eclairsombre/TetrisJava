@@ -91,7 +91,7 @@ public class Grid extends Observable {
      * Method to go to the next level.
      */
     public void nextLevel() {
-        statsValues.level = new Level(statsValues.level.getLevel());
+        statsValues.level = new Level(statsValues.level.level() + 1);
         signalChange("level");
     }
 
@@ -441,9 +441,6 @@ public class Grid extends Observable {
 
     public void setPaused(boolean paused) {
         isPaused = paused;
-        if (paused) {
-            signalChange("pause");
-        }
     }
 
     public void reset(boolean debugMode) {

@@ -3,7 +3,6 @@ package Tetris.controller;
 public class Scheduler extends Thread {
     private final Runnable r;
     private long pause;
-    private boolean isRunning = false;
     private boolean wait = false;
 
     public Scheduler(long pause, Runnable runnable) {
@@ -16,8 +15,7 @@ public class Scheduler extends Thread {
      */
     @Override
     public void run() {
-        isRunning = true;
-        while (isRunning) {
+        while (true) {
             try {
                 if (!wait) {
                     r.run();
@@ -33,7 +31,7 @@ public class Scheduler extends Thread {
      * Stops the thread
      */
     public void stopThread() {
-        isRunning = false;
+        this.interrupt();
     }
 
     public void setPause(long pause) {

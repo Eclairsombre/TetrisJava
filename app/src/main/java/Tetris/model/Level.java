@@ -1,17 +1,7 @@
 package Tetris.model;
 
-public class Level {
-    private final int level;
-
-    public Level(int level) {
-        this.level = level;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
+public record Level(int level) {
     public long getSpeed() {
-        return 1000 / level;
+        return level < 25 ? 1000 / level : 1000 / 25;
     }
 }

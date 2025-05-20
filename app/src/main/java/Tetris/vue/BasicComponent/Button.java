@@ -3,6 +3,9 @@ package Tetris.vue.BasicComponent;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Button is a custom JPanel that contains a JButton with a specified text and action.
+ */
 public class Button extends JPanel {
     public Button(String text, Runnable runnable) {
         JButton button = new JButton(text);

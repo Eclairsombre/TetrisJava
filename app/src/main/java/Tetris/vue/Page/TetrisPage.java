@@ -27,12 +27,10 @@ public class TetrisPage extends JPanel implements Observer {
     private final int widthGrid;
     private final int heightGrid;
     Runnable changeToGameOver;
-    Runnable changeToPause;
 
-    public TetrisPage(Game g, Runnable changeToGameOver, Runnable changeToPause) {
+    public TetrisPage(Game g, Runnable changeToGameOver) {
         Color backgroundColor = Color.LIGHT_GRAY;
         this.changeToGameOver = changeToGameOver;
-        this.changeToPause = changeToPause;
         game = g;
 
         widthGrid = game.getLengthGrid()[0];
@@ -179,7 +177,6 @@ public class TetrisPage extends JPanel implements Observer {
                 return;
             }
             switch ((String) arg) {
-                case "pause" -> changeToPause.run();
                 case "timer" -> dashBoardVue.updateTimerLabel(this.game.getStatsValues().getTime());
                 case "stats" -> dashBoardVue.updateStats(this.game.getStatsValues());
                 case "grid" -> SwingUtilities.invokeLater(this::updateBoard);

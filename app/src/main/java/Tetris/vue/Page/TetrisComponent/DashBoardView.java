@@ -48,7 +48,7 @@ public class DashBoardView extends JPanel {
 
     public void updateStats(StatsValues statsValues) {
         scoreLabel.setText("Score : " + statsValues.score);
-        levelLabel.setText("Niveau : " + (statsValues.level.getLevel()));
+        levelLabel.setText("Niveau : " + (statsValues.level.level()));
         lineDeleteCountLabel.setText("Lignes supprimées : " + statsValues.lineDeleteCount);
         scoreDisplayLabel.setText(statsValues.lineClearDisplay);
     }

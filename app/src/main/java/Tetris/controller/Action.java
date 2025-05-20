@@ -7,8 +7,7 @@ public enum Action {
     ROTATE_LEFT(Game::rotatePieceLeft),
     ROTATE_RIGHT(Game::rotatePieceRight),
     HOLD(Game::exchangeHoldAndCurrent),
-    RDROP(Game::doRdrop),
-    PAUSE(Game::pauseGame);
+    RDROP(Game::doRdrop);
 
     private final GameAction action;
 

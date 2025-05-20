@@ -40,4 +40,8 @@ public class MusicPlayer {
             clip.setFramePosition(0); // Rewind to the beginning
         }
     }
+
+    public boolean isPlaying() {
+        return clip != null && clip.isRunning();
+    }
 }
