@@ -8,11 +8,11 @@ import java.util.List;
 
 public class PieceManager {
     private final List<Piece> nextPiece = new ArrayList<>();
+    private final SecureRandom random = new java.security.SecureRandom();
     private List<Integer> lastPiece = new ArrayList<>(List.of(-1, -1, -1)); // impossible piece index to start
     private boolean canHoldPiece = true;
     private Piece currentPiece;
     private Piece holdPiece;
-    private final SecureRandom random = new java.security.SecureRandom();
 
     public PieceManager(boolean debugMode) {
         reset(debugMode);
@@ -36,6 +36,11 @@ public class PieceManager {
         return p;
     }
 
+    /**
+     * Method to exchange the hold piece with the current piece.
+     *
+     * @return true if the exchange was successful, false if the hold piece is not available.
+     */
     public boolean exchangeHoldAndCurrent() {
         if (!canHoldPiece) {
             return false;
@@ -52,6 +57,11 @@ public class PieceManager {
         return true;
     }
 
+    /**
+     * Method to get a new piece.
+     *
+     * @return a new piece.
+     */
     public Piece getNouvellePiece() {
         // make a semi-random choice of a piece to avoid too many duplicates
         int idx = random.nextInt(7);
@@ -80,12 +90,20 @@ public class PieceManager {
         }
     }
 
+    /**
+     * Method to change the current piece.
+     */
     public void changePiece() {
         currentPiece = nextPiece.removeFirst();
         nextPiece.addLast(initializePiece());
         canHoldPiece = true;
     }
 
+    /**
+     * Method to reset the piece manager.
+     *
+     * @param debugMode if true, the current piece is set to a specific piece for debugging.
+     */
     public void reset(boolean debugMode) {
         if (debugMode) {
             currentPiece = new PieceT(PieceColor.CYAN);

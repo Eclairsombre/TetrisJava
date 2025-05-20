@@ -51,7 +51,7 @@ public class StatsValues {
     }
 
 
-    public void execResetScoreSkillLabel() {
+    public void resetLineClearDisplayAfterDelay() {
         if (callView != null) {
             if (resetScoreSkillLabel != null && resetScoreSkillLabel.isAlive()) {
                 resetScoreSkillLabel.interrupt();
@@ -60,7 +60,7 @@ public class StatsValues {
                 try {
                     sleep(1000);
                 } catch (InterruptedException e) {
-                    // we don't care
+                    // Thread was interrupted, do nothing
                 }
                 lineClearDisplay = "";
                 callView.run();
@@ -69,6 +69,13 @@ public class StatsValues {
         }
     }
 
+    /**
+     * Method to calculate the score.
+     *
+     * @param nbLinesCleared Number of lines cleared.
+     * @param TSpin          Whether it was a T-Spin.
+     * @param allClear       Whether it was an all clear.
+     */
     void calculateScore(int nbLinesCleared, boolean TSpin, boolean allClear) {
         int score = 0;
         String label = "";
@@ -139,7 +146,9 @@ public class StatsValues {
         this.score += score;
     }
 
-
+    /**
+     * Method to save the score to a file.
+     */
     public void saveScore() {
         String[] lines = fileWriterAndReader.readFromFile();
         String nouvelleLigne = "Level :" + (level.getLevel() + 1) + " , " + score + " , " + getTime();

@@ -20,10 +20,10 @@ public class Grid extends Observable {
     private final PieceManager pieceManager;
     private final StatsValues statsValues;
     private final int debugPos;
+    private final AiUtils aiUtils;
     private boolean isPaused = false;
     private boolean TSpin = false;
     private boolean isFixing = false;
-    private final AiUtils aiUtils;
 
     public Grid(int width, int height, boolean debugMode, int debugPos) {
         this.statsValues = new StatsValues(() -> signalChange("stats"));
@@ -53,6 +53,11 @@ public class Grid extends Observable {
         return statsValues.fileWriterAndReader;
     }
 
+    /**
+     * Method to signal a change in the grid.
+     *
+     * @param type which change appended
+     */
     public void signalChange(String type) {
         setChanged();
         notifyObservers(type);
@@ -62,16 +67,27 @@ public class Grid extends Observable {
         return statsValues;
     }
 
+    /**
+     * Method to add points to the score.
+     *
+     * @param points the points to add
+     */
     public void addToScore(int points) {
         statsValues.score += points;
         signalChange("stats");
     }
 
+    /**
+     * Method to go to the next level.
+     */
     public void nextLevel() {
         statsValues.level = new Level(statsValues.level.getLevel() + 1);
         signalChange("level");
     }
 
+    /**
+     * Method to increment the seconds of the timer.
+     */
     public void incrementSeconds() {
         if (!isPaused) {
             statsValues.incrementSeconds();
@@ -83,6 +99,9 @@ public class Grid extends Observable {
         return this.pieceManager;
     }
 
+    /**
+     * Method to exchange the hold and current piece.
+     */
     public void exchangeHoldAndCurrent() {
         if (pieceManager.exchangeHoldAndCurrent()) { // the exchange is possible and done
             signalChange("grid");
@@ -103,6 +122,9 @@ public class Grid extends Observable {
         }
     }
 
+    /**
+     * Method to clean the lines when needed
+     */
     private void clearLines() {
         int nbLinesCleared = 0;
         List<Integer> linesToDelete = new ArrayList<>();
@@ -129,10 +151,15 @@ public class Grid extends Observable {
 
             statsValues.calculateScore(nbLinesCleared, TSpin, isAllClear());
             signalChange("stats");
-            statsValues.execResetScoreSkillLabel();
+            statsValues.resetLineClearDisplayAfterDelay();
         }
     }
 
+    /**
+     * Method to check if the grid is empty
+     *
+     * @return true if the grid is empty, false otherwise
+     */
     private boolean isAllClear() {
         for (PieceColor[] c : grid) {
             for (PieceColor i : c) {
@@ -144,6 +171,11 @@ public class Grid extends Observable {
         return true;
     }
 
+    /**
+     * Method to color the line white
+     *
+     * @param y the line to color
+     */
     private void colorWhiteLine(int y) {
         for (int x = 0; x < width; x++) {
             setCell(x, y, PieceColor.WHITE);
@@ -151,6 +183,11 @@ public class Grid extends Observable {
         signalChange("grid");
     }
 
+    /**
+     * Method to get a copy of the grid with the current piece placed at the given position.
+     *
+     * @return the grid
+     */
     private PieceColor[][] getTempGrid(int x, int y, int[][] shape) {
         PieceColor[][] tempGrid = new PieceColor[height][width];
         for (int r = 0; r < height; r++) {
@@ -167,6 +204,11 @@ public class Grid extends Observable {
         return tempGrid;
     }
 
+    /**
+     * Method to delete a line
+     *
+     * @param y the line to delete
+     */
     private void deleteLine(int y) {
         statsValues.lineDeleteCount++;
         for (int x = 0; x < width; x++) {
@@ -182,15 +224,29 @@ public class Grid extends Observable {
         // signalChange("grid"); after this function because we call it in the movePiece method
     }
 
-    private boolean isLineComplete(int y, PieceColor[][] usePiece) {
+    /**
+     * Method to check if the line is complete
+     *
+     * @param y    the line to check
+     * @param grid the grid to check
+     * @return true if the line is complete, false otherwise
+     */
+    private boolean isLineComplete(int y, PieceColor[][] grid) {
         for (int x = 0; x < width; x++) {
-            if (usePiece[y][x] == PieceColor.NONE) {
+            if (grid[y][x] == PieceColor.NONE) {
                 return false;
             }
         }
         return true;
     }
 
+    /**
+     * Method to find the maximum Y position for a shape
+     *
+     * @param shape the shape to check
+     * @param x     the x position of the shape
+     * @return the maximum Y position for the shape
+     */
     public int findMaxY(int[][] shape, int x) {
         int y = 0;
         while (y < height) {
@@ -202,6 +258,11 @@ public class Grid extends Observable {
         return y;
     }
 
+    /**
+     * Method to drop the piece to the bottom
+     *
+     * @param incrementScore if true, increment the score
+     */
     public void doRdrop(boolean incrementScore) {
         int move_to = findMaxY(pieceManager.getCurrentPiece().getShape(), pieceManager.getCurrentPiece().getX());
         for (int i = 0; i < move_to; i++) {
@@ -210,6 +271,14 @@ public class Grid extends Observable {
         movePiece(0, 1, true, false);
     }
 
+    /**
+     * Method to move the piece
+     *
+     * @param x_move         the x movement
+     * @param y_move         the y movement
+     * @param fixPiece       if true, fix the piece
+     * @param incrementScore if true, increment the score
+     */
     public synchronized void movePiece(int x_move, int y_move, boolean fixPiece, boolean incrementScore) {
         if (isPaused) {
             return;
@@ -241,12 +310,18 @@ public class Grid extends Observable {
         }
     }
 
+    /**
+     * Method to fix the piece
+     *
+     * @param currentPiece the current piece
+     * @param color        the color of the piece
+     */
     public void fixPiece(Piece currentPiece, PieceColor color) {
         Thread fixPieceThread = new Thread(() -> {
             try {
                 sleep(100);
             } catch (InterruptedException e) {
-                // we don't care
+                // The thread was interrupted, do nothing
                 System.out.println("Error sleeping");
             }
             if (!isValidPositionForShape(currentPiece.getShape(), currentPiece.getX(), currentPiece.getY() + 1)) { // we check if the piece must be fixed
@@ -272,10 +347,13 @@ public class Grid extends Observable {
         isFixing = true;
     }
 
+    /**
+     * Method to check if the current piece can do a T-Spin
+     */
     private void checkTSpin() {
         if (pieceManager.getCurrentPiece() instanceof PieceT) {
             Piece currentPiece = pieceManager.getCurrentPiece();
-            int[][] coords = { {0, 0}, {2, 0}, {0, 2}, {2, 2} };
+            int[][] coords = {{0, 0}, {2, 0}, {0, 2}, {2, 2}};
             int count = 0;
             for (int[] c : coords) {
                 if (!isValidPositionForShape(new int[][]{{currentPiece.getX(), currentPiece.getY()}}, c[0], c[1])) {
@@ -288,6 +366,11 @@ public class Grid extends Observable {
         }
     }
 
+    /**
+     * Method to rotate the piece
+     *
+     * @param isLeft true if the piece must be rotated to the left, false otherwise
+     */
     public void rotatePiece(boolean isLeft) {
         Piece currentPiece = this.pieceManager.getCurrentPiece();
         int[][] originalRotatedShape = currentPiece.getRotatedPosition(isLeft);
@@ -304,14 +387,10 @@ public class Grid extends Observable {
         int[][] upperCorner;
         String direction = ((PieceT) currentPiece).getDirection();
         switch (direction) {
-            case "up" ->
-                    upperCorner = isLeft ? new int[][]{{2, 0}} : new int[][]{{0, 0}};
-            case "down" ->
-                    upperCorner = isLeft ? new int[][]{{0, 0}} : new int[][]{{2, 0}};
-            case "left" ->
-                    upperCorner = isLeft ? new int[][]{{0, 0}, {0, 1}, {0, 2}} : null;
-            case "right" ->
-                    upperCorner = isLeft ? null : new int[][]{{2, 0}, {2, 1}, {2, 2}};
+            case "up" -> upperCorner = isLeft ? new int[][]{{2, 0}} : new int[][]{{0, 0}};
+            case "down" -> upperCorner = isLeft ? new int[][]{{0, 0}} : new int[][]{{2, 0}};
+            case "left" -> upperCorner = isLeft ? new int[][]{{0, 0}, {0, 1}, {0, 2}} : null;
+            case "right" -> upperCorner = isLeft ? null : new int[][]{{2, 0}, {2, 1}, {2, 2}};
             case null, default -> {
                 System.out.println("Error: direction is null");
                 return;
@@ -325,6 +404,14 @@ public class Grid extends Observable {
         }
     }
 
+    /**
+     * Method to try to rotate the piece
+     *
+     * @param kicks                the kicks to try
+     * @param currentPiece         the current piece
+     * @param originalRotatedShape the original rotated shape
+     * @return true if the rotation is possible, false otherwise
+     */
     private boolean tryRotate(int[][] kicks, Piece currentPiece, int[][] originalRotatedShape) {
         for (int[] kick : kicks) {
             if (isValidPositionForShape(originalRotatedShape, currentPiece.getX() + kick[0], currentPiece.getY() + kick[1])) {
@@ -413,6 +500,11 @@ public class Grid extends Observable {
         signalChange("stats");
     }
 
+    /**
+     * Method to get the best move for the current piece
+     *
+     * @return the combinaison of placement to go to the best position
+     */
     public int[] getBestMove() {
         Piece currentPiece = pieceManager.getCurrentPiece();
         Piece nextPiece = pieceManager.getNextPiece().getFirst();
@@ -463,6 +555,13 @@ public class Grid extends Observable {
         return new int[0]; // should never happen
     }
 
+    /**
+     * Method to find the best move for a piece
+     *
+     * @param originalNextPieceShape the shape of the next piece
+     * @param piece                  the piece to check
+     * @return the best move for the piece
+     */
     public long[] findBestMoveForPiece(int[][] originalNextPieceShape, Piece piece) {
         long bestScore = Integer.MIN_VALUE;
         long bestX = -1;
@@ -491,6 +590,14 @@ public class Grid extends Observable {
         return new long[]{bestScore, bestX, bestRotation};
     }
 
+    /**
+     * Method to check if the position is valid for a shape
+     *
+     * @param shape the shape to check
+     * @param x     the x position of the shape
+     * @param y     the y position of the shape
+     * @return true if the position is valid, false otherwise
+     */
     private boolean isValidPositionForShape(int[][] shape, int x, int y) {
         if (shape == null) {
             return false;

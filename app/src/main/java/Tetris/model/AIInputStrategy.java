@@ -6,6 +6,11 @@ public class AIInputStrategy {
     private int[] plannedMoves = null;
     private int currentMoveIndex = 0;
 
+    /**
+     * Processes the input for the AI.
+     *
+     * @param grid The grid object representing the game state.
+     */
     public void processInput(Grid grid) {
         if (!enabled || grid.isPaused()) {
             return;
@@ -39,6 +44,11 @@ public class AIInputStrategy {
         }
     }
 
+    /**
+     * Enables the AI input strategy.
+     *
+     * @param grid The grid object representing the game state.
+     */
     public void enable(Grid grid) {
         if (!enabled) {
             enabled = true;
@@ -60,6 +70,9 @@ public class AIInputStrategy {
         }
     }
 
+    /**
+     * Disables the AI input strategy.
+     */
     public void disable() {
         if (enabled) {
             enabled = false;

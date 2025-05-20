@@ -13,6 +13,14 @@ public class AiUtils {
         this.height = height;
     }
 
+    /**
+     * Calculates the moves needed to reach the targetX from startX.
+     *
+     * @param startX
+     * @param targetX
+     * @param rotations
+     * @return
+     */
     int[] calculateMoves(int startX, int targetX, int rotations) {
         List<Integer> moves = new java.util.ArrayList<>();
         for (int i = 0; i < rotations; i++) {
@@ -40,6 +48,14 @@ public class AiUtils {
         return result;
     }
 
+    /**
+     * Evaluates the position of the piece on the grid.
+     *
+     * @param previousMaxHeight The maximum height of the grid before placing the piece.
+     * @param shape             The shape of the piece.
+     * @param grid              The current state of the grid.
+     * @return A score representing the quality of the position.
+     */
     long evaluatePosition(int previousMaxHeight, int[][] shape, PieceColor[][] grid) {
         long score = 0;
 
@@ -57,6 +73,14 @@ public class AiUtils {
     }
 
 
+    /**
+     * Calculates the maximum height of the grid after placing the piece.
+     *
+     * @param previousMaxHeight The maximum height of the grid before placing the piece.
+     * @param shape             The shape of the piece.
+     * @param grid              The current state of the grid.
+     * @return The maximum height of the grid after placing the piece.
+     */
     private int getMaxHeightAfterPlacement(int previousMaxHeight, int[][] shape, PieceColor[][] grid) {
         int maxHeight = 0;
 
@@ -78,6 +102,12 @@ public class AiUtils {
         return maxHeight;
     }
 
+    /**
+     * Calculates the number of complete lines after placing the piece.
+     *
+     * @param grid The current state of the grid.
+     * @return The number of complete lines after placing the piece.
+     */
     public int getCompleteLinesAfterPlacement(PieceColor[][] grid) {
         int completeLines = 0;
 
@@ -97,6 +127,12 @@ public class AiUtils {
         return completeLines;
     }
 
+    /**
+     * Calculates the number of holes after placing the piece.
+     *
+     * @param grid The current state of the grid.
+     * @return The number of holes after placing the piece.
+     */
     public int getHoleAfterPlacement(PieceColor[][] grid) {
         int holeCount = 0;
 
@@ -114,6 +150,12 @@ public class AiUtils {
         return holeCount;
     }
 
+    /**
+     * Calculates the bumpiness of the grid after placing the piece.
+     *
+     * @param grid The current state of the grid.
+     * @return The bumpiness of the grid after placing the piece.
+     */
     public int getBumpinessAfterPlacement(PieceColor[][] grid) {
         int bumpiness = 0;
 

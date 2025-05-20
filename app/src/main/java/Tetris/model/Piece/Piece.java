@@ -4,9 +4,9 @@ package Tetris.model.Piece;
 public class Piece {
     private final int[][] shape = new int[4][2]; // General shape for the piece
     private final PieceColor color;
+    private final int[] center = new int[2]; // Center of the piece for rotation
     private int x = 0;
     private int y = 0; // Position of the piece on the grid
-    private final int[] center = new int[2]; // Center of the piece for rotation
 
     public Piece(PieceColor color) {
         this.color = color;
@@ -18,15 +18,6 @@ public class Piece {
         return shape;
     }
 
-    public int[][] getCoordinates(int x, int y) {
-        int[][] coordinates = new int[4][2];
-        for (int i = 0; i < 4; i++) {
-            coordinates[i][0] = this.shape[i][0] + x;
-            coordinates[i][1] = this.shape[i][1] + y;
-        }
-        return coordinates;
-    }
-
     public void setShape(int[][] shape) {
         if (shape.length == 4 && shape[0].length == 2) {
             for (int i = 0; i < 4; i++) {
@@ -36,6 +27,22 @@ public class Piece {
         } else {
             throw new IllegalArgumentException("Shape must be 4x2.");
         }
+    }
+
+    /**
+     * Returns the coordinates of the piece on the grid.
+     *
+     * @param x The x-coordinate of the piece on the grid.
+     * @param y The y-coordinate of the piece on the grid.
+     * @return An array of coordinates representing the piece's position on the grid.
+     */
+    public int[][] getCoordinates(int x, int y) {
+        int[][] coordinates = new int[4][2];
+        for (int i = 0; i < 4; i++) {
+            coordinates[i][0] = this.shape[i][0] + x;
+            coordinates[i][1] = this.shape[i][1] + y;
+        }
+        return coordinates;
     }
 
     public int getX() {
@@ -55,6 +62,12 @@ public class Piece {
         return color;
     }
 
+    /**
+     * Returns the rotated position of the piece based on the pivot point.
+     *
+     * @param isLeft True if rotating left, false if rotating right.
+     * @return An array of coordinates representing the rotated position of the piece.
+     */
     public int[][] getRotatedPosition(boolean isLeft) {
         int[][] rotatedShape = new int[4][2];
         int pivotX = center[0];
@@ -80,6 +93,11 @@ public class Piece {
         return rotatedShape;
     }
 
+    /**
+     * Returns the maximum Y coordinate of the piece.
+     *
+     * @return The maximum Y coordinate of the piece.
+     */
     public int maxYCoord() {
         int maxY = shape[0][1];
         for (int i = 1; i < 4; i++) {

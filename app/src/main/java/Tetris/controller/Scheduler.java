@@ -11,6 +11,9 @@ public class Scheduler extends Thread {
         this.pause = pause;
     }
 
+    /**
+     * This method is called when the thread is started. It runs the runnable
+     */
     @Override
     public void run() {
         isRunning = true;
@@ -26,6 +29,9 @@ public class Scheduler extends Thread {
         }
     }
 
+    /**
+     * Stops the thread
+     */
     public void stopThread() {
         isRunning = false;
     }

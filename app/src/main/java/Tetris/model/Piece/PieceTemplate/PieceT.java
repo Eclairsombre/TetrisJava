@@ -13,13 +13,18 @@ public class PieceT extends Piece {
         super.setShape(shape);
     }
 
+    /**
+     * Get the direction of the piece
+     *
+     * @return the direction of the piece
+     */
     public String getDirection() {
         int[] down = {0, 1};
         int[] up = {1, 2};
         int[] left = {2, 1};
         int[] right = {1, 0};
         List<int[]> coinToCheck = new java.util.ArrayList<>(List.of(down, up, left, right));
-        for (int[] pos: getShape()) {
+        for (int[] pos : getShape()) {
             if (pos[0] == 1 && pos[1] == 2) {
                 coinToCheck.remove(up);
             } else if (pos[0] == 0 && pos[1] == 1) {
