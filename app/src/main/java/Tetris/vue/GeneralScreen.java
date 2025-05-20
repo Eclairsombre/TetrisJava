@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+
 import static Tetris.controller.Action.*;
 
 public class GeneralScreen extends JFrame {
@@ -22,7 +23,7 @@ public class GeneralScreen extends JFrame {
     PopupPage pausePopup;
     String selectedPage = "homePage";
     Game game;
-    String musicPath = "data/music/tetris.wav";
+    String musicPath = "data/music/TetrisOST.wav";
     MusicChoosePage musicChoosePage;
     MusicPlayer musicPlayer;
     boolean debugMode;

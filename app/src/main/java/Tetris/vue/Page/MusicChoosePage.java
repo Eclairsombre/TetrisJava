@@ -10,7 +10,7 @@ import java.util.prefs.Preferences;
 
 public class MusicChoosePage extends JPanel {
     private MusicPlayer previewPlayer;
-    private String paths = "data/music/tetris.wav";
+    private String paths = "data/music/TetrisOST.wav";
 
     public MusicChoosePage(Runnable returnToMenu) {
         setSize(400, 250);
