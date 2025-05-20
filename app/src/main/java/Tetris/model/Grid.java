@@ -418,30 +418,23 @@ public class Grid extends Observable {
         Piece nextPiece = pieceManager.getNextPiece().getFirst();
         Piece holdPiece = pieceManager.getHoldPiece();
 
-        int bestScore = Integer.MIN_VALUE;
-        int bestX = -1;
-        int bestRotation = -1;
-
         int[][] originalShape = currentPiece.getShape();
         int[][] originalHoldPieceShape = holdPiece != null ? holdPiece.getShape() : null;
-        int[][] originalNextPieceShape = nextPiece.getShape();
+        int[][] originalNextPieceShape = nextPiece != null ? nextPiece.getShape() : null;
 
-        int[] values = findBestMoveForPiece(originalShape, currentPiece, bestScore, bestX, bestRotation);
-        bestScore = values[0];
-        bestX = values[1];
-        bestRotation = values[2];
+        long[] values = findBestMoveForPiece(originalShape, currentPiece);
+        long bestScore = values[0];
+        int bestX = (int) values[1];
+        int bestRotation = (int) values[2];
         String whichPieceToUse = "current";
 
         values = findBestMoveForPiece(
                 holdPiece != null ? originalHoldPieceShape : originalNextPieceShape,
-                holdPiece != null ? holdPiece : nextPiece,
-                bestScore,
-                bestX,
-                bestRotation
+                holdPiece != null ? holdPiece : nextPiece
         );
-        if (values[0] != bestScore || values[1] != bestX || values[2] != bestRotation) {
-            bestX = values[1];
-            bestRotation = values[2];
+        if (values[0] > bestScore) {
+            bestX = (int) values[1];
+            bestRotation = (int) values[2];
             whichPieceToUse = "hold";
         }
 
@@ -449,7 +442,9 @@ public class Grid extends Observable {
         if (holdPiece != null) {
             holdPiece.setShape(originalHoldPieceShape);
         } else {
-            nextPiece.setShape(originalNextPieceShape);
+            if (nextPiece != null) {
+                nextPiece.setShape(originalNextPieceShape);
+            }
         }
 
         switch (whichPieceToUse) {
@@ -468,7 +463,11 @@ public class Grid extends Observable {
         return new int[0]; // should never happen
     }
 
-    public int[] findBestMoveForPiece(int[][] originalNextPieceShape, Piece piece, int bestScore, int bestX, int bestRotation) {
+    public long[] findBestMoveForPiece(int[][] originalNextPieceShape, Piece piece) {
+        long bestScore = Integer.MIN_VALUE;
+        long bestX = -1;
+        long bestRotation = 0;
+
         for (int rotation = 0; rotation < 4; rotation++) {
             int[][] rotatedShape = originalNextPieceShape;
             if (rotation > 0) {
@@ -480,7 +479,7 @@ public class Grid extends Observable {
             for (int x = -1; x < width; x++) {
                 if (isValidPositionForShape(rotatedShape, x, piece.getY())) {
                     int maxY = findMaxY(rotatedShape, x);
-                    int score = aiUtils.evaluatePosition(maxY, rotatedShape, getTempGrid(x, maxY, rotatedShape));
+                    long score = aiUtils.evaluatePosition(maxY, rotatedShape, getTempGrid(x, maxY, rotatedShape));
                     if (score > bestScore) {
                         bestScore = score;
                         bestX = x;
@@ -489,7 +488,7 @@ public class Grid extends Observable {
                 }
             }
         }
-        return new int[]{bestScore, bestX, bestRotation};
+        return new long[]{bestScore, bestX, bestRotation};
     }
 
     private boolean isValidPositionForShape(int[][] shape, int x, int y) {
