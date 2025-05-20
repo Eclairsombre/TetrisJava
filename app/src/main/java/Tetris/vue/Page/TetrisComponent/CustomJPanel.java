@@ -22,6 +22,8 @@ public class CustomJPanel extends JPanel {
     }
 
     public void updateBorder() {
+        setPreferredSize(new Dimension(20, 20));
+
         super.setBackground(baseColor);
         setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.BLACK, getHeight() / 10),
