@@ -25,6 +25,9 @@ public class Game extends Observable {
         reset();
     }
 
+    /**
+     * Method to reset the game.
+     */
     public void reset() {
         if (scheduler != null && scheduler.isAlive()) {
             scheduler.stopThread();
@@ -47,6 +50,9 @@ public class Game extends Observable {
         return grid.isPaused();
     }
 
+    /**
+     * Method to pause the game.
+     */
     public void pauseGame() {
         if (scheduler.isAlive()) {
             scheduler.stopThread();
@@ -54,6 +60,9 @@ public class Game extends Observable {
         grid.setPaused(true);
     }
 
+    /**
+     * Method to resume the game.
+     */
     public void resumeGame() {
         if (!scheduler.isAlive()) {
             scheduler = new Scheduler(grid.getStatsValues().level.getSpeed(), runnable);
@@ -138,9 +147,13 @@ public class Game extends Observable {
     public void setAiMode(boolean isAIMod) {
         grid.setAiMode(isAIMod);
         if (isAIMod) {
-            aiInputStrategy.enable(grid);
+            aiInputStrategy.enable(this);
         } else {
             aiInputStrategy.disable();
         }
+    }
+
+    public int[] getBestMove() {
+        return grid.getBestMove();
     }
 }

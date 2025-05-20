@@ -1,5 +1,9 @@
 package Tetris.model;
 
+import Tetris.controller.Game;
+
+import static Tetris.controller.Action.*;
+
 public class AIInputStrategy {
     private boolean enabled = false;
     private Thread aiThread;
@@ -9,10 +13,10 @@ public class AIInputStrategy {
     /**
      * Processes the input for the AI.
      *
-     * @param grid The grid object representing the game state.
+     * @param game The game object representing the game state.
      */
-    public void processInput(Grid grid) {
-        if (!enabled || grid.isPaused()) {
+    public void processInput(Game game) {
+        if (!enabled || game.isPaused()) {
             return;
         }
 
@@ -20,7 +24,7 @@ public class AIInputStrategy {
         int index = this.currentMoveIndex;
 
         if (currentPlannedMoves == null || index >= currentPlannedMoves.length) {
-            currentPlannedMoves = grid.getBestMove();
+            currentPlannedMoves = game.getBestMove();
             index = 0;
             this.plannedMoves = currentPlannedMoves;
             this.currentMoveIndex = index;
@@ -33,13 +37,13 @@ public class AIInputStrategy {
         this.currentMoveIndex = index + 1;
 
         switch (moveType) {
-            case 0 -> grid.rotatePiece(true);
-            case 1 -> grid.rotatePiece(false);
-            case 2 -> grid.movePiece(-1, 0, false, false);
-            case 3 -> grid.movePiece(1, 0, false, false);
-            case 4 -> grid.movePiece(0, 1, true, false);
-            case 5 -> grid.doRdrop(false);
-            case 6 -> grid.exchangeHoldAndCurrent();
+            case 0 -> ROTATE_LEFT.execute(game);
+            case 1 -> ROTATE_RIGHT.execute(game);
+            case 2 -> MOVE_LEFT.execute(game);
+            case 3 -> MOVE_RIGHT.execute(game);
+            case 4 -> MOVE_DOWN.execute(game);
+            case 5 -> RDROP.execute(game);
+            case 6 -> HOLD.execute(game);
             default -> System.err.println("Error: Invalid move type " + moveType);
         }
     }
@@ -49,7 +53,7 @@ public class AIInputStrategy {
      *
      * @param grid The grid object representing the game state.
      */
-    public void enable(Grid grid) {
+    public void enable(Game game) {
         if (!enabled) {
             enabled = true;
             plannedMoves = null;
@@ -57,7 +61,7 @@ public class AIInputStrategy {
 
             aiThread = new Thread(() -> {
                 while (enabled) {
-                    processInput(grid);
+                    processInput(game);
                     try {
                         Thread.sleep(5);
                     } catch (InterruptedException e) {
