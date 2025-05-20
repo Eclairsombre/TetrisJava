@@ -40,18 +40,18 @@ public class AiUtils {
         return result;
     }
 
-    int evaluatePosition(int previousMaxHeight, int[][] shape, PieceColor[][] grid) {
-        int score = 0;
+    long evaluatePosition(int previousMaxHeight, int[][] shape, PieceColor[][] grid) {
+        long score = 0;
 
-        int maxHeight = getMaxHeightAfterPlacement(previousMaxHeight, shape, grid);
-        int completeLines = getCompleteLinesAfterPlacement(grid);
-        int holes = getHoleAfterPlacement(grid);
-        int bumpiness = getBumpinessAfterPlacement(grid);
+        long maxHeight = getMaxHeightAfterPlacement(previousMaxHeight, shape, grid);
+        long completeLines = getCompleteLinesAfterPlacement(grid);
+        long holes = getHoleAfterPlacement(grid);
+        long bumpiness = getBumpinessAfterPlacement(grid);
 
-        score -= maxHeight * 730;
+        score += maxHeight * -730;
         score += completeLines * 608;
-        score -= holes * 814;
-        score -= bumpiness * 224;
+        score += holes * -817;
+        score += bumpiness * -224;
 
         return score;
     }
