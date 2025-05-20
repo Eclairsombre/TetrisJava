@@ -91,7 +91,7 @@ public class Grid extends Observable {
      * Method to go to the next level.
      */
     public void nextLevel() {
-        statsValues.level = new Level(statsValues.level.getLevel() + 1);
+        statsValues.level = new Level(statsValues.level.getLevel());
         signalChange("level");
     }
 

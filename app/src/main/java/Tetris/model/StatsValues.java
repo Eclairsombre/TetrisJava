@@ -12,7 +12,7 @@ import static java.lang.Thread.sleep;
 public class StatsValues {
     private final Runnable callView;
     public int score = 0;
-    public Level level = new Level(0);
+    public Level level = new Level(1);
     public int lineDeleteCount = 0;
     public String lineClearDisplay = "";
     public FileWriterAndReader fileWriterAndReader = new FileWriterAndReader(
@@ -45,7 +45,7 @@ public class StatsValues {
      */
     public void reset() {
         score = 0;
-        level = new Level(0);
+        level = new Level(1);
         seconds = 0;
         lineDeleteCount = 0;
     }
@@ -151,7 +151,7 @@ public class StatsValues {
      */
     public void saveScore() {
         String[] lines = fileWriterAndReader.readFromFile();
-        String nouvelleLigne = "Level :" + (level.getLevel() + 1) + " , " + score + " , " + getTime();
+        String nouvelleLigne = "Level :" + (level.getLevel()) + " , " + score + " , " + getTime();
         List<String> allScores = new ArrayList<>();
 
         for (String line : lines) {
