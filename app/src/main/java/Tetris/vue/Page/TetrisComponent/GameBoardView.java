@@ -2,7 +2,12 @@ package Tetris.vue.Page.TetrisComponent;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
+/**
+ * Displays the game board.
+ */
 public class GameBoardView extends JPanel {
     JPanel[][] cases;
     int width;
@@ -34,6 +39,12 @@ public class GameBoardView extends JPanel {
         add(boardPanel);
         setBackground(backgroundColor);
         setFocusable(false);
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent evt) {
+                setSize(getSize().width / 2, getSize().height / 2); // Adjust the size of the boardPanel
+            }
+        });
     }
 
     @Override
@@ -51,11 +62,5 @@ public class GameBoardView extends JPanel {
                 new_height - offset
         ));
         revalidate();
-    }
-
-    @Override
-    public void paint(Graphics g) {
-        setSize(getSize().width / 2, getSize().height / 2);
-        super.paint(g);
     }
 }

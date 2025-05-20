@@ -5,6 +5,9 @@ import Tetris.model.FileWriterAndReader;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * PieceDisplayManager is a custom JPanel that displays the next pieces and the hold piece.
+ */
 public class PieceDisplayManager extends JPanel {
     FileWriterAndReader fileWriterAndReader;
     JPanel scorePanel = new JPanel();
@@ -48,6 +51,9 @@ public class PieceDisplayManager extends JPanel {
         setBackground(background);
     }
 
+    /**
+     * Updates the best scores displayed in the score panel.
+     */
     public void updateBestScores() {
         scorePanel.removeAll();
         String[] scores = fileWriterAndReader.readFromFile();

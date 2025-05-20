@@ -10,9 +10,18 @@ import java.awt.*;
 public class PopupPage extends JPanel {
     private final JLabel scoreLabel, levelLabel, timeLabel;
 
-    public PopupPage(String text, Color color, Game game, Tetris.vue.BasicComponent.Button actionButton, Button backHomeButton) {
+    /**
+     * Constructor for the PopupPage class.
+     * Displays a JPanel above the game board with the specified text, color, and buttons.
+     *
+     * @param text            The text to display in the popup.
+     * @param color           The color of the text.
+     * @param game            The game instance.
+     * @param actionButton    The action button to be displayed.
+     * @param backHomeButton  The button to go back to the home screen.
+     */
+    public PopupPage(String text, Color color, Game game, Button actionButton, Button backHomeButton) {
         setFocusable(false); // To avoid focus issues
-
         setSize(400, 250);
 
         JPanel mainPanel = new JPanel();
@@ -58,6 +67,11 @@ public class PopupPage extends JPanel {
         add(mainPanel);
     }
 
+    /**
+     * Update the stats displayed in the popup.
+     *
+     * @param statsValues The StatsValues object containing the updated stats.
+     */
     public void updateStats(StatsValues statsValues) {
         scoreLabel.setText("Score : " + statsValues.score);
         levelLabel.setText("Niveau : " + (statsValues.level.level()));

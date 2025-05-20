@@ -59,30 +59,30 @@ public class GeneralScreen extends JFrame {
      */
     public GeneralScreen(boolean debugMode, int debugPos) {
         // Initialize all the pages and the game instances
-        for (int i = 0; i < this.games.length; i++) {
-            this.games[i] = new Game(debugMode, debugPos);
+        for (int i = 0; i < games.length; i++) {
+            games[i] = new Game(debugMode, debugPos);
         }
-        this.musicPlayer = new MusicPlayer("data/music/TetrisOST.wav");
-        this.musicChoosePopup = new MusicChoosePopup(() -> setPage("homePage"));
+        musicPlayer = new MusicPlayer("data/music/TetrisOST.wav");
+        musicChoosePopup = new MusicChoosePopup(() -> setPage("homePage"));
 
-        this.homePage = new HomePage(new Button("Mode 1 Joueur", () -> {
-            this.is2PlayerMode = false;
+        homePage = new HomePage(new Button("Mode 1 Joueur", () -> {
+            is2PlayerMode = false;
             setPage("tetrisView");
         }), new Button("Mode 2 Joueurs", () -> {
-            this.is2PlayerMode = true;
+            is2PlayerMode = true;
             setPage("tetrisView");
         }), new Button("Choisir la musique", () -> setPage("musicChoosePage")));
 
-        this.pausePopup = new PopupPage("PAUSE", Color.BLACK, this.games[0],
+        pausePopup = new PopupPage("PAUSE", Color.BLACK, games[0],
                 new Button("Revenir au jeu", () -> setPage("tetrisView")),
                 new Button("Retour au menu", () -> setPage("homePage"))
         );
 
         initPages();
 
-        for (int i = 0; i < this.games.length; i++) {
-            this.isGameOver[i] = false;
-            this.isPreviousGameOver[i] = false;
+        for (int i = 0; i < games.length; i++) {
+            isGameOver[i] = false;
+            isPreviousGameOver[i] = false;
             playersPages[i] = tetrisPage[i];
         }
 
@@ -101,20 +101,19 @@ public class GeneralScreen extends JFrame {
      * Initialize the game pages for each player.
      */
     public void initPages() {
-        for (int i = 0; i < this.games.length; i++) {
+        for (int i = 0; i < games.length; i++) {
             int finalI = i; // to use in the lambda expression
-            this.tetrisPage[i] = new TetrisPage(this.games[i],
+            tetrisPage[i] = new TetrisPage(games[i],
                     () -> {
-                        this.isGameOver[finalI] = true;
+                        isGameOver[finalI] = true;
                         setPage("gameOver");
                     }
             );
-            this.tetrisPage[i].start();
-            this.games[i].addGridObserver(this.tetrisPage[i]);
+            games[i].addGridObserver(tetrisPage[i]);
 
-            this.gameOverPopup[i] = new PopupPage("GAME OVER", Color.RED, this.games[i],
+            gameOverPopup[i] = new PopupPage("GAME OVER", Color.RED, games[i],
                     new Button("Rejouer", () -> {
-                        this.isGameOver[finalI] = false;
+                        isGameOver[finalI] = false;
                         setPage("tetrisView");
                     }),
                     new Button("Retour au menu", () -> setPage("homePage"))
@@ -128,106 +127,106 @@ public class GeneralScreen extends JFrame {
      * @param page the name of the page to set
      */
     public synchronized void setPage(String page) {
-        String previousPage = this.selectedPage;
+        String previousPage = selectedPage;
         getContentPane().removeAll();
 
         switch (page) {
             case "homePage" -> {
-                this.musicPlayer.stop();
-                this.musicPlayer.reset();
-                this.musicPlayer = new MusicPlayer(this.musicChoosePopup.getPath());
-                this.homePage.setButtonsVisibility(true);
-                for (int i = 0; i < this.games.length; i++) { // reset the game instances
-                    this.isGameOver[i] = false;
-                    this.isPreviousGameOver[i] = false;
-                    this.games[i].setAiMode(false);
-                    this.games[i].stopGame();
+                musicPlayer.stop();
+                musicPlayer.reset();
+                musicPlayer = new MusicPlayer(musicChoosePopup.getPath());
+                homePage.setButtonsVisibility(true);
+                for (int i = 0; i < games.length; i++) { // reset the game instances
+                    isGameOver[i] = false;
+                    isPreviousGameOver[i] = false;
+                    games[i].setAiMode(false);
+                    games[i].stopGame();
                 }
-                this.homePage.setPreferredSize(getSize()); // to force resizing
-                add(this.homePage);
+                homePage.setPreferredSize(getSize()); // to force resizing
+                add(homePage);
             }
             case "tetrisView" -> {
-                if (!this.musicPlayer.isPlaying()) {
-                    this.musicPlayer.play();
+                if (!musicPlayer.isPlaying()) {
+                    musicPlayer.play();
                 }
 
-                for (int i = 0; i < this.games.length; i++) {
-                    if ((this.isPreviousGameOver[i] && !previousPage.equals("pause")) || previousPage.equals("homePage")) {
-                        this.games[i].reset();
-                        this.playersPages[i] = this.tetrisPage[i];
-                        this.isPreviousGameOver[i] = false;
+                for (int i = 0; i < games.length; i++) {
+                    if ((isPreviousGameOver[i] && !previousPage.equals("pause")) || previousPage.equals("homePage")) {
+                        games[i].reset();
+                        playersPages[i] = tetrisPage[i];
+                        isPreviousGameOver[i] = false;
                     }
                 }
 
-                this.games[0].resumeGame();
-                if (this.is2PlayerMode) {
-                    this.games[1].resumeGame();
+                games[0].resumeGame();
+                if (is2PlayerMode) {
+                    games[1].resumeGame();
                 }
 
                 if (previousPage.equals("homePage")) {
                     if (is2PlayerMode) {
-                        this.playersPages[0].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
-                        this.playersPages[1].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
+                        playersPages[0].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
+                        playersPages[1].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
                     } else {
-                        this.playersPages[0].setPreferredSize(getSize());
+                        playersPages[0].setPreferredSize(getSize());
                     }
                 }
 
-                if (this.is2PlayerMode) {
-                    addTwinPanel(this.playersPages[0], this.playersPages[1]);
+                if (is2PlayerMode) {
+                    addTwinPanel(playersPages[0], playersPages[1]);
                 } else {
-                    add(this.playersPages[0]);
+                    add(playersPages[0]);
                 }
             }
             case "gameOver" -> {
-                if (this.is2PlayerMode) {
-                    for (int i = 0; i < this.games.length; i++) {
-                        if (!this.isGameOver[i]) {
+                if (is2PlayerMode) {
+                    for (int i = 0; i < games.length; i++) {
+                        if (!isGameOver[i]) {
                             continue;
                         }
-                        this.gameOverPopup[i].updateStats(this.games[i].getStatsValues());
-                        this.games[i].stopGame();
-                        this.isPreviousGameOver[i] = true;
-                        this.playersPages[i] = new JPanel();
+                        gameOverPopup[i].updateStats(games[i].getStatsValues());
+                        games[i].stopGame();
+                        isPreviousGameOver[i] = true;
+                        playersPages[i] = new JPanel();
                         int divideWidth = 2;
-                        JLayeredPane layeredPane = getJLayeredPane(this.tetrisPage[i], this.gameOverPopup[i], divideWidth);
-                        this.playersPages[i].add(layeredPane);
+                        JLayeredPane layeredPane = getJLayeredPane(tetrisPage[i], gameOverPopup[i], divideWidth);
+                        playersPages[i].add(layeredPane);
                         // because of the container, we need to force the resizing
-                        this.playersPages[i].addComponentListener(new ComponentAdapter() {
+                        playersPages[i].addComponentListener(new ComponentAdapter() {
                             @Override
                             public void componentResized(ComponentEvent e) {
                                 layeredPane.setPreferredSize(new Dimension(getSize().width / divideWidth, getSize().height));
                             }
                         });
                     }
-                    addTwinPanel(this.playersPages[0], this.playersPages[1]);
-                } else if (this.isGameOver[0]) { // if only one player is playing
-                    this.gameOverPopup[0].updateStats(this.games[0].getStatsValues());
-                    this.games[0].stopGame();
-                    this.isPreviousGameOver[0] = true;
-                    this.playersPages[0] = new JPanel();
-                    add(getJLayeredPane(this.tetrisPage[0], this.gameOverPopup[0], 1));
+                    addTwinPanel(playersPages[0], playersPages[1]);
+                } else if (isGameOver[0]) { // if only one player is playing
+                    gameOverPopup[0].updateStats(games[0].getStatsValues());
+                    games[0].stopGame();
+                    isPreviousGameOver[0] = true;
+                    playersPages[0] = new JPanel();
+                    add(getJLayeredPane(tetrisPage[0], gameOverPopup[0], 1));
                 }
             }
             case "musicChoosePage" -> {
-                this.homePage.setButtonsVisibility(false);
-                add(getJLayeredPane(this.homePage, this.musicChoosePopup, 1));
+                homePage.setButtonsVisibility(false);
+                add(getJLayeredPane(homePage, musicChoosePopup, 1));
             }
             case "pause" -> {
-                this.musicPlayer.stop();
-                this.pausePopup.updateStats(this.games[0].getStatsValues());
-                if (this.is2PlayerMode) {
+                musicPlayer.stop();
+                pausePopup.updateStats(games[0].getStatsValues());
+                if (is2PlayerMode) {
                     JPanel container = new JPanel();
                     container.setLayout(new BorderLayout());
-                    container.add(this.tetrisPage[0], BorderLayout.WEST);
-                    container.add(this.tetrisPage[1], BorderLayout.EAST);
-                    add(getJLayeredPane(container, this.pausePopup, 1));
+                    container.add(tetrisPage[0], BorderLayout.WEST);
+                    container.add(tetrisPage[1], BorderLayout.EAST);
+                    add(getJLayeredPane(container, pausePopup, 1));
                 } else {
-                    add(getJLayeredPane(this.tetrisPage[0], this.pausePopup, 1));
+                    add(getJLayeredPane(tetrisPage[0], pausePopup, 1));
                 }
             }
         }
-        this.selectedPage = page;
+        selectedPage = page;
         repaint();
         revalidate();
     }

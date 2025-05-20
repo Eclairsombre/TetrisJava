@@ -3,6 +3,10 @@ package Tetris.vue.Page.TetrisComponent;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * PieceDisplayView is a custom JPanel that displays the next pieces in a Tetris game.
+ * It uses a grid layout to arrange the pieces in a 4x4 grid.
+ */
 public class PieceDisplayView extends JPanel {
     public PieceDisplayView(JPanel[][] nextPieceCells, int width, int height, float ratio) {
         int length = 4;

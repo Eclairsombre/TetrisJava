@@ -5,6 +5,9 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
+/**
+ * displays a colored border and background.
+ */
 public class CustomJPanel extends JPanel {
     private Color baseColor;
 

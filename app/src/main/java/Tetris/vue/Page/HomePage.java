@@ -5,14 +5,9 @@ import Tetris.vue.BasicComponent.Button;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
-import java.util.Observable;
-import java.util.Observer;
 
-@SuppressWarnings("deprecation")
-public class HomePage extends JPanel implements Observer {
-    private final Button start1PGameButton;
-    private final Button start2PGameButton;
-    private final Button chooseMusicButton;
+public class HomePage extends JPanel {
+    private final Button[] buttons;
 
     public HomePage(Button start1PGameButton, Button start2PGameButton, Button chooseMusicButton) {
         setLayout(null);
@@ -21,15 +16,12 @@ public class HomePage extends JPanel implements Observer {
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 24));
         add(welcomeLabel);
 
-        this.start1PGameButton = start1PGameButton;
-        this.start2PGameButton = start2PGameButton;
-        this.chooseMusicButton = chooseMusicButton;
+        buttons = new Button[]{start1PGameButton, start2PGameButton, chooseMusicButton};
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.add(this.start1PGameButton);
-        buttonPanel.add(this.start2PGameButton);
-        buttonPanel.add(this.chooseMusicButton);
-
+        for (Button button : buttons) {
+            buttonPanel.add(button);
+        }
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         add(buttonPanel);
 
@@ -43,18 +35,14 @@ public class HomePage extends JPanel implements Observer {
         });
 
         setVisible(true);
+        // forced to set the size here to display labels correctly
         welcomeLabel.setBounds(0, getHeight() / 4, 800, 100);
         buttonPanel.setBounds(0, getHeight() - buttonPanel.getHeight(), 800, 200);
     }
 
-    @Override
-    public void update(Observable o, Object arg) {
-        // do nothing here
-    }
-
     public void setButtonsVisibility(boolean enabled) {
-        start1PGameButton.setVisible(enabled);
-        start2PGameButton.setVisible(enabled);
-        chooseMusicButton.setVisible(enabled);
+        for (Button button : buttons) {
+            button.setVisible(enabled);
+        }
     }
 }

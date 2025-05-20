@@ -6,6 +6,9 @@ import Tetris.vue.BasicComponent.TextView;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * DashBoardView shows the game statistics and information.
+ */
 public class DashBoardView extends JPanel {
     private final JLabel AILabel, scoreLabel, levelLabel, timerLabel, lineDeleteCountLabel, scoreDisplayLabel;
 

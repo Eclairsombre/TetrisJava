@@ -8,6 +8,9 @@ import java.awt.*;
 import java.io.File;
 import java.util.prefs.Preferences;
 
+/**
+ * Displays a list of available music files and provides buttons to play, stop, and confirm the selection.
+ */
 public class MusicChoosePopup extends JPanel {
     private MusicPlayer previewPlayer;
     private String paths = "data/music/TetrisOST.wav";

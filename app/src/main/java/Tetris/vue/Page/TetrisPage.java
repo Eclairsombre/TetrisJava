@@ -28,6 +28,13 @@ public class TetrisPage extends JPanel implements Observer {
     private final int heightGrid;
     Runnable changeToGameOver;
 
+    /**
+     * Constructor for the TetrisPage class.
+     * Initializes a Tetris game view
+     *
+     * @param g                 The game instance.
+     * @param changeToGameOver  Runnable to change to the game over screen.
+     */
     public TetrisPage(Game g, Runnable changeToGameOver) {
         Color backgroundColor = Color.LIGHT_GRAY;
         this.changeToGameOver = changeToGameOver;
@@ -59,8 +66,14 @@ public class TetrisPage extends JPanel implements Observer {
             updateNextPiece();
             updateBoard();
         });
+
+        game.addObserver(this);
+        setVisible(true);
     }
 
+    /**
+     * Method to update the AI label on the dashboard bouton.
+     */
     public void updateAILabel() {
         if (game.isAiMode()) {
             dashBoardVue.updateAILabel("AI Mode : ON");
@@ -87,11 +100,9 @@ public class TetrisPage extends JPanel implements Observer {
         return getColorCell(game.getGridCell(x, y));
     }
 
-    public void start() {
-        game.addObserver(this); // Abonnement déplacé ici
-        setVisible(true);
-    }
-
+    /**
+     * Updates the colors of the cells based on the current piece and the grid state.
+     */
     public void updateBoard() {
         List<Integer> whiteLines = new ArrayList<>();
         for (int i = 0; i < widthGrid; i++) {
@@ -111,19 +122,22 @@ public class TetrisPage extends JPanel implements Observer {
 
         for (int i = 0; i < 4; i++) {
             int x = coords[i][0];
-            if (RDropCoords[i][1] > maxY) {
+            if (RDropCoords[i][1] > maxY) { // shape of the piece below the piece
                 cases[RDropCoords[i][1]][x].setBackground(Color.GRAY);
             }
-            if (whiteLines.contains(coords[i][1])) {
-                cases[coords[i][1]][x].setBackground(Color.WHITE);
+            if (whiteLines.contains(coords[i][1])) { // if the line is full
+                cases[coords[i][1]][x].setBackground(Color.WHITE); // we set the piece color like the line
             } else {
                 cases[coords[i][1]][x].setBackground(color);
             }
         }
 
-        this.repaint();
+        repaint();
     }
 
+    /**
+     * Updates the next piece and hold piece displayed in PieceDisplayManager.
+     */
     public void updateNextPiece() {
         for (int i = 0; i < 3; i++) {
             Piece nextPiece = game.getPieceManager().getNextPiece().get(i);
@@ -169,6 +183,9 @@ public class TetrisPage extends JPanel implements Observer {
         repaint();
     }
 
+    /**
+     * General reception of the updates from the game, through the observer pattern.
+     */
     @Override
     public void update(Observable o, Object arg) {
         try {
@@ -177,8 +194,8 @@ public class TetrisPage extends JPanel implements Observer {
                 return;
             }
             switch ((String) arg) {
-                case "timer" -> dashBoardVue.updateTimerLabel(this.game.getStatsValues().getTime());
-                case "stats" -> dashBoardVue.updateStats(this.game.getStatsValues());
+                case "timer" -> dashBoardVue.updateTimerLabel(game.getStatsValues().getTime());
+                case "stats" -> dashBoardVue.updateStats(game.getStatsValues());
                 case "grid" -> SwingUtilities.invokeLater(this::updateBoard);
                 case "gameOver" -> {
                     piecePanel.updateBestScores();
@@ -187,8 +204,8 @@ public class TetrisPage extends JPanel implements Observer {
                     changeToGameOver.run();
                 }
                 case "nextPiece" -> SwingUtilities.invokeLater(this::updateNextPiece);
-                case "level" -> this.game.updateLevel();
-                case "fixPiece" -> this.game.fixPiece();
+                case "level" -> game.updateLevel();
+                case "fixPiece" -> game.fixPiece();
                 default -> System.err.println("Error: arg is not a valid String");
             }
         } catch (Exception e) {
