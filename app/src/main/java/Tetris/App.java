@@ -3,7 +3,7 @@
  */
 package Tetris;
 
-import Tetris.vue.GeneralScreen;
+import Tetris.VueController.GeneralScreen;
 
 public class App {
     public static void main(String[] args) {
