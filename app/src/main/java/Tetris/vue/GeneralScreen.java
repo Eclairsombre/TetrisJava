@@ -134,9 +134,9 @@ public class GeneralScreen extends JFrame {
             case "homePage" -> {
                 this.musicPlayer.stop();
                 this.homePage.setPreferredSize(getSize()); // to force resizing
-                games[0].pauseGame();
-                games[1].pauseGame();
                 add(this.homePage);
+                games[0].stopGame();
+                games[1].stopGame();
             }
             case "tetrisView" -> {
                 if (previousPage.equals("homePage")) {
@@ -272,19 +272,23 @@ public class GeneralScreen extends JFrame {
                         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                             setPage("tetrisView");
                             games[0].resumeGame();
-                            games[1].resumeGame();
+                            if (is2PlayerMode) {
+                                games[1].resumeGame();
+                            }
                         }
                     }
                     case "tetrisView" -> {
                         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                             games[0].pauseGame();
-                            games[1].pauseGame();
+                            if (is2PlayerMode) {
+                                games[1].pauseGame();
+                            }
                         }
                         if (e.getKeyCode() == KeyEvent.VK_O) {
                             games[0].setAiMode(!games[0].isAiMode());
                             tetrisPage[0].updateAILabel();
                         }
-                        if (e.getKeyCode() == KeyEvent.VK_P) {
+                        if (e.getKeyCode() == KeyEvent.VK_P && is2PlayerMode) {
                             games[1].setAiMode(!games[1].isAiMode());
                             tetrisPage[1].updateAILabel();
                         }
