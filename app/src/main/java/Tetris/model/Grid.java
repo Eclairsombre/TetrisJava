@@ -24,6 +24,8 @@ public class Grid extends Observable {
     private boolean isPaused = false;
     private boolean TSpin = false;
     private boolean isFixing = false;
+    private boolean aiMode = false;
+
 
     public Grid(int width, int height, boolean debugMode, int debugPos) {
         this.statsValues = new StatsValues(() -> signalChange("stats"));
@@ -51,6 +53,14 @@ public class Grid extends Observable {
 
     public FileWriterAndReader getFileWriterAndReader() {
         return statsValues.fileWriterAndReader;
+    }
+
+    public boolean isAiMode() {
+        return aiMode;
+    }
+
+    public void setAiMode(boolean aiMode) {
+        this.aiMode = aiMode;
     }
 
     /**
@@ -317,9 +327,10 @@ public class Grid extends Observable {
      * @param color        the color of the piece
      */
     public void fixPiece(Piece currentPiece, PieceColor color) {
+
         Thread fixPieceThread = new Thread(() -> {
             try {
-                sleep(100);
+                sleep(aiMode ? 20 : 300);
             } catch (InterruptedException e) {
                 // The thread was interrupted, do nothing
                 System.out.println("Error sleeping");

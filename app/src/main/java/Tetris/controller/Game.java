@@ -16,9 +16,8 @@ public class Game extends Observable {
     private final boolean debugMode;
     private final Grid grid;
     private final Runnable runnable = () -> movePieceDown(false);
-    private Scheduler scheduler, timer;
-    private boolean aiMode = false;
     private final AIInputStrategy aiInputStrategy = new AIInputStrategy();
+    private Scheduler scheduler, timer;
 
     public Game(boolean debugMode, int debugPos) {
         this.debugMode = debugMode;
@@ -133,11 +132,11 @@ public class Game extends Observable {
     }
 
     public boolean isAiMode() {
-        return aiMode;
+        return grid.isAiMode();
     }
 
     public void setAiMode(boolean isAIMod) {
-        this.aiMode = isAIMod;
+        grid.setAiMode(isAIMod);
         if (isAIMod) {
             aiInputStrategy.enable(grid);
         } else {
