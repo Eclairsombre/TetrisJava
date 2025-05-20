@@ -5,37 +5,51 @@ import java.util.List;
 
 import static java.lang.Thread.sleep;
 
+/**
+ * Class to manage the score, level, and time of the game.
+ * It also handles the display of the line clear message.
+ */
 public class StatsValues {
+    private final Runnable callView;
     public int score = 0;
     public Level level = new Level(0);
-    private int seconds = 0;
     public int lineDeleteCount = 0;
     public String lineClearDisplay = "";
-    private final Runnable callView;
-    private Thread resetScoreSkillLabel;
-    private int BtBCounter = 0;
     public FileWriterAndReader fileWriterAndReader = new FileWriterAndReader(
             "app/src/main/resources/score.txt"
     );
+    private int seconds = 0;
+    private Thread resetScoreSkillLabel;
+    private int BtBCounter = 0;
 
     StatsValues(Runnable callView) {
         this.callView = callView;
     }
 
+    /**
+     * Method to get the current time in the format HH:MM:SS.
+     */
     public String getTime() {
         return String.format("%02d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, seconds % 60);
     }
 
+    /**
+     * Method to increment the time.
+     */
     public void incrementSeconds() {
         seconds++;
     }
 
+    /**
+     * Method to reset the StatsValues Object.
+     */
     public void reset() {
         score = 0;
         level = new Level(0);
         seconds = 0;
         lineDeleteCount = 0;
     }
+
 
     public void execResetScoreSkillLabel() {
         if (callView != null) {
