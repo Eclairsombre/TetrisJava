@@ -199,13 +199,10 @@ public class TetrisPage extends JPanel implements Observer {
                 case "grid" -> SwingUtilities.invokeLater(this::updateBoard);
                 case "gameOver" -> {
                     piecePanel.updateBestScores();
-                    grid.setAiMode(false);
                     dashBoardVue.updateAILabel("AI Mode : OFF");
                     changeToGameOver.run();
                 }
                 case "nextPiece" -> SwingUtilities.invokeLater(this::updateNextPiece);
-                case "level" -> grid.updateLevel();
-                case "fixPiece" -> grid.fixPiece();
                 default -> System.err.println("Error: arg is not a valid String");
             }
         } catch (Exception e) {

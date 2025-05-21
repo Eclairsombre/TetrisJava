@@ -4,14 +4,7 @@ import Tetris.Model.Piece.PieceColor;
 
 import java.util.List;
 
-public class AiUtils {
-    public final int width;
-    public final int height;
-
-    public AiUtils(int width, int height) {
-        this.width = width;
-        this.height = height;
-    }
+public record AiUtils(int width, int height) {
 
     /**
      * Calculates the moves needed to reach the targetX from startX.

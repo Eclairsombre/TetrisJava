@@ -74,10 +74,6 @@ public class Grid extends Observable {
         }
     }
 
-    public void fixPiece() {
-        scheduler.setWait();
-    }
-
     /**
      * Method to signal a change in the grid.
      *
@@ -107,7 +103,7 @@ public class Grid extends Observable {
      */
     public void nextLevel() {
         statsValues.level = new Level(statsValues.level.level() + 1);
-        signalChange("level");
+        updateLevel();
     }
 
     /**
@@ -243,7 +239,7 @@ public class Grid extends Observable {
             if (width >= 0) System.arraycopy(grid[i - 1], 0, grid[i], 0, width);
         }
         if (statsValues.lineDeleteCount % 10 == 0) {
-            nextLevel(); // signalChange("level");
+            nextLevel();
         }
         signalChange("stats");
         // signalChange("grid"); after this function because we call it in the movePiece method
@@ -335,12 +331,13 @@ public class Grid extends Observable {
         // check end game
         if (currentPiece.getY() == 0) {
             this.statsValues.saveScore();
+            setAiMode(false);
             signalChange("gameOver");
             return;
         }
 
         if (!isFixing) { // to avoid double fixing (one by the user and one by the thread)
-            signalChange("fixPiece"); // signal the thread
+            scheduler.setWait();
             fixPiece(currentPiece, currentPiece.getColor());
         }
     }
@@ -376,7 +373,7 @@ public class Grid extends Observable {
             }
             // if the piece is not fixed, we don't do anything and we restart the thread
             isFixing = false;
-            signalChange("fixPiece");
+            scheduler.setWait();
         });
 
         fixPieceThread.start();
