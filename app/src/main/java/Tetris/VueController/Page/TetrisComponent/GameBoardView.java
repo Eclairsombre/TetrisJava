@@ -9,17 +9,17 @@ import java.awt.event.ComponentEvent;
  * Displays the game board.
  */
 public class GameBoardView extends JPanel {
-    JPanel[][] cases;
+    private final JPanel[][] cases;
     /// @param cases the cases of the game board
-    int width;
+    private final int width;
     /// @param width the width of the game board
-    int height;
+    private final int height;
     /// @param height the height of the game board
-    JPanel boardPanel;
+    private final JPanel boardPanel;
     /// @param boardPanel the panel that contains the game board
-    int ratio = 13;
+    private final int ratio = 13;
     /// @param ratio the ratio of the game board
-    int offset = 20;
+    private final int offset = 20;
     /// @param offset the offset of the game board
 
     /**

@@ -9,9 +9,9 @@ import java.awt.*;
  * PieceDisplayManager is a custom JPanel that displays the next pieces and the hold piece.
  */
 public class PieceDisplayManager extends JPanel {
-    FileWriterAndReader fileWriterAndReader;
+    private final FileWriterAndReader fileWriterAndReader;
     /// @param fileWriterAndReader FileWriterAndReader instance to read and write scores
-    JPanel scorePanel = new JPanel();
+    private final JPanel scorePanel = new JPanel();
     /// @param scorePanel JPanel to display the best scores
 
     /**
