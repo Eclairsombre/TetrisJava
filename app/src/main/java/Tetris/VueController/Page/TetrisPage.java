@@ -48,7 +48,7 @@ public class TetrisPage extends JPanel implements Observer {
      * @param g                The game instance.
      * @param changeToGameOver Runnable to change to the game over screen.
      */
-    public TetrisPage(Tetris.Model.Grid g, Runnable changeToGameOver) {
+    public TetrisPage(Grid g, Runnable changeToGameOver) {
         Color backgroundColor = Color.LIGHT_GRAY;
         this.changeToGameOver = changeToGameOver;
 
@@ -205,7 +205,8 @@ public class TetrisPage extends JPanel implements Observer {
             switch (message) {
                 case "timer" -> dashBoardVue.updateTimerLabel(statsValues.getTime());
                 case "stats" -> dashBoardVue.updateStats(statsValues);
-                case "grid" -> SwingUtilities.invokeLater(() -> updateBoard(grid, pieceManager.getCurrentPiece(), maxRDropY));
+                case "grid" ->
+                        SwingUtilities.invokeLater(() -> updateBoard(grid, pieceManager.getCurrentPiece(), maxRDropY));
                 case "gameOver" -> {
                     piecePanel.updateBestScores();
                     dashBoardVue.updateAILabel("AI Mode : OFF");

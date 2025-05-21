@@ -1,11 +1,12 @@
 package Tetris.VueController;
 
-import static Tetris.Model.Utils.Action.*;
-
 import Tetris.Model.Grid;
 import Tetris.VueController.BasicComponent.Button;
 import Tetris.VueController.BasicComponent.MusicPlayer;
-import Tetris.VueController.Page.*;
+import Tetris.VueController.Page.HomePage;
+import Tetris.VueController.Page.MusicChoosePopup;
+import Tetris.VueController.Page.PopupPage;
+import Tetris.VueController.Page.TetrisPage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +15,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
+import static Tetris.Model.Utils.Action.*;
+
 
 /**
  * GeneralScreen is the main class that creates the GUI for the Tetris game.
@@ -21,7 +24,6 @@ import java.awt.event.KeyEvent;
  * This class allows JPanel change interface without creating a new JFrame.
  */
 public class GeneralScreen extends JFrame {
-    private String selectedPage = "homePage";
     private final HomePage homePage;
     /// Main menu of the app
 
@@ -38,15 +40,16 @@ public class GeneralScreen extends JFrame {
     /// Pause page in the game screen
 
     private final MusicChoosePopup musicChoosePopup;
-    /// Music selection page in the main menu
-
-    private MusicPlayer musicPlayer;
     /// Music player for the background music
 
     private final JPanel[] playersPages = new JPanel[2];
     /// Game page template for each player
 
     private final boolean[] isGameOver = new boolean[2];
+    private String selectedPage = "homePage";
+    /// Music selection page in the main menu
+
+    private MusicPlayer musicPlayer;
     private boolean is2PlayerMode;
     /// Basic booleans to manage the game state
 
@@ -54,8 +57,8 @@ public class GeneralScreen extends JFrame {
     /**
      * Constructor for the GeneralScreen class. Initialize the app and all the pages.
      *
-     * @param debugMode  boolean indicating if the game is in debug mode
-     * @param debugPos   integer indicating the index of the debug position
+     * @param debugMode boolean indicating if the game is in debug mode
+     * @param debugPos  integer indicating the index of the debug position
      */
     public GeneralScreen(boolean debugMode, int debugPos) {
         // Initialize all the pages and the game instances
@@ -145,7 +148,7 @@ public class GeneralScreen extends JFrame {
                     musicPlayer.play();
                 }
 
-                for (int i = 0; i < grids.length; i++) {
+                for (int i = 0; i < (is2PlayerMode ? grids.length : 1); i++) {
                     if ((isGameOver[i] && !previousPage.equals("pause")) || previousPage.equals("homePage")) {
                         grids[i].reset();
                         playersPages[i] = tetrisPage[i];
@@ -245,8 +248,8 @@ public class GeneralScreen extends JFrame {
      * Create a JLayeredPane with two panels (background and foreground) and set their bounds.
      * Usually used for the game over popup and the pause popup.
      *
-     * @param background the background panel
-     * @param foreground the foreground panel
+     * @param background  the background panel
+     * @param foreground  the foreground panel
      * @param divideWidth the width to divide the screen
      * @return the JLayeredPane with the two panels
      */
@@ -271,8 +274,8 @@ public class GeneralScreen extends JFrame {
     /**
      * Prepare the layered pane by setting the bounds of the background and foreground panels.
      *
-     * @param background the background panel
-     * @param foreground the foreground panel
+     * @param background  the background panel
+     * @param foreground  the foreground panel
      * @param divideWidth the width to divide the screen
      */
     private void prepareLayeredPane(JPanel background, JPanel foreground, int divideWidth) {

@@ -65,7 +65,7 @@ public record AiUtils(int width, int height) {
 
         score += maxHeight * -730;
         score += completeLines * 608;
-        score += holes * -817;
+        score += holes * -717;
         score += bumpiness * -224;
 
         return score;

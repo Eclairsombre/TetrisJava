@@ -1,6 +1,7 @@
 package Tetris.Model.Ai;
 
 import Tetris.Model.Grid;
+import Tetris.Model.Piece.Piece;
 import Tetris.Model.Utils.Scheduler;
 
 import static Tetris.Model.Utils.Action.*;
@@ -9,6 +10,8 @@ import static Tetris.Model.Utils.Action.*;
  * AIInputStrategy is a class that manages the AI input strategy for a Tetris game.
  */
 public class AIInputStrategy {
+    /// @param lastPieceY Y position of the last piece for which moves were calculated
+    private static final int MAX_MOVES_BEFORE_RECALC = 3;
     private boolean enabled = false;
     /// @param enabled Indicates if the AI is enabled or not.
     private Thread aiThread;
@@ -17,6 +20,12 @@ public class AIInputStrategy {
     /// @param plannedMoves The planned moves for the AI.
     private int currentMoveIndex = 0;
     /// @param currentMoveIndex The index of the current move in the planned moves.
+    private int lastPieceId = -1;
+    /// @param lastPieceId ID of the last piece for which moves were calculated
+    private int lastPieceX = -1;
+    /// @param lastPieceX X position of the last piece for which moves were calculated
+    private int lastPieceY = -1;
+    /// @param MAX_MOVES_BEFORE_RECALC Maximum number of moves before recalculating the best move
 
     /**
      * Processes the input for the AI.
@@ -28,21 +37,37 @@ public class AIInputStrategy {
             return;
         }
 
-        int[] currentPlannedMoves = this.plannedMoves;
-        int index = this.currentMoveIndex;
+        // Get current piece information to check if we need to recalculate
+        Piece currentPiece = grid.getPieceManager().getCurrentPiece();
+        int currentPieceId = System.identityHashCode(currentPiece);
+        int currentPieceX = currentPiece.getX();
+        int currentPieceY = currentPiece.getY();
 
-        if (currentPlannedMoves == null || index >= currentPlannedMoves.length) {
-            currentPlannedMoves = grid.getBestMove();
-            index = 0;
-            this.plannedMoves = currentPlannedMoves;
-            this.currentMoveIndex = index;
+        //To avoid desyncronization between the AI and the game, we check if the piece has moved
+        boolean shouldRecalculate =
+                plannedMoves == null ||
+                        currentMoveIndex >= plannedMoves.length ||
+                        currentPieceId != lastPieceId ||
+                        Math.abs(currentPieceX - lastPieceX) > 1 ||
+                        Math.abs(currentPieceY - lastPieceY) > 1 ||
+                        currentMoveIndex >= MAX_MOVES_BEFORE_RECALC;
 
-            if (currentPlannedMoves == null || currentPlannedMoves.length == 0) {
+        if (shouldRecalculate) {
+            plannedMoves = grid.getBestMove();
+            currentMoveIndex = 0;
+
+            // Update tracking variables
+            lastPieceId = currentPieceId;
+            lastPieceX = currentPieceX;
+            lastPieceY = currentPieceY;
+
+            if (plannedMoves == null || plannedMoves.length == 0) {
                 return;
             }
         }
-        int moveType = currentPlannedMoves[index];
-        this.currentMoveIndex = index + 1;
+
+        int moveType = plannedMoves[currentMoveIndex];
+        currentMoveIndex++;
 
         switch (moveType) {
             case 0 -> ROTATE_LEFT.execute(grid);
@@ -66,8 +91,11 @@ public class AIInputStrategy {
             enabled = true;
             plannedMoves = null;
             currentMoveIndex = 0;
+            lastPieceId = -1;
+            lastPieceX = -1;
+            lastPieceY = -1;
 
-            aiThread = new Scheduler(5, () -> processInput(grid));
+            aiThread = new Scheduler(100, () -> processInput(grid));
             aiThread.start();
         }
     }
