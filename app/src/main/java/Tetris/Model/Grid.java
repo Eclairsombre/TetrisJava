@@ -6,10 +6,7 @@ import Tetris.Model.Piece.Piece;
 import Tetris.Model.Piece.PieceColor;
 import Tetris.Model.Piece.PieceManager;
 import Tetris.Model.Piece.PieceTemplate.PieceT;
-import Tetris.Model.Utils.FileWriterAndReader;
-import Tetris.Model.Utils.Level;
-import Tetris.Model.Utils.Scheduler;
-import Tetris.Model.Utils.StatsValues;
+import Tetris.Model.Utils.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,33 +21,35 @@ import static java.lang.Thread.sleep;
 @SuppressWarnings("deprecation")
 public class Grid extends Observable {
     private final boolean debugMode;
-    /// @param debugMode if the game is in debug mode
+    /// debugMode if the game is in debug mode
     private final int width;
-    /// @param width the width of the grid
+    /// width the width of the grid
     private final int height;
-    /// @param height the height of the grid
+    /// height the height of the grid
     private final PieceColor[][] grid;
-    /// @param grid the grid
+    /// grid the grid
     private final PieceManager pieceManager;
-    /// @param pieceManager the piece manager
+    /// pieceManager the piece manager
     private final StatsValues statsValues;
-    /// @param statsValues the stats values
+    /// statsValues the stats values
     private final int debugPos;
-    /// @param debugPos the debug position
+    /// debugPos the debug position
     private final AIInputStrategy aiInputStrategy = new AIInputStrategy();
-    /// @param aiInputStrategy the AI input strategy
+    /// aiInputStrategy the AI input strategy
     private final AiUtils aiUtils;
-    /// @param aiUtils the AI utils
+    /// aiUtils the AI utils
     boolean isPaused = false;
-    /// @param isPaused if the game is paused
+    /// isPaused if the game is paused
     private boolean TSpin = false;
-    /// @param TSpin if the game is in T-Spin mode
+    /// TSpin if the game is in T-Spin mode
     private boolean isFixing = false;
-    /// @param isFixing if the game is fixing the piece
+    /// isFixing if the game is fixing the piece
     private Scheduler scheduler, timer;
-    /// @param scheduler the scheduler
+    /// scheduler the scheduler
     private boolean aiMode = false;
-    /// @param aiMode if the game is in AI mode
+    /// aiMode if the game is in AI mode
+    private boolean isGameOver = false;
+    /// isGameOver if the game is over
 
 
     /**
@@ -82,6 +81,10 @@ public class Grid extends Observable {
         return new int[]{width, height};
     }
 
+    public PieceColor[][] getGrid() {
+        return grid;
+    }
+
     public FileWriterAndReader getFileWriterAndReader() {
         return statsValues.fileWriterAndReader;
     }
@@ -99,6 +102,10 @@ public class Grid extends Observable {
         }
     }
 
+    public boolean isGameOver() {
+        return isGameOver;
+    }
+
     /**
      * Method to signal a change in the grid.
      *
@@ -106,7 +113,14 @@ public class Grid extends Observable {
      */
     public void signalChange(String type) {
         setChanged();
-        notifyObservers(type);
+        switch (type) {
+            case "timer" -> notifyObservers(ObservableMessage.of("timer", null, statsValues, null, 0));
+            case "stats" -> notifyObservers(ObservableMessage.of("stats", null, statsValues, null, 0));
+            case "grid" -> notifyObservers(ObservableMessage.of("grid", grid, null, pieceManager, findMaxY(pieceManager.getCurrentPiece())));
+            case "gameOver" -> notifyObservers(ObservableMessage.of("gameOver", null, null, null, 0));
+            case "nextPiece" -> notifyObservers(ObservableMessage.of("nextPiece", null, null, pieceManager, 0));
+            default -> System.out.println("Error: unknown type of signal");
+        }
     }
 
     public StatsValues getStatsValues() {
@@ -153,13 +167,6 @@ public class Grid extends Observable {
             signalChange("grid");
             signalChange("nextPiece");
         }
-    }
-
-    public PieceColor getCell(int x, int y) {
-        if (x >= 0 && x < width && y >= 0 && y < height) {
-            return grid[y][x];
-        }
-        return null;
     }
 
     public void setCell(int x, int y, PieceColor value) {
@@ -357,6 +364,7 @@ public class Grid extends Observable {
         if (currentPiece.getY() == 0) {
             this.statsValues.saveScore();
             setAiMode(false);
+            isGameOver = true;
             signalChange("gameOver");
             return;
         }
@@ -511,6 +519,7 @@ public class Grid extends Observable {
     }
 
     public void reset() {
+        isGameOver = false;
         if (scheduler != null && scheduler.isAlive()) {
             scheduler.stopThread();
         }

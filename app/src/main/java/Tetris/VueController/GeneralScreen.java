@@ -1,6 +1,7 @@
 package Tetris.VueController;
 
 import static Tetris.Model.Utils.Action.*;
+
 import Tetris.Model.Grid;
 import Tetris.VueController.BasicComponent.Button;
 import Tetris.VueController.BasicComponent.MusicPlayer;
@@ -303,36 +304,36 @@ public class GeneralScreen extends JFrame {
                         }
                         case "homePage" -> System.exit(0);
                     }
-                } else if (selectedPage.equals("tetrisView")) {
+                } else if (selectedPage.equals("tetrisView") || selectedPage.equals("gameOver")) {
                     if (e.getKeyCode() == KeyEvent.VK_O) {
                         grids[0].setAiMode(!grids[0].isAiMode());
-                        tetrisPage[0].updateAILabel();
+                        tetrisPage[0].updateAILabel(grids[0]);
                     }
                     if (e.getKeyCode() == KeyEvent.VK_P && is2PlayerMode) {
                         grids[1].setAiMode(!grids[1].isAiMode());
-                        tetrisPage[1].updateAILabel();
+                        tetrisPage[1].updateAILabel(grids[1]);
                     }
                 }
             }
 
             @Override
             public void keyPressed(KeyEvent e) {
-                if (!selectedPage.equals("tetrisView")) {
+                if (!(selectedPage.equals("tetrisView") || selectedPage.equals("gameOver"))) {
                     return;
                 }
-                if (!(grids[0].isAiMode()) && !isGameOver[0] && !grids[0].isPaused()) {
-                    switch (e.getKeyCode()) {
-                        case KeyEvent.VK_S -> MOVE_DOWN.execute(grids[0]);
-                        case KeyEvent.VK_Q -> MOVE_LEFT.execute(grids[0]);
-                        case KeyEvent.VK_D -> MOVE_RIGHT.execute(grids[0]);
-                        case KeyEvent.VK_Z -> RDROP.execute(grids[0]);
-                        case KeyEvent.VK_A -> ROTATE_LEFT.execute(grids[0]);
-                        case KeyEvent.VK_E -> ROTATE_RIGHT.execute(grids[0]);
-                        case KeyEvent.VK_SPACE -> HOLD.execute(grids[0]);
-                    }
+
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_S -> MOVE_DOWN.execute(grids[0]);
+                    case KeyEvent.VK_Q -> MOVE_LEFT.execute(grids[0]);
+                    case KeyEvent.VK_D -> MOVE_RIGHT.execute(grids[0]);
+                    case KeyEvent.VK_Z -> RDROP.execute(grids[0]);
+                    case KeyEvent.VK_A -> ROTATE_LEFT.execute(grids[0]);
+                    case KeyEvent.VK_E -> ROTATE_RIGHT.execute(grids[0]);
+                    case KeyEvent.VK_SPACE -> HOLD.execute(grids[0]);
+
                 }
 
-                if (is2PlayerMode && !(grids[1].isAiMode()) && !isGameOver[1] && !grids[1].isPaused()) {
+                if (is2PlayerMode) {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_NUMPAD5 -> MOVE_DOWN.execute(grids[1]);
                         case KeyEvent.VK_NUMPAD4 -> MOVE_LEFT.execute(grids[1]);

@@ -21,6 +21,9 @@ public enum Action {
     }
 
     public void execute(Grid grid) {
+        if (grid.isPaused() || grid.isGameOver()) {
+            return;
+        }
         action.execute(grid);
     }
 
