@@ -1,7 +1,7 @@
 package Tetris.Model.Piece.PieceTemplate;
 
 import Tetris.Model.Piece.Piece;
-import Tetris.Model.Piece.PieceColor;
+import Tetris.Utils.PieceColor;
 
 /**
  * PieceL class represents the L-shaped Tetris piece.

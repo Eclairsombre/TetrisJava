@@ -1,5 +1,6 @@
 package Tetris.Model.Piece;
 
+import Tetris.Utils.PieceColor;
 import Tetris.Model.Piece.PieceTemplate.*;
 
 import java.security.SecureRandom;
@@ -11,17 +12,17 @@ import java.util.List;
  */
 public class PieceManager {
     private final List<Piece> nextPiece = new ArrayList<>();
-    /// @param nextPiece the list of next pieces
+    /// nextPiece the list of next pieces
     private final SecureRandom random = new java.security.SecureRandom();
-    /// @param random the random number generator
+    /// random the random number generator
     private List<Integer> lastPiece = new ArrayList<>(List.of(-1, -1, -1)); // impossible piece index to start
-    /// @param lastPiece the list of last pieces
+    /// lastPiece the list of last pieces
     private boolean canHoldPiece = true;
-    /// @param canHoldPiece if the player can hold a piece
+    /// canHoldPiece if the player can hold a piece
     private Piece currentPiece;
-    /// @param currentPiece the current piece
+    /// currentPiece the current piece
     private Piece holdPiece;
-    /// @param holdPiece the hold piece
+    /// holdPiece the hold piece
 
     /**
      * Constructor for PieceManager.
@@ -122,10 +123,11 @@ public class PieceManager {
         if (debugMode) {
             currentPiece = new PieceT(PieceColor.CYAN);
             currentPiece.setPos(3, 0);
+            holdPiece = new PieceZ(PieceColor.CYAN);
         } else {
             currentPiece = initializePiece();
+            holdPiece = null;
         }
-        holdPiece = null;
         lastPiece = new ArrayList<>(List.of(-1, -1, -1));
         nextPiece.clear();
         for (int i = 0; i < 3; i++) {

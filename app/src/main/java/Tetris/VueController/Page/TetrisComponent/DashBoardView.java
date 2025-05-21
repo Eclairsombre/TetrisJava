@@ -1,7 +1,7 @@
 package Tetris.VueController.Page.TetrisComponent;
 
-import Tetris.Model.Utils.ObservableMessage;
-import Tetris.Model.Utils.StatsValues;
+import Tetris.Utils.ObservableMessage;
+import Tetris.Model.GridComponent.StatsValues;
 import Tetris.VueController.BasicComponent.TextView;
 
 import javax.swing.*;
@@ -59,7 +59,7 @@ public class DashBoardView extends JPanel implements Observer {
 
         scoreDisplayLabel = new JLabel("", SwingConstants.CENTER);
         scoreDisplayLabel.setForeground(Color.RED);
-        TextView scoreDisplayPanel = new TextView(fontSize * 2, backgroundColor, scoreDisplayLabel);
+        TextView scoreDisplayPanel = new TextView(fontSize + 6, backgroundColor, scoreDisplayLabel);
         scoreDisplayPanel.setBounds(20, 300, 260, 50);
         add(scoreDisplayPanel);
     }

@@ -1,6 +1,5 @@
 package Tetris.VueController.Page;
 
-import Tetris.Model.Utils.StatsValues;
 import Tetris.VueController.BasicComponent.Button;
 
 import javax.swing.*;

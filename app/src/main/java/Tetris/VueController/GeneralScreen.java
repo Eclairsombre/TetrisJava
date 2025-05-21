@@ -1,6 +1,6 @@
 package Tetris.VueController;
 
-import Tetris.Model.Grid;
+import Tetris.Utils.ObservableAction;
 import Tetris.VueController.BasicComponent.Button;
 import Tetris.VueController.BasicComponent.MusicPlayer;
 import Tetris.VueController.Page.HomePage;
@@ -14,10 +14,11 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Observable;
+import java.util.Observer;
 
-import static Tetris.Model.Utils.Action.*;
-import static Tetris.Model.Utils.ObservableAction.getAction;
-import Tetris.Model.Utils.ObservableAction;
+import static Tetris.Utils.Action.*;
+import static Tetris.Utils.ObservableAction.getAction;
 
 
 /**
@@ -59,17 +60,8 @@ public class GeneralScreen extends JFrame {
     /**
      * Constructor for the GeneralScreen class. Initialize the app and all the pages.
      *
-     * @param gridJ1 the grid for player 1
-     * @param gridJ2 the grid for player 2
      */
-    public GeneralScreen(Grid gridJ1, Grid gridJ2) {
-        Grid[] grids = new Grid[2];
-        grids[0] = gridJ1;
-        grids[1] = gridJ2;
-
-        keybindHandler.addObserver(gridJ1);
-        keybindHandler.addObserver(gridJ2);
-
+    public GeneralScreen(int widthGrid, int heightGrid) {
         musicPlayer = new MusicPlayer("data/music/TetrisOST.wav");
         musicChoosePopup = new MusicChoosePopup(() -> setPage("homePage"));
 
@@ -86,7 +78,7 @@ public class GeneralScreen extends JFrame {
                 new Button("Retour au menu", () -> setPage("homePage"))
         );
 
-        initPages(grids);
+        initPages(widthGrid, heightGrid);
 
         for (int i = 0; i < playerCount; i++) {
             isGameOver[i] = false;
@@ -107,16 +99,15 @@ public class GeneralScreen extends JFrame {
     /**
      * Initialize the game pages for each player.
      */
-    public void initPages(Grid[] grids) {
+    public void initPages(int widthGrid, int heightGrid) {
         for (int i = 0; i < playerCount; i++) {
             int finalI = i; // to use in the lambda expression
-            tetrisPage[i] = new TetrisPage(grids[i],
+            tetrisPage[i] = new TetrisPage(
                     () -> {
                         isGameOver[finalI] = true;
                         setPage("gameOver");
-                    }
+                    }, heightGrid, widthGrid
             );
-            grids[i].addObserver(tetrisPage[i]);
             gameOverPopup[i] = new PopupPage("GAME OVER", Color.RED,
                     new Button("Rejouer", () -> setPage("tetrisView")),
                     new Button("Retour au menu", () -> setPage("homePage"))
@@ -349,5 +340,22 @@ public class GeneralScreen extends JFrame {
                 }
             }
         });
+    }
+
+    /**
+     * Add observers to the game pages and the keybind handler.
+     *
+     * @param o the observers to add, but must also be an Observable
+     */
+    @SuppressWarnings("deprecation")
+    public void addGridObserver(Observer[] o) {
+        for (int i = 0; i < playerCount; i++) {
+            if (o[i] == null || !(o[i] instanceof Observable)) {
+                throw new IllegalArgumentException("Each objet must be Observer and Observable at the same time");
+            }
+            keybindHandler.addObserver(o[i]);
+            tetrisPage[i].addObserverToTetrisPage((Observable) o[i]);
+            keybindHandler.handleKeybind(new ObservableAction(i, CALL_STATS)); // to initialize the best record
+        }
     }
 }

@@ -1,4 +1,4 @@
-package Tetris.Model.Utils;
+package Tetris.Model.GridComponent;
 
 import java.io.FileReader;
 import java.io.FileWriter;

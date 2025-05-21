@@ -1,9 +1,9 @@
 package Tetris.VueController.Page.TetrisComponent;
 
 import Tetris.Model.Piece.Piece;
-import Tetris.Model.Piece.PieceColor;
-import Tetris.Model.Utils.ObservableMessage;
-import static Tetris.Model.Piece.PieceColor.getColorCell;
+import Tetris.Utils.PieceColor;
+import Tetris.Utils.ObservableMessage;
+import static Tetris.Utils.PieceColor.getColorCell;
 
 import javax.swing.*;
 import java.awt.*;

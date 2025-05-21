@@ -1,6 +1,6 @@
 package Tetris.VueController;
 
-import Tetris.Model.Utils.ObservableAction;
+import Tetris.Utils.ObservableAction;
 
 import java.util.Observable;
 

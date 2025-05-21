@@ -1,8 +1,12 @@
 package Tetris.Model.Ai;
 
-import Tetris.Model.Piece.PieceColor;
+import Tetris.Model.Piece.Piece;
+import Tetris.Model.Piece.PieceManager;
+import Tetris.Utils.PieceColor;
+import static Tetris.Utils.StaticGridFunction.*;
 
 import java.util.List;
+
 
 /**
  * Utility class for AI calculations in Tetris.
@@ -173,5 +177,118 @@ public record AiUtils(int width, int height) {
         }
 
         return bumpiness;
+    }
+
+    /**
+     * Method to get the best move for the current piece
+     *
+     * @return the combinaison of placement to go to the best position
+     */
+    public int[] getBestMove(PieceManager pieceManager, PieceColor[][] grid) {
+        Piece currentPiece = pieceManager.getCurrentPiece();
+        Piece nextPiece = pieceManager.getNextPiece().getFirst();
+        Piece holdPiece = pieceManager.getHoldPiece();
+
+        int[][] originalShape = currentPiece.getShape();
+        int[][] originalHoldPieceShape = holdPiece != null ? holdPiece.getShape() : null;
+        int[][] originalNextPieceShape = nextPiece != null ? nextPiece.getShape() : null;
+
+        long[] values = findBestMoveForPiece(originalShape, currentPiece, grid);
+        long bestScore = values[0];
+        int bestX = (int) values[1];
+        int bestRotation = (int) values[2];
+        String whichPieceToUse = "current";
+
+        values = findBestMoveForPiece(
+                holdPiece != null ? originalHoldPieceShape : originalNextPieceShape,
+                holdPiece != null ? holdPiece : nextPiece,
+                grid
+        );
+        if (values[0] > bestScore) {
+            bestX = (int) values[1];
+            bestRotation = (int) values[2];
+            whichPieceToUse = "hold";
+        }
+
+        currentPiece.setShape(originalShape);
+        if (holdPiece != null) {
+            holdPiece.setShape(originalHoldPieceShape);
+        } else {
+            if (nextPiece != null) {
+                nextPiece.setShape(originalNextPieceShape);
+            }
+        }
+
+        switch (whichPieceToUse) {
+            case "hold" -> {
+                int[] moves = calculateMoves(currentPiece.getX(), bestX, bestRotation);
+                int[] temp = new int[moves.length + 1];
+                temp[0] = 6;
+                System.arraycopy(moves, 0, temp, 1, moves.length);
+                return temp;
+            }
+            case "current" -> {
+                return calculateMoves(currentPiece.getX(), bestX, bestRotation);
+            }
+        }
+
+        return new int[0]; // should never happen
+    }
+
+
+    /**
+     * Method to find the best move for a piece
+     *
+     * @param originalNextPieceShape the shape of the next piece
+     * @param piece                  the piece to check
+     * @return the best move for the piece
+     */
+    public long[] findBestMoveForPiece(int[][] originalNextPieceShape, Piece piece, PieceColor[][] grid) {
+        long bestScore = Integer.MIN_VALUE;
+        long bestX = -1;
+        long bestRotation = 0;
+
+        for (int rotation = 0; rotation < 4; rotation++) {
+            int[][] rotatedShape = originalNextPieceShape;
+            if (rotation > 0) {
+                for (int r = 0; r < rotation; r++) {
+                    rotatedShape = piece.getRotatedPosition(false);
+                }
+            }
+
+            for (int x = -1; x < width; x++) {
+                if (isValidPositionForShape(grid, rotatedShape, x, piece.getY(), width, height)) {
+                    int maxY = findMaxYInGrid(grid, rotatedShape, x, width, height);
+                    long score = evaluatePosition(maxY, rotatedShape, getTempGrid(grid, x, maxY, rotatedShape, piece.getColor()));
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestX = x;
+                        bestRotation = rotation;
+                    }
+                }
+            }
+        }
+        return new long[]{bestScore, bestX, bestRotation};
+    }
+
+    /**
+     * Method to get a copy of the grid with the current piece placed at the given position.
+     *
+     * @return the grid
+     */
+    private PieceColor[][] getTempGrid(PieceColor[][] grid, int x, int y, int[][] shape, PieceColor color) {
+        PieceColor[][] tempGrid = new PieceColor[height][width];
+        for (int r = 0; r < height; r++) {
+            System.arraycopy(grid[r], 0, tempGrid[r], 0, width);
+        }
+
+        for (int[] point : shape) {
+            int testX = point[0] + x;
+            int testY = point[1] + y;
+            if (testX >= 0 && testX < width && testY >= 0 && testY < height) {
+                tempGrid[testY][testX] = color;
+            }
+        }
+        return tempGrid;
     }
 }

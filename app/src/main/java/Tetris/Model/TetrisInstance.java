@@ -1,22 +1,25 @@
 package Tetris.Model;
 
+import Tetris.Utils.Action;
+import Tetris.Utils.PieceColor;
+import Tetris.Utils.ObservableMessage;
+import Tetris.Utils.ObservableAction;
 import Tetris.Model.Ai.AIInputStrategy;
-import Tetris.Model.Ai.AiUtils;
 import Tetris.Model.Piece.Piece;
-import Tetris.Model.Piece.PieceColor;
 import Tetris.Model.Piece.PieceManager;
 import Tetris.Model.Piece.PieceTemplate.PieceT;
-import Tetris.Model.Utils.*;
+import Tetris.Model.GridComponent.*;
 
 import java.util.*;
 
+import static Tetris.Utils.StaticGridFunction.*;
 import static java.lang.Thread.sleep;
 
 /**
  * Class to manage the grid
  */
 @SuppressWarnings("deprecation")
-public class Grid extends Observable implements Observer {
+public class TetrisInstance extends Observable implements Observer {
     private final boolean debugMode;
     /// debugMode if the game is in debug mode
     private final int width;
@@ -31,10 +34,8 @@ public class Grid extends Observable implements Observer {
     /// statsValues the stats values
     private final int debugPos;
     /// debugPos the debug position
-    private final AIInputStrategy aiInputStrategy = new AIInputStrategy();
+    private final AIInputStrategy aiInputStrategy;
     /// aiInputStrategy the AI input strategy
-    private final AiUtils aiUtils;
-    /// aiUtils the AI utils
     boolean isPaused = false;
     /// isPaused if the game is paused
     private boolean TSpin = false;
@@ -50,7 +51,6 @@ public class Grid extends Observable implements Observer {
     private final int idGrid;
     /// idGrid the id of the grid (used for Action reception)
 
-
     /**
      * Constructor for the grid
      *
@@ -59,7 +59,8 @@ public class Grid extends Observable implements Observer {
      * @param debugMode if the game is in debug mode
      * @param debugPos  the debug position
      */
-    public Grid(int width, int height, boolean debugMode, int debugPos, int idGrid) {
+    public TetrisInstance(int width, int height, boolean debugMode, int debugPos, int idGrid) {
+        this.aiInputStrategy = new AIInputStrategy(width, height);
         this.debugMode = debugMode;
         this.statsValues = new StatsValues(() -> signalChange("stats"));
         this.height = height;
@@ -73,20 +74,7 @@ public class Grid extends Observable implements Observer {
         }
         this.pieceManager = new PieceManager(debugMode);
         this.debugPos = debugPos;
-        this.aiUtils = new AiUtils(width, height);
         reset();
-    }
-
-    public int[] getLengthGrid() {
-        return new int[]{width, height};
-    }
-
-    public PieceColor[][] getGrid() {
-        return grid;
-    }
-
-    public FileWriterAndReader getFileWriterAndReader() {
-        return statsValues.fileWriterAndReader;
     }
 
     public boolean isAiMode() {
@@ -103,31 +91,20 @@ public class Grid extends Observable implements Observer {
         signalChange("AILabel");
     }
 
-    public boolean isGameOver() {
-        return isGameOver;
-    }
-
     /**
-     * Method to signal a change in the grid.
-     *
-     * @param type which change appended
+     * Method to get the grid
+     * @return a copy of the grid
      */
-    public void signalChange(String type) {
-        setChanged();
-        switch (type) {
-            case "timer" -> notifyObservers(ObservableMessage.of("timer", null, statsValues, null, 0, false));
-            case "stats" -> notifyObservers(ObservableMessage.of("stats", null, statsValues, null, 0, false));
-            case "grid" ->
-                    notifyObservers(ObservableMessage.of("grid", grid, null, pieceManager, findMaxY(pieceManager.getCurrentPiece()), false));
-            case "gameOver" -> notifyObservers(ObservableMessage.of("gameOver", null, null, null, 0, false));
-            case "nextPiece" -> notifyObservers(ObservableMessage.of("nextPiece", null, null, pieceManager, 0, false));
-            case "AILabel" -> notifyObservers(ObservableMessage.of("AILabel", null, null, null, 0, isAiMode()));
-            default -> System.out.println("Error: unknown type of signal");
+    public PieceColor[][] getGrid() {
+        PieceColor[][] gridCopy = new PieceColor[height][width];
+        for (int i = 0; i < height; i++) {
+            System.arraycopy(grid[i], 0, gridCopy[i], 0, width);
         }
+        return gridCopy;
     }
 
-    public StatsValues getStatsValues() {
-        return statsValues;
+    public PieceManager getPieceManager() {
+        return this.pieceManager;
     }
 
     /**
@@ -141,14 +118,6 @@ public class Grid extends Observable implements Observer {
     }
 
     /**
-     * Method to go to the next level.
-     */
-    public void nextLevel() {
-        statsValues.level = new Level(statsValues.level.level() + 1);
-        updateLevel();
-    }
-
-    /**
      * Method to increment the seconds of the timer.
      */
     public void incrementSeconds() {
@@ -156,10 +125,6 @@ public class Grid extends Observable implements Observer {
             statsValues.incrementSeconds();
             signalChange("timer");
         }
-    }
-
-    public PieceManager getPieceManager() {
-        return this.pieceManager;
     }
 
     /**
@@ -217,18 +182,11 @@ public class Grid extends Observable implements Observer {
      * @return true if the grid is empty, false otherwise
      */
     private boolean isAllClear() {
-        for (PieceColor[] c : grid) {
-            for (PieceColor i : c) {
-                if (i != PieceColor.NONE) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return Arrays.stream(grid).flatMap(Arrays::stream).noneMatch(i -> i != PieceColor.NONE);
     }
 
     /**
-     * Method to color the line white
+     * Method to color a line in white (for display purposes when clearing lines)
      *
      * @param y the line to color
      */
@@ -237,27 +195,6 @@ public class Grid extends Observable implements Observer {
             setCell(x, y, PieceColor.WHITE);
         }
         signalChange("grid");
-    }
-
-    /**
-     * Method to get a copy of the grid with the current piece placed at the given position.
-     *
-     * @return the grid
-     */
-    private PieceColor[][] getTempGrid(int x, int y, int[][] shape) {
-        PieceColor[][] tempGrid = new PieceColor[height][width];
-        for (int r = 0; r < height; r++) {
-            System.arraycopy(grid[r], 0, tempGrid[r], 0, width);
-        }
-
-        for (int[] point : shape) {
-            int testX = point[0] + x;
-            int testY = point[1] + y;
-            if (testX >= 0 && testX < width && testY >= 0 && testY < height) {
-                tempGrid[testY][testX] = pieceManager.getCurrentPiece().getColor();
-            }
-        }
-        return tempGrid;
     }
 
     /**
@@ -274,7 +211,8 @@ public class Grid extends Observable implements Observer {
             if (width >= 0) System.arraycopy(grid[i - 1], 0, grid[i], 0, width);
         }
         if (statsValues.lineDeleteCount % 10 == 0) {
-            nextLevel();
+            statsValues.level = new Level(statsValues.level.level() + 1); // increase level
+            scheduler.setPause(statsValues.level.getSpeed()); // update speed
         }
         signalChange("stats");
         // signalChange("grid"); after this function because we call it in the movePiece method
@@ -303,29 +241,11 @@ public class Grid extends Observable implements Observer {
      * @return the maximum Y position for this piece
      */
     public int findMaxY(Piece piece) {
-        return findMaxY(piece.getShape(), piece.getX());
+        return findMaxYInGrid(grid, piece.getShape(), piece.getX(), width, height);
     }
 
     /**
-     * Method to find the maximum Y position for a shape
-     *
-     * @param shape the shape to check
-     * @param x     the horizontal position in the grid
-     * @return the maximum Y position for this shape
-     */
-    private int findMaxY(int[][] shape, int x) {
-        int y = 0;
-        while (y < height) {
-            if (!isValidPositionForShape(shape, x, y + 1)) {
-                break;
-            }
-            y++;
-        }
-        return y;
-    }
-
-    /**
-     * Method to drop the piece to the bottom
+     * Method to drop the piece to the bottom directly
      *
      * @param incrementScore if true, increment the score
      */
@@ -351,7 +271,7 @@ public class Grid extends Observable implements Observer {
         }
 
         Piece currentPiece = this.pieceManager.getCurrentPiece();
-        if (isValidPositionForShape(currentPiece.getShape(), currentPiece.getX() + x_move, currentPiece.getY() + y_move)) {
+        if (isValidPositionForShape(grid, currentPiece.getShape(), currentPiece.getX() + x_move, currentPiece.getY() + y_move, width, height)) {
             if (incrementScore) {
                 addToScore(1);
             }
@@ -373,27 +293,28 @@ public class Grid extends Observable implements Observer {
         }
 
         if (!isFixing) { // to avoid double fixing (one by the user and one by the thread)
-            scheduler.setWait();
+            scheduler.setWait(true);
             fixPiece(currentPiece, currentPiece.getColor());
         }
     }
 
     /**
      * Method to fix the piece
+     * When this method is called, we the piece can move while waiting for the thread to finish, and you can't call again the method
+     * Once the thread is finished, we check if the piece must be fixed or not, and we really fix it if needed
      *
      * @param currentPiece the current piece
      * @param color        the color of the piece
      */
     public void fixPiece(Piece currentPiece, PieceColor color) {
-
         Thread fixPieceThread = new Thread(() -> {
             try {
-                sleep(aiMode ? 20 : 300);
+                sleep(isAiMode() ? 20 : 300);
             } catch (InterruptedException e) {
                 // The thread was interrupted, do nothing
                 System.out.println("Error sleeping");
             }
-            if (!isValidPositionForShape(currentPiece.getShape(), currentPiece.getX(), currentPiece.getY() + 1)) { // we check if the piece must be fixed
+            if (!isValidPositionForShape(grid, currentPiece.getShape(), currentPiece.getX(), currentPiece.getY() + 1, width, height)) { // we check if the piece must be fixed
                 for (int[] c : currentPiece.getCoordinates(currentPiece.getX(), currentPiece.getY())) {
                     if (c[1] >= 0) {
                         setCell(c[0], c[1], color);
@@ -409,9 +330,8 @@ public class Grid extends Observable implements Observer {
             }
             // if the piece is not fixed, we don't do anything and we restart the thread
             isFixing = false;
-            scheduler.setWait();
+            scheduler.setWait(false); // restart the scheduler
         });
-
         fixPieceThread.start();
         isFixing = true;
     }
@@ -425,7 +345,7 @@ public class Grid extends Observable implements Observer {
             int[][] coords = {{0, 0}, {2, 0}, {0, 2}, {2, 2}};
             int count = 0;
             for (int[] c : coords) {
-                if (!isValidPositionForShape(new int[][]{{currentPiece.getX(), currentPiece.getY()}}, c[0], c[1])) {
+                if (!isValidPositionForShape(grid, new int[][]{{currentPiece.getX(), currentPiece.getY()}}, c[0], c[1], width, height)) {
                     count++;
                 }
             }
@@ -436,7 +356,7 @@ public class Grid extends Observable implements Observer {
     }
 
     /**
-     * Method to rotate the piece
+     * Method to rotate the piece. Handle the T-Spin case
      *
      * @param isLeft true if the piece must be rotated to the left, false otherwise
      */
@@ -468,7 +388,7 @@ public class Grid extends Observable implements Observer {
 
         // special case for T-Spin
         kicks = new int[][]{{1, 1}, {-1, 1}, {0, 2}, {-1, 2}, {1, 2}};
-        if (!isValidPositionForShape(upperCorner, currentPiece.getX(), currentPiece.getY())) {
+        if (!isValidPositionForShape(grid, upperCorner, currentPiece.getX(), currentPiece.getY(), width, height)) {
             tryRotate(kicks, currentPiece, originalRotatedShape);
         }
     }
@@ -479,11 +399,11 @@ public class Grid extends Observable implements Observer {
      * @param kicks                the kicks to try
      * @param currentPiece         the current piece
      * @param originalRotatedShape the original rotated shape
-     * @return true if the rotation is possible, false otherwise
+     * @return true if the rotation is made, false otherwise
      */
     private boolean tryRotate(int[][] kicks, Piece currentPiece, int[][] originalRotatedShape) {
         for (int[] kick : kicks) {
-            if (isValidPositionForShape(originalRotatedShape, currentPiece.getX() + kick[0], currentPiece.getY() + kick[1])) {
+            if (isValidPositionForShape(grid, originalRotatedShape, currentPiece.getX() + kick[0], currentPiece.getY() + kick[1], width, height)) {
                 currentPiece.setShape(originalRotatedShape);
                 currentPiece.setPos(currentPiece.getX() + kick[0], currentPiece.getY() + kick[1]);
                 signalChange("grid");
@@ -510,10 +430,6 @@ public class Grid extends Observable implements Observer {
             scheduler.start();
         }
         isPaused = false;
-    }
-
-    public void updateLevel() {
-        scheduler.setPause(statsValues.level.getSpeed());
     }
 
     public void stopGame() {
@@ -547,52 +463,7 @@ public class Grid extends Observable implements Observer {
                 }
             }
 
-            // debug mode configuration
-            switch (debugPos) {
-                case 0, 3 -> {
-                    if (debugPos == 3) {
-                        grid[16][2] = PieceColor.RED;
-                        grid[16][6] = PieceColor.RED;
-                    }
-                    grid[17][1] = PieceColor.RED;
-                    grid[17][7] = PieceColor.RED;
-                    grid[18][2] = PieceColor.NONE;
-                    grid[18][6] = PieceColor.NONE;
-                    grid[19][1] = PieceColor.NONE;
-                    grid[19][2] = PieceColor.NONE;
-                    grid[19][3] = PieceColor.NONE;
-                    grid[19][5] = PieceColor.NONE;
-                    grid[19][6] = PieceColor.NONE;
-                    grid[19][7] = PieceColor.NONE;
-                    grid[20][2] = PieceColor.NONE;
-                    grid[20][6] = PieceColor.NONE;
-                }
-                case 1 -> {
-                    grid[18][3] = PieceColor.NONE;
-                    grid[18][4] = PieceColor.NONE;
-                    grid[19][2] = PieceColor.NONE;
-                    grid[19][3] = PieceColor.NONE;
-                    grid[19][4] = PieceColor.NONE;
-                    grid[20][4] = PieceColor.NONE;
-                    grid[21][4] = PieceColor.NONE;
-                }
-                case 2 -> {
-                    grid[18][3] = PieceColor.NONE;
-                    grid[18][4] = PieceColor.NONE;
-                    grid[19][2] = PieceColor.NONE;
-                    grid[19][3] = PieceColor.NONE;
-                    grid[19][4] = PieceColor.NONE;
-                    grid[20][2] = PieceColor.NONE;
-                    grid[21][2] = PieceColor.NONE;
-                    grid[21][3] = PieceColor.NONE;
-                    grid[22][2] = PieceColor.NONE;
-                    grid[22][3] = PieceColor.NONE;
-                    grid[22][4] = PieceColor.NONE;
-                    grid[23][4] = PieceColor.NONE;
-                    grid[23][5] = PieceColor.NONE;
-                    grid[24][4] = PieceColor.NONE;
-                }
-            }
+            setDebugGrid(grid, debugPos);
         }
         scheduler.start();
         timer.start();
@@ -603,130 +474,31 @@ public class Grid extends Observable implements Observer {
     }
 
     /**
-     * Method to get the best move for the current piece
+     * Method to signal a change in the grid.
      *
-     * @return the combinaison of placement to go to the best position
+     * @param type which change appended
      */
-    public int[] getBestMove() {
-        Piece currentPiece = pieceManager.getCurrentPiece();
-        Piece nextPiece = pieceManager.getNextPiece().getFirst();
-        Piece holdPiece = pieceManager.getHoldPiece();
-
-        int[][] originalShape = currentPiece.getShape();
-        int[][] originalHoldPieceShape = holdPiece != null ? holdPiece.getShape() : null;
-        int[][] originalNextPieceShape = nextPiece != null ? nextPiece.getShape() : null;
-
-        long[] values = findBestMoveForPiece(originalShape, currentPiece);
-        long bestScore = values[0];
-        int bestX = (int) values[1];
-        int bestRotation = (int) values[2];
-        String whichPieceToUse = "current";
-
-        values = findBestMoveForPiece(
-                holdPiece != null ? originalHoldPieceShape : originalNextPieceShape,
-                holdPiece != null ? holdPiece : nextPiece
-        );
-        if (values[0] > bestScore) {
-            bestX = (int) values[1];
-            bestRotation = (int) values[2];
-            whichPieceToUse = "hold";
+    public void signalChange(String type) {
+        setChanged();
+        switch (type) {
+            case "timer", "stats", "initBestScores", "gameOver" ->
+                    notifyObservers(ObservableMessage.of(type, null, statsValues, null, 0, false));
+            case "grid" ->
+                    notifyObservers(ObservableMessage.of(type, grid, null, pieceManager, findMaxY(pieceManager.getCurrentPiece()), false));
+            case "nextPiece" -> notifyObservers(ObservableMessage.of(type, null, null, pieceManager, 0, false));
+            case "AILabel" -> notifyObservers(ObservableMessage.of(type, null, null, null, 0, isAiMode()));
+            default -> System.out.println("Error: unknown type of signal");
         }
-
-        currentPiece.setShape(originalShape);
-        if (holdPiece != null) {
-            holdPiece.setShape(originalHoldPieceShape);
-        } else {
-            if (nextPiece != null) {
-                nextPiece.setShape(originalNextPieceShape);
-            }
-        }
-
-        switch (whichPieceToUse) {
-            case "hold" -> {
-                int[] moves = aiUtils.calculateMoves(currentPiece.getX(), bestX, bestRotation);
-                int[] temp = new int[moves.length + 1];
-                temp[0] = 6;
-                System.arraycopy(moves, 0, temp, 1, moves.length);
-                return temp;
-            }
-            case "current" -> {
-                return aiUtils.calculateMoves(currentPiece.getX(), bestX, bestRotation);
-            }
-        }
-
-        return new int[0]; // should never happen
-    }
-
-    /**
-     * Method to find the best move for a piece
-     *
-     * @param originalNextPieceShape the shape of the next piece
-     * @param piece                  the piece to check
-     * @return the best move for the piece
-     */
-    public long[] findBestMoveForPiece(int[][] originalNextPieceShape, Piece piece) {
-        long bestScore = Integer.MIN_VALUE;
-        long bestX = -1;
-        long bestRotation = 0;
-
-        for (int rotation = 0; rotation < 4; rotation++) {
-            int[][] rotatedShape = originalNextPieceShape;
-            if (rotation > 0) {
-                for (int r = 0; r < rotation; r++) {
-                    rotatedShape = piece.getRotatedPosition(false);
-                }
-            }
-
-            for (int x = -1; x < width; x++) {
-                if (isValidPositionForShape(rotatedShape, x, piece.getY())) {
-                    int maxY = findMaxY(rotatedShape, x);
-                    long score = aiUtils.evaluatePosition(maxY, rotatedShape, getTempGrid(x, maxY, rotatedShape));
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestX = x;
-                        bestRotation = rotation;
-                    }
-                }
-            }
-        }
-        return new long[]{bestScore, bestX, bestRotation};
-    }
-
-    /**
-     * Method to check if the position is valid for a shape
-     *
-     * @param shape the shape to check
-     * @param x     the x position of the shape
-     * @param y     the y position of the shape
-     * @return true if the position is valid, false otherwise
-     */
-    private boolean isValidPositionForShape(int[][] shape, int x, int y) {
-        if (shape == null) {
-            return false;
-        }
-        for (int[] pos : shape) {
-            int x_next = pos[0] + x;
-            int y_next = pos[1] + y;
-            if (Arrays.stream(shape).anyMatch(c -> c[0] == x && c[1] == y)) { // case where the piece is already in the grid
-                continue;
-            }
-            if (x_next < 0 || x_next >= width || y_next >= height || (y_next >= 0 && !(grid[y_next][x_next] == PieceColor.NONE))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override
     public void update(Observable o, Object arg) {
         if (arg instanceof ObservableAction(int idGrid1, Action action)) {
             if (idGrid1 == idGrid || (action != Action.RESUME_GAME && isPaused())) {
-                if (isGameOver()) {
+                if (isGameOver) {
                     switch (action) {
-                        case CHANGE_IA_STATE, STOP_GAME, STOP_IA, RESET, PAUSE_GAME, RESUME_GAME:
+                        case CHANGE_IA_STATE, STOP_GAME, STOP_IA, RESET, PAUSE_GAME, RESUME_GAME, CALL_STATS:
                             action.execute(this);
-                        default:
-                            return;
                     }
                 } else {
                     action.execute(this);

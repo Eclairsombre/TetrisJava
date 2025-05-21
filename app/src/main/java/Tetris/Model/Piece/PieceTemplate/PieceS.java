@@ -1,7 +1,7 @@
 package Tetris.Model.Piece.PieceTemplate;
 
 import Tetris.Model.Piece.Piece;
-import Tetris.Model.Piece.PieceColor;
+import Tetris.Utils.PieceColor;
 
 /**
  * PieceS class represents the S-shaped Tetris piece.

@@ -3,33 +3,42 @@
  */
 package Tetris;
 
-import Tetris.Model.Grid;
+import Tetris.Model.TetrisInstance;
 import Tetris.VueController.GeneralScreen;
 
+import java.util.Observer;
+
 public class App {
+    @SuppressWarnings("deprecation")
     public static void main(String[] args) {
+        GeneralScreen generalScreen;
+        TetrisInstance tetrisInstanceP1;
+        TetrisInstance tetrisInstanceP2;
         if (args.length > 0) {
             if (args[0].equals("-debug")) {
                 System.out.println("Debug mode activated");
                 if (args.length > 1) {
                     System.out.println("Debug mode activated with argument: " + args[1]);
-                    Grid g1 = new Grid(10, 25, true, Integer.parseInt(args[1]), 0);
-                    Grid g2 = new Grid(10, 25, true, Integer.parseInt(args[1]), 1);
-                    new GeneralScreen(g1, g2);
+                    tetrisInstanceP1 = new TetrisInstance(10, 25, true, Integer.parseInt(args[1]), 0);
+                    tetrisInstanceP2 = new TetrisInstance(10, 25, true, Integer.parseInt(args[1]), 1);
                 } else {
-                    Grid g1 = new Grid(10, 25, true, 0, 0);
-                    Grid g2 = new Grid(10, 25, true, 0, 1);
-                    new GeneralScreen(g1, g2);
+                    tetrisInstanceP1 = new TetrisInstance(10, 25, true, 0, 0);
+                    tetrisInstanceP2 = new TetrisInstance(10, 25, true, 0, 1);
                 }
             } else {
                 System.out.println("Invalid argument: " + args[0]);
                 System.out.println("Usage: java -jar Tetris.jar [-debug [port]]");
+                System.out.println("Default port: 0");
+                System.out.println("Debug mode: false");
+                tetrisInstanceP1 = new TetrisInstance(10, 25, false, 0, 0);
+                tetrisInstanceP2 = new TetrisInstance(10, 25, false, 0, 1);
                 System.exit(1);
             }
         } else {
-            Grid g1 = new Grid(10, 25, false, 0, 0);
-            Grid g2 = new Grid(10, 25, false, 0, 1);
-            new GeneralScreen(g1, g2);
+            tetrisInstanceP1 = new TetrisInstance(10, 25, false, 0, 0);
+            tetrisInstanceP2 = new TetrisInstance(10, 25, false, 0, 1);
         }
+        generalScreen = new GeneralScreen(10, 25);
+        generalScreen.addGridObserver(new Observer[]{tetrisInstanceP1, tetrisInstanceP2});
     }
 }

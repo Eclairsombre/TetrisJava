@@ -1,4 +1,4 @@
-package Tetris.Model.Piece;
+package Tetris.Utils;
 
 import java.awt.*;
 

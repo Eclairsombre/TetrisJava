@@ -3,23 +3,21 @@ package Tetris.VueController.Page.TetrisComponent;
 import Tetris.Model.Piece.Piece;
 import Tetris.Model.Piece.PieceManager;
 import Tetris.Model.Piece.PieceTemplate.PieceI;
-import Tetris.Model.Utils.FileWriterAndReader;
-import Tetris.Model.Utils.ObservableMessage;
+import Tetris.Model.GridComponent.FileWriterAndReader;
+import Tetris.Utils.ObservableMessage;
+import static Tetris.Utils.PieceColor.getColorCell;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Observable;
 import java.util.Observer;
 
-import static Tetris.Model.Piece.PieceColor.getColorCell;
 
 /**
  * PieceDisplayManager is a custom JPanel that displays the next pieces and the hold piece.
  */
 @SuppressWarnings("deprecation")
 public class PieceDisplayManager extends JPanel implements Observer {
-    private final FileWriterAndReader fileWriterAndReader;
-    /// fileWriterAndReader FileWriterAndReader instance to read and write scores
     private final JPanel scorePanel = new JPanel();
     /// scorePanel JPanel to display the best scores
     private final CustomJPanel[][] holdPieceCells;
@@ -32,9 +30,8 @@ public class PieceDisplayManager extends JPanel implements Observer {
      * @param width          the width of the cells
      * @param height         the height of the cells
      * @param background     the background color of the panel
-     * @param FWAR           the FileWriterAndReader instance to read and write scores
      */
-    public PieceDisplayManager(int width, int height, Color background, FileWriterAndReader FWAR) {
+    public PieceDisplayManager(int width, int height, Color background) {
         nextPiecesTabs = new CustomJPanel[3][4][4];
         holdPieceCells = new CustomJPanel[4][4];
 
@@ -71,16 +68,13 @@ public class PieceDisplayManager extends JPanel implements Observer {
         scorePanel.setBounds(600, 750, 230, 100);
         add(scorePanel);
 
-        fileWriterAndReader = FWAR;
-        updateBestScores();
-
         setBackground(background);
     }
 
     /**
      * Updates the best scores displayed in the score panel.
      */
-    public void updateBestScores() {
+    public void updateBestScores(FileWriterAndReader fileWriterAndReader) {
         scorePanel.removeAll();
         String[] scores = fileWriterAndReader.readFromFile();
         for (String score : scores) {
@@ -90,8 +84,6 @@ public class PieceDisplayManager extends JPanel implements Observer {
         repaint();
         revalidate();
     }
-
-
 
     /**
      * Updates the next piece and hold piece displayed in PieceDisplayManager.
@@ -152,8 +144,8 @@ public class PieceDisplayManager extends JPanel implements Observer {
         }
         if (OM.message().equals("nextPiece")) {
             updateNextPiece(OM.pieceManager());
-        } else if (OM.message().equals("gameOver")) {
-            updateBestScores();
+        } else if (OM.message().equals("gameOver") || OM.message().equals("initBestScores")) {
+            updateBestScores(OM.statsValues().fileWriterAndReader);
         }
     }
 }

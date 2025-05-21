@@ -1,8 +1,7 @@
-package Tetris.Model.Utils;
+package Tetris.Utils;
 
 import java.awt.event.KeyEvent;
-
-import static Tetris.Model.Utils.Action.*;
+import static Tetris.Utils.Action.*;
 
 public record ObservableAction(int idGrid, Action action) {
     /// @param idGrid The id of the grid

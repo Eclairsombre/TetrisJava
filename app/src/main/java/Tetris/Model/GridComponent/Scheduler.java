@@ -1,21 +1,21 @@
-package Tetris.Model.Utils;
+package Tetris.Model.GridComponent;
 
 /**
  * This class is used to create a thread that runs a runnable at a fixed interval
  */
 public class Scheduler extends Thread {
     private final Runnable r;
-    /// @param r the runnable to run
+    /// r the runnable to run
     private long pause;
-    /// @param pause the time to wait between runs
+    /// pause the time to wait between runs
     private boolean wait = false;
-    /// @param wait if true, the thread will wait before running the runnable
+    /// wait if true, the thread will wait before running the runnable
 
     /**
      * Constructor for the Scheduler class
      *
-     * @param pause
-     * @param runnable
+     * @param pause the time to wait between runs
+     * @param runnable the runnable to run
      */
     public Scheduler(long pause, Runnable runnable) {
         this.r = runnable;
@@ -50,7 +50,7 @@ public class Scheduler extends Thread {
         this.pause = pause;
     }
 
-    public void setWait() {
-        this.wait = !this.wait;
+    public void setWait(boolean wait) {
+        this.wait = wait;
     }
 }
