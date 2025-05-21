@@ -1,13 +1,25 @@
 package Tetris.Model.Piece;
 
-
+/**
+ * Represents a Tetris piece with its shape, color, and position on the grid.
+ */
 public class Piece {
-    private final int[][] shape = new int[4][2]; // General shape for the piece
+    private final int[][] shape = new int[4][2];
+    /// @param shape The shape of the piece represented as a 4x2 array.
     private final PieceColor color;
-    private final int[] center = new int[2]; // Center of the piece for rotation
+    /// @param color The color of the piece.
+    private final int[] center = new int[2];
+    /// @param center The center of the piece for rotation.
     private int x = 0;
-    private int y = 0; // Position of the piece on the grid
+    /// @param x The x-coordinate of the piece on the grid.
+    private int y = 0;
+    /// @param y The y-coordinate of the piece on the grid.
 
+    /**
+     * Constructor for the Piece class.
+     *
+     * @param color The color of the piece.
+     */
     public Piece(PieceColor color) {
         this.color = color;
         this.center[0] = 1;

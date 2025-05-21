@@ -8,6 +8,14 @@ import java.awt.*;
  * It uses a grid layout to arrange the pieces in a 4x4 grid.
  */
 public class PieceDisplayView extends JPanel {
+    /**
+     * Constructor for PieceDisplayView.
+     *
+     * @param nextPieceCells
+     * @param width
+     * @param height
+     * @param ratio
+     */
     public PieceDisplayView(JPanel[][] nextPieceCells, int width, int height, float ratio) {
         int length = 4;
         JPanel npPanel = new JPanel();

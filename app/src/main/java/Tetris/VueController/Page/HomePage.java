@@ -6,9 +6,21 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 
+/**
+ * This class represents the home page of the Tetris game.
+ */
 public class HomePage extends JPanel {
     private final Button[] buttons;
+    /// @param buttons the buttons to be displayed on the home page
 
+    /**
+     * Constructor for the HomePage class.
+     * Initializes the home page with a welcome label and buttons.
+     *
+     * @param start1PGameButton The button to start a 1-player game.
+     * @param start2PGameButton The button to start a 2-player game.
+     * @param chooseMusicButton The button to choose music.
+     */
     public HomePage(Button start1PGameButton, Button start2PGameButton, Button chooseMusicButton) {
         setLayout(null);
 

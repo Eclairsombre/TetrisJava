@@ -4,13 +4,19 @@ import Tetris.Model.Piece.PieceColor;
 
 import java.util.List;
 
+/**
+ * Utility class for AI calculations in Tetris.
+ *
+ * @param width
+ * @param height
+ */
 public record AiUtils(int width, int height) {
 
     /**
      * Calculates the moves needed to reach the targetX from startX.
      *
-     * @param startX x-coordinate of the starting position
-     * @param targetX x-coordinate of the target position
+     * @param startX    x-coordinate of the starting position
+     * @param targetX   x-coordinate of the target position
      * @param rotations number of rotations to be performed
      * @return an array of moves
      */

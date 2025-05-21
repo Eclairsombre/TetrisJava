@@ -11,17 +11,31 @@ import static java.lang.Thread.sleep;
  */
 public class StatsValues {
     private final Runnable callView;
+    /// @param callView Runnable to call the view when needed
     public int score = 0;
+    /// @param score Current score of the game
     public Level level = new Level(1);
+    /// @param level Current level of the game
     public int lineDeleteCount = 0;
+    /// @param lineDeleteCount Number of lines deleted
     public String lineClearDisplay = "";
+    /// @param lineClearDisplay Message to display when lines are cleared
     public FileWriterAndReader fileWriterAndReader = new FileWriterAndReader(
             "app/src/main/resources/score.txt"
     );
+    /// @param fileWriterAndReader File writer and reader to save the score
     private int seconds = 0;
+    /// @param seconds Current time in seconds
     private Thread resetScoreSkillLabel;
+    /// @param resetScoreSkillLabel Thread to reset the line clear display after a delay
     private int BtBCounter = 0;
+    /// @param BtBCounter Counter for back-to-back lines cleared
 
+    /**
+     * Constructor for StatsValues.
+     *
+     * @param callView Runnable to call the view when needed
+     */
     public StatsValues(Runnable callView) {
         this.callView = callView;
     }

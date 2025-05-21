@@ -2,6 +2,9 @@ package Tetris.Model.Utils;
 
 import Tetris.Model.Grid;
 
+/**
+ * Enum representing the possible actions that can be performed on the Tetris grid.
+ */
 public enum Action {
     MOVE_LEFT(grid -> grid.movePiece(-1, 0, false, false)),
     MOVE_RIGHT(grid -> grid.movePiece(1, 0, false, false)),

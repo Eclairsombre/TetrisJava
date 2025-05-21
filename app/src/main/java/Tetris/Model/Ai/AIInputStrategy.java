@@ -1,14 +1,22 @@
 package Tetris.Model.Ai;
+
 import Tetris.Model.Grid;
 import Tetris.Model.Utils.Scheduler;
 
 import static Tetris.Model.Utils.Action.*;
 
+/**
+ * AIInputStrategy is a class that manages the AI input strategy for a Tetris game.
+ */
 public class AIInputStrategy {
     private boolean enabled = false;
+    /// @param enabled Indicates if the AI is enabled or not.
     private Thread aiThread;
+    /// @param aiThread The thread that runs the AI input strategy.
     private int[] plannedMoves = null;
+    /// @param plannedMoves The planned moves for the AI.
     private int currentMoveIndex = 0;
+    /// @param currentMoveIndex The index of the current move in the planned moves.
 
     /**
      * Processes the input for the AI.
@@ -59,7 +67,7 @@ public class AIInputStrategy {
             plannedMoves = null;
             currentMoveIndex = 0;
 
-            aiThread = new Scheduler(5, () -> processInput(grid) );
+            aiThread = new Scheduler(5, () -> processInput(grid));
             aiThread.start();
         }
     }

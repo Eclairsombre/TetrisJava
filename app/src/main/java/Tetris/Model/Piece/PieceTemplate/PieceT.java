@@ -5,8 +5,16 @@ import Tetris.Model.Piece.PieceColor;
 
 import java.util.List;
 
+/**
+ * PieceT class represents the T-shaped piece in Tetris.
+ */
 public class PieceT extends Piece {
 
+    /**
+     * Constructor for PieceT
+     *
+     * @param color the color of the piece
+     */
     public PieceT(PieceColor color) {
         super(color);
         int[][] shape = {{0, 1}, {1, 1}, {2, 1}, {1, 0}};

@@ -10,7 +10,20 @@ import java.awt.*;
  */
 public class PieceDisplayManager extends JPanel {
     FileWriterAndReader fileWriterAndReader;
+    /// @param fileWriterAndReader FileWriterAndReader instance to read and write scores
     JPanel scorePanel = new JPanel();
+    /// @param scorePanel JPanel to display the best scores
+
+    /**
+     * Constructor for PieceDisplayManager.
+     *
+     * @param nextPiecesTabs the next pieces to be displayed
+     * @param holdPieceCells the hold piece cells
+     * @param width          the width of the cells
+     * @param height         the height of the cells
+     * @param background     the background color of the panel
+     * @param FWAR           the FileWriterAndReader instance to read and write scores
+     */
     public PieceDisplayManager(JPanel[][][] nextPiecesTabs, JPanel[][] holdPieceCells, int width, int height, Color background, FileWriterAndReader FWAR) {
         LayoutManager layout = new BoxLayout(this, BoxLayout.Y_AXIS);
         setLayout(layout);

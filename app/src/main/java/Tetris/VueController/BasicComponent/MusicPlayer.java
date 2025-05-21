@@ -5,9 +5,18 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Class to play background music.
+ */
 public class MusicPlayer {
     private Clip clip;
+    /// @param clip the clip to play
 
+    /**
+     * Constructor to initialize the music player with a file path.
+     *
+     * @param filePath
+     */
     public MusicPlayer(String filePath) {
         try {
             InputStream audioStream = getClass().getClassLoader().getResourceAsStream(filePath);

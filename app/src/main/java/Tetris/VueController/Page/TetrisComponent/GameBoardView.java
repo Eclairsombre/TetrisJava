@@ -10,12 +10,26 @@ import java.awt.event.ComponentEvent;
  */
 public class GameBoardView extends JPanel {
     JPanel[][] cases;
+    /// @param cases the cases of the game board
     int width;
+    /// @param width the width of the game board
     int height;
+    /// @param height the height of the game board
     JPanel boardPanel;
+    /// @param boardPanel the panel that contains the game board
     int ratio = 13;
+    /// @param ratio the ratio of the game board
     int offset = 20;
+    /// @param offset the offset of the game board
 
+    /**
+     * Constructor for the GameBoardView class.
+     *
+     * @param width           The width of the game board.
+     * @param height          The height of the game board.
+     * @param cases           The cases of the game board.
+     * @param backgroundColor The background color of the game board.
+     */
     public GameBoardView(int width, int height, JPanel[][] cases, Color backgroundColor) {
         this.cases = cases;
         this.width = width;

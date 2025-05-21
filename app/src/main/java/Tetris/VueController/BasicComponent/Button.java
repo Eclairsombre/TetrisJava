@@ -7,6 +7,12 @@ import java.awt.*;
  * Contains a JButton with a specified text and action.
  */
 public class Button extends JPanel {
+    /**
+     * Constructs a Button with the specified text and action.
+     *
+     * @param text
+     * @param runnable
+     */
     public Button(String text, Runnable runnable) {
         JButton button = new JButton(text);
         button.setFont(new Font("Arial", Font.PLAIN, 18));

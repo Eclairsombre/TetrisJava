@@ -16,24 +16,36 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+/**
+ * TetrisPage class represents the main game page of the Tetris game.
+ */
 @SuppressWarnings("deprecation")
 public class TetrisPage extends JPanel implements Observer {
     private final CustomJPanel[][] cases;
+    /// @param cases the grid of the game
     private final CustomJPanel[][] holdPieceCells;
+    /// @param holdPieceCells the cells of the hold piece
     private final CustomJPanel[][][] nextPieceCells;
+    /// @param nextPieceCells the cells of the next pieces
     private final Grid grid;
+    /// @param grid the grid of the game
     private final DashBoardView dashBoardVue;
+    /// @param dashBoardVue the dashboard of the game
     private final PieceDisplayManager piecePanel;
+    /// @param piecePanel the panel that displays the pieces
     private final int widthGrid;
+    /// @param widthGrid the width of the grid
     private final int heightGrid;
+    /// @param heightGrid the height of the grid
     Runnable changeToGameOver;
+    /// @param changeToGameOver the function to call when the game is over
 
     /**
      * Constructor for the TetrisPage class.
      * Initializes a Tetris game view
      *
-     * @param g                 The game instance.
-     * @param changeToGameOver  Runnable to change to the game over screen.
+     * @param g                The game instance.
+     * @param changeToGameOver Runnable to change to the game over screen.
      */
     public TetrisPage(Tetris.Model.Grid g, Runnable changeToGameOver) {
         Color backgroundColor = Color.LIGHT_GRAY;

@@ -6,14 +6,28 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * PieceManager is a class that manages the pieces in the Tetris game.
+ */
 public class PieceManager {
     private final List<Piece> nextPiece = new ArrayList<>();
+    /// @param nextPiece the list of next pieces
     private final SecureRandom random = new java.security.SecureRandom();
+    /// @param random the random number generator
     private List<Integer> lastPiece = new ArrayList<>(List.of(-1, -1, -1)); // impossible piece index to start
+    /// @param lastPiece the list of last pieces
     private boolean canHoldPiece = true;
+    /// @param canHoldPiece if the player can hold a piece
     private Piece currentPiece;
+    /// @param currentPiece the current piece
     private Piece holdPiece;
+    /// @param holdPiece the hold piece
 
+    /**
+     * Constructor for PieceManager.
+     *
+     * @param debugMode if true, the current piece is set to a specific piece for debugging.
+     */
     public PieceManager(boolean debugMode) {
         reset(debugMode);
     }

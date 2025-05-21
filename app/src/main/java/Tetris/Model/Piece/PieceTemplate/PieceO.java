@@ -3,14 +3,28 @@ package Tetris.Model.Piece.PieceTemplate;
 import Tetris.Model.Piece.Piece;
 import Tetris.Model.Piece.PieceColor;
 
+/**
+ * PieceO class represents the O-shaped Tetris piece.
+ */
 public class PieceO extends Piece {
 
+    /**
+     * Constructor for PieceO.
+     *
+     * @param color The color of the piece.
+     */
     public PieceO(PieceColor color) {
         super(color);
         int[][] shape = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
         super.setShape(shape);
     }
 
+    /**
+     * Returns the rotated position of the O piece.
+     *
+     * @param isLeft Indicates whether the rotation is to the left or right.
+     * @return The rotated position of the O piece.
+     */
     @Override
     public int[][] getRotatedPosition(boolean isLeft) {
         // O piece does not change shape on rotation

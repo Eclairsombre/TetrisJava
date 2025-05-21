@@ -6,18 +6,25 @@ import Tetris.VueController.BasicComponent.Button;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * PopupPage class represents a popup window that displays game statistics and buttons.
+ * It extends JPanel and is used to show information such as score, level, and time.
+ */
 public class PopupPage extends JPanel {
     private final JLabel scoreLabel, levelLabel, timeLabel;
+    /// @param scoreLabel   The label to display the score.
+    /// @param levelLabel   The label to display the level.
+    /// @param timeLabel    The label to display the time.
 
     /**
      * Constructor for the PopupPage class.
      * Displays a JPanel above the grid board with the specified text, color, and buttons.
      *
-     * @param text            The text to display in the popup.
-     * @param color           The color of the text.
-     * @param statsValues     The StatsValues object containing the stats to display.
-     * @param actionButton    The action button to be displayed.
-     * @param backHomeButton  The button to go back to the home screen.
+     * @param text           The text to display in the popup.
+     * @param color          The color of the text.
+     * @param statsValues    The StatsValues object containing the stats to display.
+     * @param actionButton   The action button to be displayed.
+     * @param backHomeButton The button to go back to the home screen.
      */
     public PopupPage(String text, Color color, StatsValues statsValues, Button actionButton, Button backHomeButton) {
         setFocusable(false); // To avoid focus issues

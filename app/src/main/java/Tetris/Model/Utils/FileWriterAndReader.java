@@ -5,9 +5,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * This class is used to write and read from a file.
+ */
 public class FileWriterAndReader {
     private final String path;
+    /// @param path the path to the file
 
+    /**
+     * Constructor for the FileWriterAndReader class.
+     *
+     * @param path the path to the file
+     */
     public FileWriterAndReader(String path) {
         this.path = path;
     }

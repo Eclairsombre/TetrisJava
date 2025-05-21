@@ -18,24 +18,49 @@ import java.util.Observable;
 
 import static java.lang.Thread.sleep;
 
+/**
+ * Class to manage the grid
+ */
 @SuppressWarnings("deprecation")
 public class Grid extends Observable {
     private final boolean debugMode;
+    /// @param debugMode if the game is in debug mode
     private final int width;
+    /// @param width the width of the grid
     private final int height;
+    /// @param height the height of the grid
     private final PieceColor[][] grid;
+    /// @param grid the grid
     private final PieceManager pieceManager;
+    /// @param pieceManager the piece manager
     private final StatsValues statsValues;
+    /// @param statsValues the stats values
     private final int debugPos;
-    boolean isPaused = false;
-    private boolean TSpin = false;
-    private boolean isFixing = false;
-    private Scheduler scheduler, timer;
-    private boolean aiMode = false;
+    /// @param debugPos the debug position
     private final AIInputStrategy aiInputStrategy = new AIInputStrategy();
+    /// @param aiInputStrategy the AI input strategy
     private final AiUtils aiUtils;
+    /// @param aiUtils the AI utils
+    boolean isPaused = false;
+    /// @param isPaused if the game is paused
+    private boolean TSpin = false;
+    /// @param TSpin if the game is in T-Spin mode
+    private boolean isFixing = false;
+    /// @param isFixing if the game is fixing the piece
+    private Scheduler scheduler, timer;
+    /// @param scheduler the scheduler
+    private boolean aiMode = false;
+    /// @param aiMode if the game is in AI mode
 
 
+    /**
+     * Constructor for the grid
+     *
+     * @param width     the width of the grid
+     * @param height    the height of the grid
+     * @param debugMode if the game is in debug mode
+     * @param debugPos  the debug position
+     */
     public Grid(int width, int height, boolean debugMode, int debugPos) {
         this.debugMode = debugMode;
         this.statsValues = new StatsValues(() -> signalChange("stats"));
@@ -275,7 +300,7 @@ public class Grid extends Observable {
      * Method to find the maximum Y position for a shape
      *
      * @param shape the shape to check
-     * @param x the horizontal position in the grid
+     * @param x     the horizontal position in the grid
      * @return the maximum Y position for this shape
      */
     private int findMaxY(int[][] shape, int x) {

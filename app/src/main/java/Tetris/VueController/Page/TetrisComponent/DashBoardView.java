@@ -11,7 +11,18 @@ import java.awt.*;
  */
 public class DashBoardView extends JPanel {
     private final JLabel AILabel, scoreLabel, levelLabel, timerLabel, lineDeleteCountLabel, scoreDisplayLabel;
+    /// @param AILabel              Label for AI mode status
+    /// @param scoreLabel           Label for score
+    /// @param levelLabel           Label for level
+    /// @param timerLabel           Label for timer
+    /// @param lineDeleteCountLabel Label for deleted lines count
+    /// @param scoreDisplayLabel    Label for score display
 
+    /**
+     * Constructor for DashBoardView.
+     *
+     * @param backgroundColor The background color of the dashboard.
+     */
     public DashBoardView(Color backgroundColor) {
         int fontSize = 16;
         setBackground(backgroundColor);

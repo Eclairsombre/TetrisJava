@@ -1,10 +1,22 @@
 package Tetris.Model.Utils;
 
+/**
+ * This class is used to create a thread that runs a runnable at a fixed interval
+ */
 public class Scheduler extends Thread {
     private final Runnable r;
+    /// @param r the runnable to run
     private long pause;
+    /// @param pause the time to wait between runs
     private boolean wait = false;
+    /// @param wait if true, the thread will wait before running the runnable
 
+    /**
+     * Constructor for the Scheduler class
+     *
+     * @param pause
+     * @param runnable
+     */
     public Scheduler(long pause, Runnable runnable) {
         this.r = runnable;
         this.pause = pause;
