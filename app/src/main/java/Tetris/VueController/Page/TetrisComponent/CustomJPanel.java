@@ -10,7 +10,7 @@ import java.awt.event.ComponentEvent;
  */
 public class CustomJPanel extends JPanel {
     private Color baseColor;
-    /// @param baseColor the color of the panel
+    /// baseColor the color of the panel
 
     /**
      * Constructor for CustomJPanel.

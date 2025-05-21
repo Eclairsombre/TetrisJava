@@ -15,7 +15,7 @@ public class Piece {
     private int x = 0;
     /// x The x-coordinate of the piece on the grid.
     private int y = 0;
-    /// @param y The y-coordinate of the piece on the grid.
+    /// y The y-coordinate of the piece on the grid.
 
     /**
      * Constructor for the Piece class.

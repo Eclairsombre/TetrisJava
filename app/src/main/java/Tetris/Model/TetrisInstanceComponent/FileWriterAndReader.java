@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class FileWriterAndReader {
     private final String path;
-    /// @param path the path to the file
+    /// path the path to the file
 
     /**
      * Constructor for the FileWriterAndReader class.

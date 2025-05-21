@@ -15,12 +15,12 @@ import java.util.Observer;
 @SuppressWarnings("deprecation")
 public class DashBoardView extends JPanel implements Observer {
     private final JLabel AILabel, scoreLabel, levelLabel, timerLabel, lineDeleteCountLabel, scoreDisplayLabel;
-    /// @param AILabel              Label for AI mode status
-    /// @param scoreLabel           Label for score
-    /// @param levelLabel           Label for level
-    /// @param timerLabel           Label for timer
-    /// @param lineDeleteCountLabel Label for deleted lines count
-    /// @param scoreDisplayLabel    Label for score display
+    /// AILabel              Label for AI mode status
+    /// scoreLabel           Label for score
+    /// levelLabel           Label for level
+    /// timerLabel           Label for timer
+    /// lineDeleteCountLabel Label for deleted lines count
+    /// scoreDisplayLabel    Label for score display
 
     /**
      * Constructor for DashBoardView.

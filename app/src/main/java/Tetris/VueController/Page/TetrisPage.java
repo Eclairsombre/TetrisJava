@@ -21,8 +21,8 @@ public class TetrisPage extends JPanel implements Observer {
     /// piecePanel the panel that displays the pieces
     private final GameBoardView boardView;
     /// heightGrid the height of the grid
-    Runnable changeToGameOver;
-    /// @param changeToGameOver the function to call when the game is over
+    private final Runnable changeToGameOver;
+    /// changeToGameOver the function to call when the game is over
 
     /**
      * Constructor for the TetrisPage class.

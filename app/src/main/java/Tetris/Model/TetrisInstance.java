@@ -163,7 +163,7 @@ public class TetrisInstance extends Observable implements Observer {
             try {
                 sleep(100);
             } catch (InterruptedException e) {
-                // we don't care
+                // The thread was interrupted, do nothing
             }
 
             for (int y : linesToDelete) {

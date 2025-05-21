@@ -13,9 +13,9 @@ import java.util.prefs.Preferences;
  */
 public class MusicChoosePopup extends JPanel {
     private MusicPlayer previewPlayer;
-    /// @param previewPlayer  The MusicPlayer instance used for previewing music.
+    /// previewPlayer  The MusicPlayer instance used for previewing music.
     private String paths = "data/music/TetrisOST.wav";
-    /// @param paths  The path to the selected music file.
+    /// paths  The path to the selected music file.
 
     /**
      * Constructor for MusicChoosePopup.

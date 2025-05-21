@@ -29,7 +29,7 @@ public class StatsValues {
     private Thread resetScoreSkillLabel;
     /// resetScoreSkillLabel Thread to reset the line clear display after a delay
     private int BtBCounter = 0;
-    /// @param BtBCounter Counter for back-to-back lines cleared
+    /// BtBCounter Counter for back-to-back lines cleared
 
     /**
      * Constructor for StatsValues.

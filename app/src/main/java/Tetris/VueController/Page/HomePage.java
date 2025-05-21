@@ -11,7 +11,7 @@ import java.awt.event.ComponentAdapter;
  */
 public class HomePage extends JPanel {
     private final Button[] buttons;
-    /// @param buttons the buttons to be displayed on the home page
+    /// buttons the buttons to be displayed on the home page
 
     /**
      * Constructor for the HomePage class.

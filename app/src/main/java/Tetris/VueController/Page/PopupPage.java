@@ -10,9 +10,6 @@ import java.awt.*;
  * It extends JPanel and is used to show information such as score, level, and time.
  */
 public class PopupPage extends JPanel {
-    /// @param scoreLabel   The label to display the score.
-    /// @param levelLabel   The label to display the level.
-    /// @param timeLabel    The label to display the time.
 
     /**
      * Constructor for the PopupPage class.

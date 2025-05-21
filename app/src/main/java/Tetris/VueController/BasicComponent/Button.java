@@ -10,8 +10,8 @@ public class Button extends JPanel {
     /**
      * Constructs a Button with the specified text and action.
      *
-     * @param text
-     * @param runnable
+     * @param text the text to display on the button
+     * @param runnable the action to perform when the button is clicked
      */
     public Button(String text, Runnable runnable) {
         JButton button = new JButton(text);
