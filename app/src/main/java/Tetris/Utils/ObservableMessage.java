@@ -1,7 +1,7 @@
 package Tetris.Utils;
 
 import Tetris.Model.Piece.PieceManager;
-import Tetris.Model.GridComponent.StatsValues;
+import Tetris.Model.TetrisInstanceComponent.StatsValues;
 
 public record ObservableMessage(String message, PieceColor[][] grid, StatsValues statsValues, PieceManager pieceManager, int maxRDropY, boolean isAiMode) {
     /// @param message The message to display

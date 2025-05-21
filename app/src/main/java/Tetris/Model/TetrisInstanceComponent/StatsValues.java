@@ -1,4 +1,4 @@
-package Tetris.Model.GridComponent;
+package Tetris.Model.TetrisInstanceComponent;
 
 import java.util.ArrayList;
 import java.util.List;

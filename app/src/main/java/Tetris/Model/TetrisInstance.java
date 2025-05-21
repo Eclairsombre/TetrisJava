@@ -8,7 +8,7 @@ import Tetris.Model.Ai.AIInputStrategy;
 import Tetris.Model.Piece.Piece;
 import Tetris.Model.Piece.PieceManager;
 import Tetris.Model.Piece.PieceTemplate.PieceT;
-import Tetris.Model.GridComponent.*;
+import Tetris.Model.TetrisInstanceComponent.*;
 
 import java.util.*;
 

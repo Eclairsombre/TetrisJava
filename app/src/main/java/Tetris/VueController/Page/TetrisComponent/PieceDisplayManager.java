@@ -3,7 +3,7 @@ package Tetris.VueController.Page.TetrisComponent;
 import Tetris.Model.Piece.Piece;
 import Tetris.Model.Piece.PieceManager;
 import Tetris.Model.Piece.PieceTemplate.PieceI;
-import Tetris.Model.GridComponent.FileWriterAndReader;
+import Tetris.Model.TetrisInstanceComponent.FileWriterAndReader;
 import Tetris.Utils.ObservableMessage;
 import static Tetris.Utils.PieceColor.getColorCell;
 

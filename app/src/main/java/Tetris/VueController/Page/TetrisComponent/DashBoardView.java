@@ -1,7 +1,7 @@
 package Tetris.VueController.Page.TetrisComponent;
 
 import Tetris.Utils.ObservableMessage;
-import Tetris.Model.GridComponent.StatsValues;
+import Tetris.Model.TetrisInstanceComponent.StatsValues;
 import Tetris.VueController.BasicComponent.TextView;
 
 import javax.swing.*;

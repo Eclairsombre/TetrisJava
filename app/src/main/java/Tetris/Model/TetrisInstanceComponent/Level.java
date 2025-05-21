@@ -1,4 +1,4 @@
-package Tetris.Model.GridComponent;
+package Tetris.Model.TetrisInstanceComponent;
 
 /**
  * Utility class to manage the level of the game.

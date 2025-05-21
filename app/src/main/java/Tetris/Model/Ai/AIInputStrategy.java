@@ -2,7 +2,7 @@ package Tetris.Model.Ai;
 
 import Tetris.Model.TetrisInstance;
 import Tetris.Model.Piece.Piece;
-import Tetris.Model.GridComponent.Scheduler;
+import Tetris.Model.TetrisInstanceComponent.Scheduler;
 
 import java.util.Arrays;
 

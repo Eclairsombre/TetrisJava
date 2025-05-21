@@ -1,4 +1,4 @@
-package Tetris.Model.GridComponent;
+package Tetris.Model.TetrisInstanceComponent;
 
 /**
  * This class is used to create a thread that runs a runnable at a fixed interval
