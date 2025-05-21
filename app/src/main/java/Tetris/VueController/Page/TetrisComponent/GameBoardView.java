@@ -1,37 +1,43 @@
 package Tetris.VueController.Page.TetrisComponent;
 
+import Tetris.Model.Piece.Piece;
+import Tetris.Model.Piece.PieceColor;
+import Tetris.Model.Utils.ObservableMessage;
+import static Tetris.Model.Piece.PieceColor.getColorCell;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+
 
 /**
  * Displays the game board.
  */
-public class GameBoardView extends JPanel {
-    private final JPanel[][] cases;
-    /// @param cases the cases of the game board
+@SuppressWarnings("deprecation")
+public class GameBoardView extends JPanel implements Observer {
+    private final CustomJPanel[][] cases;
+    /// cases the cases of the game board
     private final int width;
-    /// @param width the width of the game board
+    /// width the width of the game board
     private final int height;
-    /// @param height the height of the game board
+    /// height the height of the game board
     private final JPanel boardPanel;
-    /// @param boardPanel the panel that contains the game board
-    private final int ratio = 13;
-    /// @param ratio the ratio of the game board
-    private final int offset = 20;
-    /// @param offset the offset of the game board
+    /// boardPanel the panel that contains the game board
 
     /**
      * Constructor for the GameBoardView class.
      *
      * @param width           The width of the game board.
      * @param height          The height of the game board.
-     * @param cases           The cases of the game board.
      * @param backgroundColor The background color of the game board.
      */
-    public GameBoardView(int width, int height, JPanel[][] cases, Color backgroundColor) {
-        this.cases = cases;
+    public GameBoardView(int width, int height, Color backgroundColor) {
+        this.cases = new CustomJPanel[height][width];
         this.width = width;
         this.height = height;
         setLayout(new GridBagLayout());
@@ -61,8 +67,44 @@ public class GameBoardView extends JPanel {
         });
     }
 
+
+    /**
+     * Updates the colors of the cells based on the current piece and the grid state.
+     */
+    public void updateBoard(PieceColor[][] grid, Piece piece, int RDropMaxY) {
+        List<Integer> whiteLines = new ArrayList<>();
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                cases[j][i].setBackground(getColorCell(grid[j][i]));
+                if (cases[j][i].getBackground() == Color.WHITE && !whiteLines.contains(j)) {
+                    whiteLines.add(j);
+                }
+            }
+        }
+        int[][] coords = piece.getCoordinates(piece.getX(), piece.getY());
+        int maxY = piece.maxYCoord();
+        Color color = getColorCell(piece.getColor());
+        int[][] RDropCoords = piece.getCoordinates(piece.getX(), RDropMaxY);
+
+        for (int i = 0; i < 4; i++) {
+            int x = coords[i][0];
+            if (RDropCoords[i][1] > maxY && RDropCoords[i][1] < height) { // shape of the piece below the piece
+                cases[RDropCoords[i][1]][x].setBackground(Color.GRAY);
+            }
+            if (whiteLines.contains(coords[i][1])) { // if the line is full
+                cases[coords[i][1]][x].setBackground(Color.WHITE); // we set the piece color like the line
+            } else {
+                cases[coords[i][1]][x].setBackground(color);
+            }
+        }
+
+        repaint();
+    }
+
     @Override
     public void setSize(int width, int height) {
+        int ratio = 13;
+        int offset = 20;
         int length = Math.min(getHeight(), height);
         int new_height;
         int new_width = length / ratio * this.width;
@@ -76,5 +118,23 @@ public class GameBoardView extends JPanel {
                 new_height - offset
         ));
         revalidate();
+    }
+
+    /**
+     * Reception of the updates from the game, through the observer pattern.
+     */
+    @Override
+    public void update(Observable o, Object arg) {
+        if (!(arg instanceof ObservableMessage OM)) {
+            System.err.println("Error: arg is not a ObservableMessage");
+            return;
+        }
+        if (OM.message().equals("grid")) {
+            SwingUtilities.invokeLater(() -> updateBoard(
+                    OM.grid(),
+                    OM.pieceManager().getCurrentPiece(),
+                    OM.maxRDropY())
+            );
+        }
     }
 }

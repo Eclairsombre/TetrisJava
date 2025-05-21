@@ -12,7 +12,13 @@ public enum Action {
     ROTATE_LEFT(grid -> grid.rotatePiece(true)),
     ROTATE_RIGHT(grid -> grid.rotatePiece(false)),
     HOLD(Grid::exchangeHoldAndCurrent),
-    RDROP(grid -> grid.doRdrop(true));
+    RDROP(grid -> grid.doRdrop(true)),
+    CHANGE_IA_STATE(grid -> grid.setAiMode(!grid.isAiMode())),
+    STOP_IA(grid -> grid.setAiMode(false)),
+    STOP_GAME(Grid::stopGame),
+    PAUSE_GAME(Grid::pauseGame),
+    RESUME_GAME(Grid::resumeGame),
+    RESET(Grid::reset);
 
     private final GameAction action;
 
@@ -21,9 +27,6 @@ public enum Action {
     }
 
     public void execute(Grid grid) {
-        if (grid.isPaused() || grid.isGameOver()) {
-            return;
-        }
         action.execute(grid);
     }
 

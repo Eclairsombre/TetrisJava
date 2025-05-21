@@ -3,6 +3,7 @@
  */
 package Tetris;
 
+import Tetris.Model.Grid;
 import Tetris.VueController.GeneralScreen;
 
 public class App {
@@ -12,9 +13,13 @@ public class App {
                 System.out.println("Debug mode activated");
                 if (args.length > 1) {
                     System.out.println("Debug mode activated with argument: " + args[1]);
-                    new GeneralScreen(true, Integer.parseInt(args[1]));
+                    Grid g1 = new Grid(10, 25, true, Integer.parseInt(args[1]), 0);
+                    Grid g2 = new Grid(10, 25, true, Integer.parseInt(args[1]), 1);
+                    new GeneralScreen(g1, g2);
                 } else {
-                    new GeneralScreen(true, 0);
+                    Grid g1 = new Grid(10, 25, true, 0, 0);
+                    Grid g2 = new Grid(10, 25, true, 0, 1);
+                    new GeneralScreen(g1, g2);
                 }
             } else {
                 System.out.println("Invalid argument: " + args[0]);
@@ -22,7 +27,9 @@ public class App {
                 System.exit(1);
             }
         } else {
-            new GeneralScreen(false, 0);
+            Grid g1 = new Grid(10, 25, false, 0, 0);
+            Grid g2 = new Grid(10, 25, false, 0, 1);
+            new GeneralScreen(g1, g2);
         }
     }
 }

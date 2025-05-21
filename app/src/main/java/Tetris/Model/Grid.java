@@ -8,10 +8,7 @@ import Tetris.Model.Piece.PieceManager;
 import Tetris.Model.Piece.PieceTemplate.PieceT;
 import Tetris.Model.Utils.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Observable;
+import java.util.*;
 
 import static java.lang.Thread.sleep;
 
@@ -19,7 +16,7 @@ import static java.lang.Thread.sleep;
  * Class to manage the grid
  */
 @SuppressWarnings("deprecation")
-public class Grid extends Observable {
+public class Grid extends Observable implements Observer {
     private final boolean debugMode;
     /// debugMode if the game is in debug mode
     private final int width;
@@ -50,6 +47,8 @@ public class Grid extends Observable {
     /// aiMode if the game is in AI mode
     private boolean isGameOver = false;
     /// isGameOver if the game is over
+    private final int idGrid;
+    /// idGrid the id of the grid (used for Action reception)
 
 
     /**
@@ -60,12 +59,13 @@ public class Grid extends Observable {
      * @param debugMode if the game is in debug mode
      * @param debugPos  the debug position
      */
-    public Grid(int width, int height, boolean debugMode, int debugPos) {
+    public Grid(int width, int height, boolean debugMode, int debugPos, int idGrid) {
         this.debugMode = debugMode;
         this.statsValues = new StatsValues(() -> signalChange("stats"));
         this.height = height;
         this.width = width;
         this.grid = new PieceColor[height][width];
+        this.idGrid = idGrid;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 grid[y][x] = PieceColor.NONE;
@@ -100,6 +100,7 @@ public class Grid extends Observable {
         } else {
             aiInputStrategy.disable();
         }
+        signalChange("AILabel");
     }
 
     public boolean isGameOver() {
@@ -114,11 +115,13 @@ public class Grid extends Observable {
     public void signalChange(String type) {
         setChanged();
         switch (type) {
-            case "timer" -> notifyObservers(ObservableMessage.of("timer", null, statsValues, null, 0));
-            case "stats" -> notifyObservers(ObservableMessage.of("stats", null, statsValues, null, 0));
-            case "grid" -> notifyObservers(ObservableMessage.of("grid", grid, null, pieceManager, findMaxY(pieceManager.getCurrentPiece())));
-            case "gameOver" -> notifyObservers(ObservableMessage.of("gameOver", null, null, null, 0));
-            case "nextPiece" -> notifyObservers(ObservableMessage.of("nextPiece", null, null, pieceManager, 0));
+            case "timer" -> notifyObservers(ObservableMessage.of("timer", null, statsValues, null, 0, false));
+            case "stats" -> notifyObservers(ObservableMessage.of("stats", null, statsValues, null, 0, false));
+            case "grid" ->
+                    notifyObservers(ObservableMessage.of("grid", grid, null, pieceManager, findMaxY(pieceManager.getCurrentPiece()), false));
+            case "gameOver" -> notifyObservers(ObservableMessage.of("gameOver", null, null, null, 0, false));
+            case "nextPiece" -> notifyObservers(ObservableMessage.of("nextPiece", null, null, pieceManager, 0, false));
+            case "AILabel" -> notifyObservers(ObservableMessage.of("AILabel", null, null, null, 0, isAiMode()));
             default -> System.out.println("Error: unknown type of signal");
         }
     }
@@ -712,5 +715,23 @@ public class Grid extends Observable {
             }
         }
         return true;
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if (arg instanceof ObservableAction(int idGrid1, Action action)) {
+            if (idGrid1 == idGrid || (action != Action.RESUME_GAME && isPaused())) {
+                if (isGameOver()) {
+                    switch (action) {
+                        case CHANGE_IA_STATE, STOP_GAME, STOP_IA, RESET, PAUSE_GAME, RESUME_GAME:
+                            action.execute(this);
+                        default:
+                            return;
+                    }
+                } else {
+                    action.execute(this);
+                }
+            }
+        }
     }
 }

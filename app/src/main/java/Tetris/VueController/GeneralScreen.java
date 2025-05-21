@@ -16,6 +16,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 import static Tetris.Model.Utils.Action.*;
+import static Tetris.Model.Utils.ObservableAction.getAction;
+import Tetris.Model.Utils.ObservableAction;
 
 
 /**
@@ -33,9 +35,6 @@ public class GeneralScreen extends JFrame {
     private final TetrisPage[] tetrisPage = new TetrisPage[2];
     /// Game page for each player
 
-    private final Grid[] grids = new Grid[2];
-    /// Game instance for each player
-
     private final PopupPage pausePopup;
     /// Pause page in the game screen
 
@@ -52,19 +51,25 @@ public class GeneralScreen extends JFrame {
     private MusicPlayer musicPlayer;
     private boolean is2PlayerMode;
     /// Basic booleans to manage the game state
-
+    private final int playerCount = 2;
+    /// number of players
+    private final KeybindHandler keybindHandler = new KeybindHandler();
+    /// Class used to call grid
 
     /**
      * Constructor for the GeneralScreen class. Initialize the app and all the pages.
      *
-     * @param debugMode boolean indicating if the game is in debug mode
-     * @param debugPos  integer indicating the index of the debug position
+     * @param gridJ1 the grid for player 1
+     * @param gridJ2 the grid for player 2
      */
-    public GeneralScreen(boolean debugMode, int debugPos) {
-        // Initialize all the pages and the game instances
-        for (int i = 0; i < grids.length; i++) {
-            grids[i] = new Grid(10, 25, debugMode, debugPos);
-        }
+    public GeneralScreen(Grid gridJ1, Grid gridJ2) {
+        Grid[] grids = new Grid[2];
+        grids[0] = gridJ1;
+        grids[1] = gridJ2;
+
+        keybindHandler.addObserver(gridJ1);
+        keybindHandler.addObserver(gridJ2);
+
         musicPlayer = new MusicPlayer("data/music/TetrisOST.wav");
         musicChoosePopup = new MusicChoosePopup(() -> setPage("homePage"));
 
@@ -76,14 +81,14 @@ public class GeneralScreen extends JFrame {
             setPage("tetrisView");
         }), new Button("Choisir la musique", () -> setPage("musicChoosePage")));
 
-        pausePopup = new PopupPage("PAUSE", Color.BLACK, grids[0].getStatsValues(),
+        pausePopup = new PopupPage("PAUSE", Color.BLACK,
                 new Button("Revenir au jeu", () -> setPage("tetrisView")),
                 new Button("Retour au menu", () -> setPage("homePage"))
         );
 
-        initPages();
+        initPages(grids);
 
-        for (int i = 0; i < grids.length; i++) {
+        for (int i = 0; i < playerCount; i++) {
             isGameOver[i] = false;
             playersPages[i] = tetrisPage[i];
         }
@@ -102,8 +107,8 @@ public class GeneralScreen extends JFrame {
     /**
      * Initialize the game pages for each player.
      */
-    public void initPages() {
-        for (int i = 0; i < grids.length; i++) {
+    public void initPages(Grid[] grids) {
+        for (int i = 0; i < playerCount; i++) {
             int finalI = i; // to use in the lambda expression
             tetrisPage[i] = new TetrisPage(grids[i],
                     () -> {
@@ -112,8 +117,7 @@ public class GeneralScreen extends JFrame {
                     }
             );
             grids[i].addObserver(tetrisPage[i]);
-
-            gameOverPopup[i] = new PopupPage("GAME OVER", Color.RED, grids[i].getStatsValues(),
+            gameOverPopup[i] = new PopupPage("GAME OVER", Color.RED,
                     new Button("Rejouer", () -> setPage("tetrisView")),
                     new Button("Retour au menu", () -> setPage("homePage"))
             );
@@ -135,10 +139,10 @@ public class GeneralScreen extends JFrame {
                 musicPlayer.reset();
                 musicPlayer = new MusicPlayer(musicChoosePopup.getPath());
                 homePage.setButtonsVisibility(true);
-                for (int i = 0; i < grids.length; i++) { // reset the game instances
+                for (int i = 0; i < playerCount; i++) { // reset the game instances
                     isGameOver[i] = false;
-                    grids[i].setAiMode(false);
-                    grids[i].stopGame();
+                    keybindHandler.handleKeybind(new ObservableAction(i, STOP_IA));
+                    keybindHandler.handleKeybind(new ObservableAction(i, STOP_GAME));
                 }
                 homePage.setPreferredSize(getSize()); // to force resizing
                 add(homePage);
@@ -148,26 +152,24 @@ public class GeneralScreen extends JFrame {
                     musicPlayer.play();
                 }
 
-                for (int i = 0; i < (is2PlayerMode ? grids.length : 1); i++) {
+                for (int i = 0; i < playerCount; i++) {
                     if ((isGameOver[i] && !previousPage.equals("pause")) || previousPage.equals("homePage")) {
-                        grids[i].reset();
-                        playersPages[i] = tetrisPage[i];
                         isGameOver[i] = false;
+                        playersPages[i] = tetrisPage[i];
+                        keybindHandler.handleKeybind(new ObservableAction(i, RESET));
                     }
                 }
 
-                grids[0].resumeGame();
+                keybindHandler.handleKeybind(new ObservableAction(0, RESUME_GAME));
                 if (is2PlayerMode) {
-                    grids[1].resumeGame();
+                    keybindHandler.handleKeybind(new ObservableAction(1, RESUME_GAME));
                 }
 
-                if (previousPage.equals("homePage")) {
-                    if (is2PlayerMode) {
-                        playersPages[0].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
-                        playersPages[1].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
-                    } else {
-                        playersPages[0].setPreferredSize(getSize());
-                    }
+                if (is2PlayerMode) {
+                    playersPages[0].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
+                    playersPages[1].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
+                } else {
+                    playersPages[0].setPreferredSize(getSize());
                 }
 
                 if (is2PlayerMode) {
@@ -178,12 +180,13 @@ public class GeneralScreen extends JFrame {
             }
             case "gameOver" -> {
                 if (is2PlayerMode) {
-                    for (int i = 0; i < grids.length; i++) {
+                    for (int i = 0; i < playerCount; i++) {
                         if (!isGameOver[i]) {
                             continue;
                         }
-                        gameOverPopup[i].updateStats(grids[i].getStatsValues());
-                        grids[i].stopGame();
+                        keybindHandler.handleKeybind(new ObservableAction(i, PAUSE_GAME));
+                        keybindHandler.handleKeybind(new ObservableAction(i, STOP_GAME));
+                        keybindHandler.handleKeybind(new ObservableAction(i, STOP_IA));
                         playersPages[i] = new JPanel();
                         int divideWidth = 2;
                         JLayeredPane layeredPane = getJLayeredPane(tetrisPage[i], gameOverPopup[i], divideWidth);
@@ -198,8 +201,7 @@ public class GeneralScreen extends JFrame {
                     }
                     addTwinPanel(playersPages[0], playersPages[1]);
                 } else if (isGameOver[0]) { // if only one player is playing
-                    gameOverPopup[0].updateStats(grids[0].getStatsValues());
-                    grids[0].stopGame();
+                    keybindHandler.handleKeybind(new ObservableAction(0, STOP_GAME));
                     playersPages[0] = new JPanel();
                     add(getJLayeredPane(tetrisPage[0], gameOverPopup[0], 1));
                 }
@@ -210,7 +212,6 @@ public class GeneralScreen extends JFrame {
             }
             case "pause" -> {
                 musicPlayer.stop();
-                pausePopup.updateStats(grids[0].getStatsValues());
                 if (is2PlayerMode) {
                     JPanel container = new JPanel();
                     container.setLayout(new BorderLayout());
@@ -248,8 +249,8 @@ public class GeneralScreen extends JFrame {
      * Create a JLayeredPane with two panels (background and foreground) and set their bounds.
      * Usually used for the game over popup and the pause popup.
      *
-     * @param background  the background panel
-     * @param foreground  the foreground panel
+     * @param background the background panel
+     * @param foreground the foreground panel
      * @param divideWidth the width to divide the screen
      * @return the JLayeredPane with the two panels
      */
@@ -297,11 +298,17 @@ public class GeneralScreen extends JFrame {
             public void keyReleased(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     switch (selectedPage) {
-                        case "pause" -> setPage("tetrisView");
-                        case "tetrisView", "gameOver" -> {
-                            grids[0].pauseGame();
+                        case "pause" -> {
+                            keybindHandler.handleKeybind(new ObservableAction(0, RESUME_GAME));
                             if (is2PlayerMode) {
-                                grids[1].pauseGame();
+                                keybindHandler.handleKeybind(new ObservableAction(1, RESUME_GAME));
+                            }
+                            setPage("tetrisView");
+                        }
+                        case "tetrisView", "gameOver" -> {
+                            keybindHandler.handleKeybind(new ObservableAction(0, PAUSE_GAME));
+                            if (is2PlayerMode) {
+                                keybindHandler.handleKeybind(new ObservableAction(1, PAUSE_GAME));
                             }
                             setPage("pause");
                         }
@@ -309,12 +316,10 @@ public class GeneralScreen extends JFrame {
                     }
                 } else if (selectedPage.equals("tetrisView") || selectedPage.equals("gameOver")) {
                     if (e.getKeyCode() == KeyEvent.VK_O) {
-                        grids[0].setAiMode(!grids[0].isAiMode());
-                        tetrisPage[0].updateAILabel(grids[0]);
+                        keybindHandler.handleKeybind(new ObservableAction(0, CHANGE_IA_STATE));
                     }
                     if (e.getKeyCode() == KeyEvent.VK_P && is2PlayerMode) {
-                        grids[1].setAiMode(!grids[1].isAiMode());
-                        tetrisPage[1].updateAILabel(grids[1]);
+                        keybindHandler.handleKeybind(new ObservableAction(1, CHANGE_IA_STATE));
                     }
                 }
             }
@@ -325,28 +330,12 @@ public class GeneralScreen extends JFrame {
                     return;
                 }
 
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_S -> MOVE_DOWN.execute(grids[0]);
-                    case KeyEvent.VK_Q -> MOVE_LEFT.execute(grids[0]);
-                    case KeyEvent.VK_D -> MOVE_RIGHT.execute(grids[0]);
-                    case KeyEvent.VK_Z -> RDROP.execute(grids[0]);
-                    case KeyEvent.VK_A -> ROTATE_LEFT.execute(grids[0]);
-                    case KeyEvent.VK_E -> ROTATE_RIGHT.execute(grids[0]);
-                    case KeyEvent.VK_SPACE -> HOLD.execute(grids[0]);
-
+                ObservableAction signalAction = getAction(e);
+                if (signalAction.idGrid() == -1 || (signalAction.idGrid() == 1 && !is2PlayerMode)) {
+                    return;
                 }
 
-                if (is2PlayerMode) {
-                    switch (e.getKeyCode()) {
-                        case KeyEvent.VK_NUMPAD5 -> MOVE_DOWN.execute(grids[1]);
-                        case KeyEvent.VK_NUMPAD4 -> MOVE_LEFT.execute(grids[1]);
-                        case KeyEvent.VK_NUMPAD6 -> MOVE_RIGHT.execute(grids[1]);
-                        case KeyEvent.VK_NUMPAD8 -> RDROP.execute(grids[1]);
-                        case KeyEvent.VK_NUMPAD7 -> ROTATE_LEFT.execute(grids[1]);
-                        case KeyEvent.VK_NUMPAD9 -> ROTATE_RIGHT.execute(grids[1]);
-                        case KeyEvent.VK_NUMPAD1 -> HOLD.execute(grids[1]);
-                    }
-                }
+                keybindHandler.handleKeybind(signalAction);
             }
         });
 

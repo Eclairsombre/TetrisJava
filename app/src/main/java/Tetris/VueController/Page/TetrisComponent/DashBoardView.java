@@ -1,15 +1,19 @@
 package Tetris.VueController.Page.TetrisComponent;
 
+import Tetris.Model.Utils.ObservableMessage;
 import Tetris.Model.Utils.StatsValues;
 import Tetris.VueController.BasicComponent.TextView;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * DashBoardView shows the game statistics and information.
  */
-public class DashBoardView extends JPanel {
+@SuppressWarnings("deprecation")
+public class DashBoardView extends JPanel implements Observer {
     private final JLabel AILabel, scoreLabel, levelLabel, timerLabel, lineDeleteCountLabel, scoreDisplayLabel;
     /// @param AILabel              Label for AI mode status
     /// @param scoreLabel           Label for score
@@ -73,5 +77,22 @@ public class DashBoardView extends JPanel {
 
     public void updateTimerLabel(String time) {
         timerLabel.setText("Temps écoulé : " + time);
+    }
+
+    /**
+     * Reception of the updates from the game, through the observer pattern.
+     */
+    @Override
+    public void update(Observable o, Object arg) {
+        if (!(arg instanceof ObservableMessage OM)) {
+            System.err.println("Error: arg is not a ObservableMessage");
+            return;
+        }
+        switch (OM.message()) {
+            case "timer" -> updateTimerLabel(OM.statsValues().getTime());
+            case "stats" -> updateStats(OM.statsValues());
+            case "gameOver" -> updateAILabel("IA Mode : OFF");
+            case "AILabel" -> updateAILabel(OM.isAiMode() ? "AI Mode : ON" : "AI Mode : OFF");
+        }
     }
 }
