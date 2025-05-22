@@ -59,7 +59,6 @@ public class GeneralScreen extends JFrame {
 
     /**
      * Constructor for the GeneralScreen class. Initialize the app and all the pages.
-     *
      */
     public GeneralScreen(int widthGrid, int heightGrid) {
         musicPlayer = new MusicPlayer("data/music/TetrisOST.wav");
@@ -143,18 +142,15 @@ public class GeneralScreen extends JFrame {
                     musicPlayer.play();
                 }
 
-                for (int i = 0; i < playerCount; i++) {
+                for (int i = 0; i < (is2PlayerMode ? 2 : 1); i++) {
                     if ((isGameOver[i] && !previousPage.equals("pause")) || previousPage.equals("homePage")) {
                         isGameOver[i] = false;
                         playersPages[i] = tetrisPage[i];
                         actionHandler.handleAction(new ObservableAction(i, RESET));
                     }
+                    actionHandler.handleAction(new ObservableAction(i, RESUME_GAME));
                 }
 
-                actionHandler.handleAction(new ObservableAction(0, RESUME_GAME));
-                if (is2PlayerMode) {
-                    actionHandler.handleAction(new ObservableAction(1, RESUME_GAME));
-                }
 
                 if (is2PlayerMode) {
                     playersPages[0].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
@@ -240,8 +236,8 @@ public class GeneralScreen extends JFrame {
      * Create a JLayeredPane with two panels (background and foreground) and set their bounds.
      * Usually used for the game over popup and the pause popup.
      *
-     * @param background the background panel
-     * @param foreground the foreground panel
+     * @param background  the background panel
+     * @param foreground  the foreground panel
      * @param divideWidth the width to divide the screen
      * @return the JLayeredPane with the two panels
      */
