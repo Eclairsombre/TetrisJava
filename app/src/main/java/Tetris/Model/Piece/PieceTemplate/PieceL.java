@@ -7,7 +7,6 @@ import Tetris.Utils.PieceColor;
  * PieceL class represents the L-shaped Tetris piece.
  */
 public class PieceL extends Piece {
-
     /**
      * Constructor for PieceL.
      *
@@ -18,5 +17,4 @@ public class PieceL extends Piece {
         int[][] shape = {{0, 1}, {1, 1}, {2, 1}, {2, 0}};
         super.setShape(shape);
     }
-
 }

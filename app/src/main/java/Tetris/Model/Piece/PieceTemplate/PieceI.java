@@ -19,7 +19,7 @@ public class PieceI extends Piece {
     }
 
     /**
-     * Returns the rotated position of the piece.
+     * Override of the Piece methods, because I tetromino have only two positions when rotate
      *
      * @param isLeft True if rotating left, false if rotating right.
      * @return The rotated position of the piece.

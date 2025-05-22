@@ -35,8 +35,8 @@ public class Piece {
     public void setShape(int[][] shape) {
         if (shape.length == 4 && shape[0].length == 2) {
             for (int i = 0; i < 4; i++) {
-                this.shape[i][0] = shape[i][0];
-                this.shape[i][1] = shape[i][1];
+                this.shape[i][0] = shape[i][0]; // x coordinates
+                this.shape[i][1] = shape[i][1]; // y coordinates
             }
         } else {
             throw new IllegalArgumentException("Shape must be 4x2.");

@@ -7,7 +7,6 @@ import Tetris.Utils.PieceColor;
  * PieceZ class represents the Z-shaped Tetris piece.
  */
 public class PieceZ extends Piece {
-
     /**
      * Constructor for PieceZ.
      *

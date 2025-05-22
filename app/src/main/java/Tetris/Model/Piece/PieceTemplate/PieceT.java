@@ -33,26 +33,17 @@ public class PieceT extends Piece {
         int[] right = {1, 0};
         List<int[]> coinToCheck = new java.util.ArrayList<>(List.of(down, up, left, right));
         for (int[] pos : getShape()) {
-            if (pos[0] == 1 && pos[1] == 2) {
-                coinToCheck.remove(up);
-            } else if (pos[0] == 0 && pos[1] == 1) {
-                coinToCheck.remove(down);
-            } else if (pos[0] == 2 && pos[1] == 1) {
-                coinToCheck.remove(left);
-            } else if (pos[0] == 1 && pos[1] == 0) {
-                coinToCheck.remove(right);
-            }
-        }
-        if (coinToCheck.size() == 1) {
-            int[] lastPoint = coinToCheck.getFirst();
-            if (lastPoint[0] == 0 && lastPoint[1] == 1) {
-                return "right";
-            } else if (lastPoint[0] == 1 && lastPoint[1] == 2) {
-                return "up";
-            } else if (lastPoint[0] == 2 && lastPoint[1] == 1) {
-                return "left";
-            } else if (lastPoint[0] == 1 && lastPoint[1] == 0) {
-                return "down";
+            if (!(coinToCheck.contains(pos))) {
+                switch (pos[0]) {
+                    case 0:
+                        return "up"; // because down isn't fill
+                    case 1:
+                        // if the second coordinate is 0, the right block isn't fill so we return left.
+                        // else, is the left block so we return the right direction
+                        return pos[1] == 0 ? "left" : "right";
+                    case 2:
+                        return "down"; // because up isn't fill
+                }
             }
         }
         return "none";

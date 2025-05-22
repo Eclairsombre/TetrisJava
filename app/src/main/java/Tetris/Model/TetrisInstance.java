@@ -373,10 +373,10 @@ public class TetrisInstance extends Observable implements Observer {
             return;
         }
 
-        int[][] upperCorner;
         String direction = ((PieceT) currentPiece).getDirection();
+        int[][] upperCorner;
         switch (direction) {
-            case "up" -> upperCorner = isLeft ? new int[][]{{2, 0}} : new int[][]{{0, 0}};
+            case "up" -> upperCorner = isLeft ? new int[][]{{0, 2}} : new int[][]{{0, 0}};
             case "down" -> upperCorner = isLeft ? new int[][]{{0, 0}} : new int[][]{{2, 0}};
             case "left" -> upperCorner = isLeft ? new int[][]{{0, 0}, {0, 1}, {0, 2}} : null;
             case "right" -> upperCorner = isLeft ? null : new int[][]{{2, 0}, {2, 1}, {2, 2}};

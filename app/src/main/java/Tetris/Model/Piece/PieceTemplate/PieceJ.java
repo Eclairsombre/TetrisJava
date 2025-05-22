@@ -7,7 +7,6 @@ import Tetris.Utils.PieceColor;
  * PieceJ class represents the J-shaped Tetris piece.
  */
 public class PieceJ extends Piece {
-
     /**
      * Constructor for PieceJ.
      *
@@ -18,5 +17,4 @@ public class PieceJ extends Piece {
         int[][] shape = {{0, 0}, {1, 0}, {2, 0}, {2, 1}};
         super.setShape(shape);
     }
-
 }
