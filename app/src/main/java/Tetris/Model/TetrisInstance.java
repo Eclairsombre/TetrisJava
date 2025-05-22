@@ -451,14 +451,14 @@ public class TetrisInstance extends Observable implements Observer {
             timer.stopThread();
         }
 
-        scheduler = new Scheduler(700, () -> movePiece(0, 1, !debugMode, false)); // go down
+        scheduler = new Scheduler(statsValues.level.getSpeed(), () -> movePiece(0, 1, !debugMode, false)); // go down
         timer = new Scheduler(1000, this::incrementSeconds);
 
         this.isPaused = false;
         statsValues.reset();
         this.pieceManager.reset(debugMode);
         for (PieceColor[] row : grid) {
-            java.util.Arrays.fill(row, PieceColor.NONE);
+            Arrays.fill(row, PieceColor.NONE);
         }
         if (debugMode) {
             setDebugGrid(grid, debugPos);

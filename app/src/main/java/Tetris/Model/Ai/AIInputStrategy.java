@@ -103,7 +103,7 @@ public class AIInputStrategy {
             lastPieceX = -1;
             lastPieceY = -1;
 
-            aiThread = new Scheduler(200, () -> processInput(tetrisInstance));
+            aiThread = new Scheduler(35, () -> processInput(tetrisInstance));
             aiThread.start();
         }
     }

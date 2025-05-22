@@ -73,7 +73,11 @@ public class GeneralScreen extends JFrame {
         }), new Button("Choisir la musique", () -> setPage("musicChoosePage")));
 
         pausePopup = new PopupPage("PAUSE", Color.BLACK,
-                new Button("Revenir au jeu", () -> setPage("tetrisView")),
+                new Button("Revenir au jeu", () -> {
+                    actionHandler.handleAction(new ObservableAction(0, RESUME_GAME));
+                    actionHandler.handleAction(new ObservableAction(1, RESUME_GAME));
+                    setPage("tetrisView");
+                }),
                 new Button("Retour au menu", () -> setPage("homePage"))
         );
 
@@ -142,26 +146,20 @@ public class GeneralScreen extends JFrame {
                     musicPlayer.play();
                 }
 
-                for (int i = 0; i < (is2PlayerMode ? 2 : 1); i++) {
+                int nbPlayers = is2PlayerMode ? 2 : 1;
+                for (int i = 0; i < nbPlayers; i++) {
                     if ((isGameOver[i] && !previousPage.equals("pause")) || previousPage.equals("homePage")) {
                         isGameOver[i] = false;
                         playersPages[i] = tetrisPage[i];
                         actionHandler.handleAction(new ObservableAction(i, RESET));
                     }
-                    actionHandler.handleAction(new ObservableAction(i, RESUME_GAME));
-                }
-
-
-                if (is2PlayerMode) {
-                    playersPages[0].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
-                    playersPages[1].setPreferredSize(new Dimension(getSize().width / 2, getSize().height));
-                } else {
-                    playersPages[0].setPreferredSize(getSize());
+                    playersPages[i].setPreferredSize(new Dimension(getSize().width / nbPlayers, getSize().height));
                 }
 
                 if (is2PlayerMode) {
                     addTwinPanel(playersPages[0], playersPages[1]);
                 } else {
+                    actionHandler.handleAction(new ObservableAction(1, PAUSE_GAME)); // to avoid end game of the other grid when the game is paused
                     add(playersPages[0]);
                 }
             }

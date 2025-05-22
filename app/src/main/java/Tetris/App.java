@@ -27,7 +27,7 @@ public class App {
                 }
             } else {
                 System.out.println("Invalid argument: " + args[0]);
-                System.out.println("Usage: java -jar Tetris.jar [-debug [port]]");
+                System.out.println("./gradlew run [-debug [port]]");
                 System.out.println("Default port: 0");
                 System.out.println("Debug mode: false");
                 tetrisInstanceP1 = new TetrisInstance(10, 25, false, 0, 0);
