@@ -44,7 +44,9 @@ public class FileWriterAndReader {
             fileReader.close();
             return stringBuilder.toString().split("\n");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Création du fichier score.txt");
+            writeToFile(List.of());
+            return new String[]{};
         }
     }
 }

@@ -10,7 +10,7 @@ joueurs et une intelligence artificielle.
 ---
 ## Prérequis
 
-- Java Development Kit (JDK) 21 ou supérieur
+- Java Development Kit (JDK) 21
 - Gradle 8.8 ou supérieur
 ----
 ## Installation
