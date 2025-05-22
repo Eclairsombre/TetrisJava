@@ -51,7 +51,7 @@ public class TetrisPage extends JPanel implements Observer {
         setVisible(true);
     }
 
-    public void addObserverToTetrisPage(Observable grid) {
+    public void addObservableToTetrisPage(Observable grid) {
         grid.addObserver(piecePanel);
         grid.addObserver(dashBoardVue);
         grid.addObserver(boardView);

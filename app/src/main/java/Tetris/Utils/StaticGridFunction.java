@@ -51,6 +51,11 @@ public class StaticGridFunction {
      */
     public static void setDebugGrid(PieceColor[][] grid, int debugPos) {
         // debug mode configuration
+        for (int i = 18; i < 25; i++) {
+            for (int j = 0; j < 10; j++) {
+                grid[i][j] = PieceColor.RED;
+            }
+        }
         switch (debugPos) {
             case 0, 3 -> {
                 if (debugPos == 3) {

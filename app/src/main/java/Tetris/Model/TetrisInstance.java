@@ -160,10 +160,12 @@ public class TetrisInstance extends Observable implements Observer {
         }
 
         if (nbLinesCleared > 0) { // we have some points to add
-            try {
-                sleep(100);
-            } catch (InterruptedException e) {
-                // The thread was interrupted, do nothing
+            if (!isAiMode()) { // ia don't need to see lines cleared
+                try {
+                    sleep(100);
+                } catch (InterruptedException e) {
+                    // The thread was interrupted, do nothing
+                }
             }
 
             for (int y : linesToDelete) {
@@ -308,11 +310,13 @@ public class TetrisInstance extends Observable implements Observer {
      */
     public void fixPiece(Piece currentPiece, PieceColor color) {
         Thread fixPieceThread = new Thread(() -> {
-            try {
-                sleep(isAiMode() ? 20 : 300);
-            } catch (InterruptedException e) {
-                // The thread was interrupted, do nothing
-                System.out.println("Error sleeping");
+            if (!isAiMode()) { // IA don't need to have time to fix a piece
+                try {
+                    sleep(250);
+                } catch (InterruptedException e) {
+                    // The thread was interrupted, do nothing
+                    System.out.println("Error sleeping");
+                }
             }
             if (!isValidPositionForShape(grid, currentPiece.getShape(), currentPiece.getX(), currentPiece.getY() + 1, width, height)) { // we check if the piece must be fixed
                 for (int[] c : currentPiece.getCoordinates(currentPiece.getX(), currentPiece.getY())) {
@@ -457,12 +461,6 @@ public class TetrisInstance extends Observable implements Observer {
             java.util.Arrays.fill(row, PieceColor.NONE);
         }
         if (debugMode) {
-            for (int i = 18; i < 25; i++) {
-                for (int j = 0; j < 10; j++) {
-                    grid[i][j] = PieceColor.RED;
-                }
-            }
-
             setDebugGrid(grid, debugPos);
         }
         scheduler.start();
@@ -476,18 +474,18 @@ public class TetrisInstance extends Observable implements Observer {
     /**
      * Method to signal a change in the grid.
      *
-     * @param type which change appended
+     * @param message which change appended
      */
-    public void signalChange(String type) {
+    public void signalChange(String message) {
         setChanged();
-        switch (type) {
+        switch (message) {
             case "timer", "stats", "initBestScores", "gameOver" ->
-                    notifyObservers(ObservableMessage.of(type, null, statsValues, null, 0, false));
+                    notifyObservers(ObservableMessage.of(message, null, statsValues, null, 0, false));
             case "grid" ->
-                    notifyObservers(ObservableMessage.of(type, grid, null, pieceManager, findMaxY(pieceManager.getCurrentPiece()), false));
-            case "nextPiece" -> notifyObservers(ObservableMessage.of(type, null, null, pieceManager, 0, false));
-            case "AILabel" -> notifyObservers(ObservableMessage.of(type, null, null, null, 0, isAiMode()));
-            default -> System.out.println("Error: unknown type of signal");
+                    notifyObservers(ObservableMessage.of(message, grid, null, pieceManager, findMaxY(pieceManager.getCurrentPiece()), false));
+            case "nextPiece" -> notifyObservers(ObservableMessage.of(message, null, null, pieceManager, 0, false));
+            case "AILabel" -> notifyObservers(ObservableMessage.of(message, null, null, null, 0, isAiMode()));
+            default -> System.out.println("Error: unknown message of signal");
         }
     }
 

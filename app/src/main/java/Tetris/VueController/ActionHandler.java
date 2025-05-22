@@ -5,8 +5,8 @@ import Tetris.Utils.ObservableAction;
 import java.util.Observable;
 
 @SuppressWarnings("deprecation")
-public class KeybindHandler extends Observable {
-    public void handleKeybind(ObservableAction OA) {
+public class ActionHandler extends Observable {
+    public void handleAction(ObservableAction OA) {
         setChanged();
         notifyObservers(OA);
     }

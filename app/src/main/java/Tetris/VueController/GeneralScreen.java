@@ -54,7 +54,7 @@ public class GeneralScreen extends JFrame {
     /// Basic booleans to manage the game state
     private final int playerCount = 2;
     /// number of players
-    private final KeybindHandler keybindHandler = new KeybindHandler();
+    private final ActionHandler actionHandler = new ActionHandler();
     /// Class used to call grid
 
     /**
@@ -132,8 +132,8 @@ public class GeneralScreen extends JFrame {
                 homePage.setButtonsVisibility(true);
                 for (int i = 0; i < playerCount; i++) { // reset the game instances
                     isGameOver[i] = false;
-                    keybindHandler.handleKeybind(new ObservableAction(i, STOP_IA));
-                    keybindHandler.handleKeybind(new ObservableAction(i, STOP_GAME));
+                    actionHandler.handleAction(new ObservableAction(i, STOP_IA));
+                    actionHandler.handleAction(new ObservableAction(i, STOP_GAME));
                 }
                 homePage.setPreferredSize(getSize()); // to force resizing
                 add(homePage);
@@ -147,13 +147,13 @@ public class GeneralScreen extends JFrame {
                     if ((isGameOver[i] && !previousPage.equals("pause")) || previousPage.equals("homePage")) {
                         isGameOver[i] = false;
                         playersPages[i] = tetrisPage[i];
-                        keybindHandler.handleKeybind(new ObservableAction(i, RESET));
+                        actionHandler.handleAction(new ObservableAction(i, RESET));
                     }
                 }
 
-                keybindHandler.handleKeybind(new ObservableAction(0, RESUME_GAME));
+                actionHandler.handleAction(new ObservableAction(0, RESUME_GAME));
                 if (is2PlayerMode) {
-                    keybindHandler.handleKeybind(new ObservableAction(1, RESUME_GAME));
+                    actionHandler.handleAction(new ObservableAction(1, RESUME_GAME));
                 }
 
                 if (is2PlayerMode) {
@@ -175,9 +175,9 @@ public class GeneralScreen extends JFrame {
                         if (!isGameOver[i]) {
                             continue;
                         }
-                        keybindHandler.handleKeybind(new ObservableAction(i, PAUSE_GAME));
-                        keybindHandler.handleKeybind(new ObservableAction(i, STOP_GAME));
-                        keybindHandler.handleKeybind(new ObservableAction(i, STOP_IA));
+                        actionHandler.handleAction(new ObservableAction(i, PAUSE_GAME));
+                        actionHandler.handleAction(new ObservableAction(i, STOP_GAME));
+                        actionHandler.handleAction(new ObservableAction(i, STOP_IA));
                         playersPages[i] = new JPanel();
                         int divideWidth = 2;
                         JLayeredPane layeredPane = getJLayeredPane(tetrisPage[i], gameOverPopup[i], divideWidth);
@@ -192,7 +192,7 @@ public class GeneralScreen extends JFrame {
                     }
                     addTwinPanel(playersPages[0], playersPages[1]);
                 } else if (isGameOver[0]) { // if only one player is playing
-                    keybindHandler.handleKeybind(new ObservableAction(0, STOP_GAME));
+                    actionHandler.handleAction(new ObservableAction(0, STOP_GAME));
                     playersPages[0] = new JPanel();
                     add(getJLayeredPane(tetrisPage[0], gameOverPopup[0], 1));
                 }
@@ -290,16 +290,16 @@ public class GeneralScreen extends JFrame {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     switch (selectedPage) {
                         case "pause" -> {
-                            keybindHandler.handleKeybind(new ObservableAction(0, RESUME_GAME));
+                            actionHandler.handleAction(new ObservableAction(0, RESUME_GAME));
                             if (is2PlayerMode) {
-                                keybindHandler.handleKeybind(new ObservableAction(1, RESUME_GAME));
+                                actionHandler.handleAction(new ObservableAction(1, RESUME_GAME));
                             }
                             setPage("tetrisView");
                         }
                         case "tetrisView", "gameOver" -> {
-                            keybindHandler.handleKeybind(new ObservableAction(0, PAUSE_GAME));
+                            actionHandler.handleAction(new ObservableAction(0, PAUSE_GAME));
                             if (is2PlayerMode) {
-                                keybindHandler.handleKeybind(new ObservableAction(1, PAUSE_GAME));
+                                actionHandler.handleAction(new ObservableAction(1, PAUSE_GAME));
                             }
                             setPage("pause");
                         }
@@ -307,10 +307,10 @@ public class GeneralScreen extends JFrame {
                     }
                 } else if (selectedPage.equals("tetrisView") || selectedPage.equals("gameOver")) {
                     if (e.getKeyCode() == KeyEvent.VK_O) {
-                        keybindHandler.handleKeybind(new ObservableAction(0, CHANGE_IA_STATE));
+                        actionHandler.handleAction(new ObservableAction(0, CHANGE_IA_STATE));
                     }
                     if (e.getKeyCode() == KeyEvent.VK_P && is2PlayerMode) {
-                        keybindHandler.handleKeybind(new ObservableAction(1, CHANGE_IA_STATE));
+                        actionHandler.handleAction(new ObservableAction(1, CHANGE_IA_STATE));
                     }
                 }
             }
@@ -326,7 +326,7 @@ public class GeneralScreen extends JFrame {
                     return;
                 }
 
-                keybindHandler.handleKeybind(signalAction);
+                actionHandler.handleAction(signalAction);
             }
         });
 
@@ -353,9 +353,9 @@ public class GeneralScreen extends JFrame {
             if (o[i] == null || !(o[i] instanceof Observable)) {
                 throw new IllegalArgumentException("Each objet must be Observer and Observable at the same time");
             }
-            keybindHandler.addObserver(o[i]);
-            tetrisPage[i].addObserverToTetrisPage((Observable) o[i]);
-            keybindHandler.handleKeybind(new ObservableAction(i, CALL_STATS)); // to initialize the best record
+            actionHandler.addObserver(o[i]);
+            tetrisPage[i].addObservableToTetrisPage((Observable) o[i]);
+            actionHandler.handleAction(new ObservableAction(i, CALL_STATS)); // to initialize the best record
         }
     }
 }
