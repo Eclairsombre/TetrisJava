@@ -302,10 +302,10 @@ public class GeneralScreen extends JFrame {
                         case "homePage" -> System.exit(0);
                     }
                 } else if (selectedPage.equals("tetrisView") || selectedPage.equals("gameOver")) {
-                    if (e.getKeyCode() == KeyEvent.VK_O) {
+                    if (e.getKeyCode() == KeyEvent.VK_T) {
                         actionHandler.handleAction(new ObservableAction(0, CHANGE_IA_STATE));
                     }
-                    if (e.getKeyCode() == KeyEvent.VK_P && is2PlayerMode) {
+                    if (e.getKeyCode() == KeyEvent.VK_Y && is2PlayerMode) {
                         actionHandler.handleAction(new ObservableAction(1, CHANGE_IA_STATE));
                     }
                 }
